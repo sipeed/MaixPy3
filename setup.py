@@ -4,7 +4,7 @@
 setup.py file for _maix
 """
 
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 
 _maix_module = Extension('_maix', sources=['src/i2c.c', 'src/pyi2c.c', 'src/_maix.c'],)
 

@@ -7,9 +7,8 @@ extern "C" {
 
 #include <Python.h>
 
-// extern pyi2c.c
-PyDoc_STRVAR(I2CDevice_name, "I2CDevice");
-extern PyTypeObject I2CDeviceObjectType;
+PyDoc_STRVAR(Camera_name, "Camera");
+extern PyTypeObject CameraObjectType;
 
 #ifdef  __cplusplus
 }

@@ -3,19 +3,22 @@
 
 #define _VERSION_ "0.1"
 #define _NAME_ "_maix"
+
 PyDoc_STRVAR(_maix_doc, "MaixPy Python3 library.\n");
 
+static PyObject *_maix_help() {
+    return PyUnicode_FromString(_maix_doc);
+}
+
 static PyMethodDef _maix_methods[] = {
+    {"help", (PyCFunction)_maix_help, METH_NOARGS, _maix_doc},
     {NULL}
 };
 
 void define_constants(PyObject *module) {
-    // PyModule_AddObject(module, "I2C_M_NOSTART", Py_BuildValue("H", I2C_M_NOSTART));
-    // PyModule_AddObject(module, "I2C_M_NO_RD_ACK", Py_BuildValue("H", I2C_M_NO_RD_ACK));
-    // PyModule_AddObject(module, "I2C_M_IGNORE_NAK", Py_BuildValue("H", I2C_M_IGNORE_NAK));
+    PyModule_AddObject(module, "_VERSION_", Py_BuildValue("H", _VERSION_));
 }
 
-#if PY_MAJOR_VERSION >= 3
 static struct PyModuleDef _maixmodule = {
     PyModuleDef_HEAD_INIT,
     _NAME_,         /* Module name */
@@ -23,33 +26,18 @@ static struct PyModuleDef _maixmodule = {
     -1,			    /* size of per-interpreter state of the module, size of per-interpreter state of the module,*/
     _maix_methods,
 };
-#endif
 
-
-#if PY_MAJOR_VERSION >= 3
 PyMODINIT_FUNC PyInit__maix(void)
-#else
-PyMODINIT_FUNC init_maix(void)
-#endif
 {
 
     PyObject *module;
 
-    if (PyType_Ready(&I2CDeviceObjectType) < 0) {
-#if PY_MAJOR_VERSION >= 3
+    if (PyType_Ready(&CameraObjectType) < 0) {
         return NULL;
-#else
-        return;
-#endif
     }
 
-#if PY_MAJOR_VERSION >= 3
     module = PyModule_Create(&_maixmodule);
     PyObject *version = PyUnicode_FromString(_VERSION_);
-#else
-    module = Py_InitModule3(_NAME_, _maix_methods, _maix_doc);
-    PyObject *version = PyString_FromString(_VERSION_);
-#endif
 
     /* Constants */
     define_constants(module);
@@ -60,11 +48,9 @@ PyMODINIT_FUNC init_maix(void)
     Py_DECREF(version);
 
     /* Register I2CDeviceObject */
-    Py_INCREF(&I2CDeviceObjectType);
-    PyModule_AddObject(module, I2CDevice_name, (PyObject *)&I2CDeviceObjectType);
+    Py_INCREF(&CameraObjectType);
+    PyModule_AddObject(module, Camera_name, (PyObject *)&CameraObjectType);
 
-#if PY_MAJOR_VERSION >= 3
     return module;
-#endif
 }
 

@@ -26,7 +26,7 @@ libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], 
 
 setup(
     name='python3-maix',
-    version='0.1.1',
+    version='0.1.2',
     license='MIT',
     author='Sipeed',
     author_email="support@sipeed.com",

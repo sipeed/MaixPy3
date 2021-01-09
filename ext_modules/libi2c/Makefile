@@ -1,4 +1,4 @@
-PYTHON		= python
+PYTHON		= python3
 CC		= $(CROSS)gcc
 AR		= $(CROSS)ar
 CFLAGS		= -Wall -g -fPIC

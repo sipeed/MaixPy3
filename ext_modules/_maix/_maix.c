@@ -47,7 +47,7 @@ PyMODINIT_FUNC PyInit__maix(void)
     PyDict_SetItemString(dict, "__version__", version);
     Py_DECREF(version);
 
-    /* Register I2CDeviceObject */
+    /* Register CameraObjectType */
     Py_INCREF(&CameraObjectType);
     PyModule_AddObject(module, Camera_name, (PyObject *)&CameraObjectType);
 

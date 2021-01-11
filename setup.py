@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-setup.py file for python3-maix
+setup.py file for MaixPy3
 """
 
 import os
@@ -25,12 +25,12 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], so
 libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 
 setup(
-    name='python3-maix',
+    name='MaixPy3',
     version='0.1.2',
     license='MIT',
     author='Sipeed',
     author_email="support@sipeed.com",
-    url='https://github.com/sipeed/python3-maix',
+    url='https://github.com/sipeed/MaixPy3',
     description="MaixPy Python3 library",
     long_description=open('README.md').read(),
     install_requires=["Pillow"],

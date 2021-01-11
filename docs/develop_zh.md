@@ -1,4 +1,4 @@
-# Python3-maix CPython 开发文档
+# MaixPy3 CPython 开发文档
 
 使用面向模块接口开发，链接跨平台的 Python 或 C 包，统一加载到 Python3 环境当中。
 
@@ -23,12 +23,12 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], so
 libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 
 setup(
-    name='python3-maix',
+    name='MaixPy3',
     version='0.1.2',
     license='MIT',
     author='Sipeed',
     author_email="support@sipeed.com",
-    url='https://github.com/sipeed/python3-maix',
+    url='https://github.com/sipeed/MaixPy3',
     description="MaixPy Python3 library",
     long_description=open('README.md').read(),
     install_requires=["Pillow"],
@@ -70,28 +70,28 @@ __all__ = ['display', 'Video', 'camera']
 
 其中 `__all__` 可以控制 import 加载的模块、对象或变量，这样一个最基本的 Python 模块就制作完成了。
 
-关于编写后的测试看 [test_maix.py](https://github.com/sipeed/python3-maix/tree/main/tests/test_maix.py) 代码可知，关于 tox 测试框架会在最后简单说明。 
+关于编写后的测试看 [test_maix.py](https://github.com/sipeed/MaixPy3/tree/main/tests/test_maix.py) 代码可知，关于 tox 测试框架会在最后简单说明。 
 
 ## 关于 CPython 模块说明
 
 以 [libi2c](https://github.com/amaork/libi2c) 举例说明原生 C 开发的模块。
 
-如果是用 C 开发就需要配合 Makefile 的规则来操作，可以直接在 python3-maix/ext_modules/libi2c 目录下直接运行 `make all` 进行构建，此时就会得到 `libi2c.so \ libi2c.a \ pylibi2c.so` 等模块。
+如果是用 C 开发就需要配合 Makefile 的规则来操作，可以直接在 MaixPy3/ext_modules/libi2c 目录下直接运行 `make all` 进行构建，此时就会得到 `libi2c.so \ libi2c.a \ pylibi2c.so` 等模块。
 
 这样目标系统就可以通过 C 代码链接(-l)该 libi2c 模块执行，而 `pylibi2c.so` 模块是可以直接在 Python 里面直接 import 就可以使用的。
 
 ```shell
-juwan@juwan-N85-N870HL:~/Desktop/v831_toolchain_linux_x86/python3-maix/ext_modules/libi2c$ python3
+juwan@juwan-N85-N870HL:~/Desktop/v831_toolchain_linux_x86/MaixPy3/ext_modules/libi2c$ python3
 Python 3.8.5 (default, Jul 28 2020, 12:59:40) 
 [GCC 9.3.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> import pylibi2c
 >>> pylibi2c
-<module 'pylibi2c' from '/home/juwan/Desktop/v831_toolchain_linux_x86/python3-maix/ext_modules/libi2c/pylibi2c.cpython-38-x86_64-linux-gnu.so'>
+<module 'pylibi2c' from '/home/juwan/Desktop/v831_toolchain_linux_x86/MaixPy3/ext_modules/libi2c/pylibi2c.cpython-38-x86_64-linux-gnu.so'>
 >>> 
 ```
 
-注意 `pylibi2c.so` 是经过 `python3 setup.py build_ext --inplace` 命令编译 [ext_modules/libi2c/src/pyi2c.c](https://github.com/sipeed/python3-maix/tree/main/ext_modules/libi2c/src/pyi2c.c) 得到的模块。
+注意 `pylibi2c.so` 是经过 `python3 setup.py build_ext --inplace` 命令编译 [ext_modules/libi2c/src/pyi2c.c](https://github.com/sipeed/MaixPy3/tree/main/ext_modules/libi2c/src/pyi2c.c) 得到的模块。
 
 其中 `#include <Python.h>` 的是来自于系统的 `usr/include` 目录，这取决于你的编译环境。
 
@@ -101,7 +101,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 ### 如何编写 pyXXX.c 的 Python 模块说明
 
-对于 make / gcc 的模块包以 ext_modules/xxxx 方式加入 python3-maix 的编译环境（setup.py）， 请确保该包可以跨平台编译通过后，同步修改 [python3-maix/setup.py](https://github.com/sipeed/python3-maix/tree/main/setup.py) 的 ext_modules 模块。
+对于 make / gcc 的模块包以 ext_modules/xxxx 方式加入 MaixPy3 的编译环境（setup.py）， 请确保该包可以跨平台编译通过后，同步修改 [MaixPy3/setup.py](https://github.com/sipeed/MaixPy3/tree/main/setup.py) 的 ext_modules 模块。
 
 ```python
 
@@ -129,7 +129,7 @@ setup(
 - ext_modules/_maix/setup.py
 - /example/test__maix.py
 
-此时我们可以在该目录（`python3-maix/ext_modules/_maix`）的 `setup.py` 進行构建。
+此时我们可以在该目录（`MaixPy3/ext_modules/_maix`）的 `setup.py` 進行构建。
 
 ```python
 #!/usr/bin/env python
@@ -155,7 +155,7 @@ setup(
 
 ```
 
-开发完成后再以同样的方式编写到 python3-maix 模块，注意 Extension 的代码的链接时的相对地址（include_dirs & sources），以及本地打包时链接时缺少的（.h）文件，注意 [MANIFEST.in](https://github.com/sipeed/python3-maix/tree/main/MANIFEST.in) 会链接本地的文件加入 Python 模块的打包。
+开发完成后再以同样的方式编写到 MaixPy3 模块，注意 Extension 的代码的链接时的相对地址（include_dirs & sources），以及本地打包时链接时缺少的（.h）文件，注意 [MANIFEST.in](https://github.com/sipeed/MaixPy3/tree/main/MANIFEST.in) 会链接本地的文件加入 Python 模块的打包。
 
 > 默认配置下打包中不会带入模块的（.h）文件，这会导致运行 tox 自动化打包构建模块时出错。
 
@@ -168,7 +168,7 @@ include ext_modules/_maix/include/*.h
 
 ### 关于 编译 CPython 模块的说明
 
-先从编译方法说起，在 `python3-maix/ext_modules/_maix/setup.py` 的目录下使用 `python3 setup.py build` 开始使用构建。
+先从编译方法说起，在 `MaixPy3/ext_modules/_maix/setup.py` 的目录下使用 `python3 setup.py build` 开始使用构建。
 
 如果在本机 Python 编译时出现如下错误：（够贴心了吧）
 
@@ -190,7 +190,7 @@ compilation terminated.
 - 一个 PyObject 类对象的结构代码。
 - 标准 CPython 模块的命令规则。
 
-以 python3-maix/ext_modules/_maix 模块为例，首先提供一个 C 实现的 Python 模块入口 [_maix.c](https://github.com/sipeed/python3-maix/tree/main/ext_modules/_maix/_maix.c) 。
+以 MaixPy3/ext_modules/_maix 模块为例，首先提供一个 C 实现的 Python 模块入口 [_maix.c](https://github.com/sipeed/MaixPy3/tree/main/ext_modules/_maix/_maix.c) 。
 
 ```c
 
@@ -269,7 +269,7 @@ static PyMethodDef _maix_methods[] = {
 
 一个标准的格式参考如下：
 
-定义一个对象必要的对外引用，将模块和对象实现分离，模块再通过（.h）文件链接对象实现，可见 [python3-maix/ext_modules/_maix/include/_maix.h](https://github.com/sipeed/python3-maix/tree/main/ext_modules/_maix/include/_maix.h) 。
+定义一个对象必要的对外引用，将模块和对象实现分离，模块再通过（.h）文件链接对象实现，可见 [MaixPy3/ext_modules/_maix/include/_maix.h](https://github.com/sipeed/MaixPy3/tree/main/ext_modules/_maix/include/_maix.h) 。
 
 ```h
 #ifdef  __cplusplus
@@ -296,7 +296,7 @@ PyModule_AddObject(module, Camera_name, (PyObject *)&CameraObjectType);
 
 ```
 
-现在该到 PyObject 的实现参考，以 [python3-maix/ext_modules/_maix/include/_maix.h](https://github.com/sipeed/python3-maix/tree/main/ext_modules/_maix/pyCamera.c) 为范本。
+现在该到 PyObject 的实现参考，以 [MaixPy3/ext_modules/_maix/include/_maix.h](https://github.com/sipeed/MaixPy3/tree/main/ext_modules/_maix/pyCamera.c) 为范本。
 
 ```c
 
@@ -441,7 +441,7 @@ static PyMethodDef _maix_methods[] = {
 
 ```
 
-关于编写 CPython 模块的参考资料很多，这里只解释 python3-maix 模块的程序设计，具体到函数的如何实现的细节就不在此赘述。
+关于编写 CPython 模块的参考资料很多，这里只解释 MaixPy3 模块的程序设计，具体到函数的如何实现的细节就不在此赘述。
 
 ### CPython 的内存标记用法
 
@@ -505,23 +505,23 @@ pip 在安装的时候就会通过 `from pip._internal.utils.compatibility_tags 
 
 ## 自动化测试框架 tox 的使用说明
 
-在本机上使用 `pip3 install tox` 完成安装，接着在 python3-maix 根目录下运行 tox 即可。
+在本机上使用 `pip3 install tox` 完成安装，接着在 MaixPy3 根目录下运行 tox 即可。
 
 它会自动构建指定的 Python 虚拟测试环境，进行打包构建，安装解包的测试，最后会收集整个目录下的 `test_*.py` 的代码加入到自动测试当中，如果你不想让个别代码参与测试，你可以改名成 `no_test_*.py` 方便排除和保留文件。
 
 更多请自行查阅 [Python 任务自动化工具 tox 教程](https://www.cnblogs.com/daniumiqi/p/12179453.html) 和官方文档 [tox.readthedocs.io](tox.readthedocs.io) ，以下为测试结果报告。
 
 ```shell
-juwan@juwan-N85-N870HL:~/Desktop/v831_toolchain_linux_x86/python3-maix$ tox
-GLOB sdist-make: /home/juwan/Desktop/v831_toolchain_linux_x86/python3-maix/setup.py
-py38 inst-nodeps: /home/juwan/Desktop/v831_toolchain_linux_x86/python3-maix/.tox/.tmp/package/1/python3-maix-0.1.2.zip
-py38 installed: attrs==20.3.0,iniconfig==1.1.1,packaging==20.8,Pillow==8.1.0,pluggy==0.13.1,py==1.10.0,pyparsing==2.4.7,pytest==6.2.1,python3-maix @ file:///home/juwan/Desktop/v831_toolchain_linux_x86/python3-maix/.tox/.tmp/package/1/python3-maix-0.1.2.zip,scripttest==1.3,toml==0.10.2
+juwan@juwan-N85-N870HL:~/Desktop/v831_toolchain_linux_x86/MaixPy3$ tox
+GLOB sdist-make: /home/juwan/Desktop/v831_toolchain_linux_x86/MaixPy3/setup.py
+py38 inst-nodeps: /home/juwan/Desktop/v831_toolchain_linux_x86/MaixPy3/.tox/.tmp/package/1/MaixPy3-0.1.2.zip
+py38 installed: attrs==20.3.0,iniconfig==1.1.1,packaging==20.8,Pillow==8.1.0,pluggy==0.13.1,py==1.10.0,pyparsing==2.4.7,pytest==6.2.1,MaixPy3 @ file:///home/juwan/Desktop/v831_toolchain_linux_x86/MaixPy3/.tox/.tmp/package/1/MaixPy3-0.1.2.zip,scripttest==1.3,toml==0.10.2
 py38 run-test-pre: PYTHONHASHSEED='820562099'
 py38 run-test: commands[0] | py.test
 ======================================= test session starts ========================================
 platform linux -- Python 3.8.5, pytest-6.2.1, py-1.10.0, pluggy-0.13.1
 cachedir: .tox/py38/.pytest_cache
-rootdir: /home/juwan/Desktop/v831_toolchain_linux_x86/python3-maix
+rootdir: /home/juwan/Desktop/v831_toolchain_linux_x86/MaixPy3
 collected 5 items                                                                                  
 
 ext_modules/_maix/example/test__maix.py .                                                    [ 20%]

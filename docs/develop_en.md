@@ -8,7 +8,7 @@ see setup.py
 
 - pip install .
 
-- pip uninstall python3-maix -y
+- pip uninstall MaixPy3 -y
 
 > *sudo python setup.py install*
 

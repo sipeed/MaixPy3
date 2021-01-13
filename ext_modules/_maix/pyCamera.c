@@ -1,45 +1,6 @@
 
 #include "_maix.h"
 
-#include "jpeglib.h"
-
-#include "string.h"
-
-static PyObject *PyJpegCompress(char *inData, int width, int height, int channels, int color_space, int quality)
-{
-  struct jpeg_compress_struct cinfo;
-  struct jpeg_error_mgr jerr;
-  long unsigned int outSize = 0;
-  uint8_t *outbuffer = NULL;
-  JSAMPROW row_pointer[1];
-
-  cinfo.err = jpeg_std_error(&jerr);
-  jpeg_create_compress(&cinfo);
-  jpeg_mem_dest(&cinfo, &outbuffer, &outSize);
-  cinfo.image_width = width;
-  cinfo.image_height = height;
-  cinfo.input_components = channels;  // 3 / 1
-  cinfo.in_color_space = color_space; // JCS_RGB / JCS_GRAYSCALE
-  jpeg_set_defaults(&cinfo);
-  jpeg_set_quality(&cinfo, quality, TRUE); // default 75
-  jpeg_start_compress(&cinfo, TRUE);
-  int row_stride = width;
-  while (cinfo.next_scanline < cinfo.image_height)
-  {
-    row_pointer[0] = (uint8_t *)&inData[cinfo.next_scanline * row_stride];
-    (void)jpeg_write_scanlines(&cinfo, row_pointer, 1);
-  }
-  jpeg_finish_compress(&cinfo);
-
-  PyObject *bytes = PyBytes_FromStringAndSize((const char *)outbuffer, outSize);
-
-  if (NULL != outbuffer)
-    free(outbuffer), outbuffer = NULL;
-
-  jpeg_destroy_compress(&cinfo);
-  return bytes;
-}
-
 /* Macros needed for Python 3 */
 #ifndef PyInt_Check
 #define PyInt_Check PyLong_Check
@@ -139,29 +100,8 @@ static PyObject *Camera_str(PyObject *object)
   return dev_desc;
 }
 
-PyDoc_STRVAR(Camera_rgb2jpg_doc, "rgb2jpg()\n\nConvert image(rgb888) bytes data to jpeg image bytes.\n");
-static PyObject *Camera_rgb2jpg(CameraObject *self, PyObject *args)
-{
-  PyObject *bytes = NULL;
-  PyObject *inRGB = NULL;
-
-  int width = self->width, height = self->height;
-  int channels = 3, color_space = JCS_RGB, quality = 75;
-
-  if (!PyArg_ParseTuple(args, "O|iiiii", &inRGB,
-                        &width, &height, &channels, &color_space, &quality))
-    return NULL;
-
-  char *rgb_data = PyBytes_AS_STRING(inRGB);
-
-  bytes = PyJpegCompress(rgb_data, width, height, channels, color_space, quality);
-
-  return bytes;
-}
-
 static PyMethodDef Camera_methods[] = {
 
-    {"rgb2jpg", (PyCFunction)Camera_rgb2jpg, METH_VARARGS, Camera_rgb2jpg_doc},
     {"close", (PyCFunction)Camera_close, METH_NOARGS, Camera_close_doc},
     {"__enter__", (PyCFunction)Camera_enter, METH_NOARGS, NULL},
     {"__exit__", (PyCFunction)Camera_exit, METH_NOARGS, NULL},

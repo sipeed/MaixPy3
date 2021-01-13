@@ -1,6 +1,7 @@
 
 import shutil
 import io
+import os
 
 from PIL import Image, ImageShow
 
@@ -16,35 +17,40 @@ try:
 except ModuleNotFoundError as e:
     pass
 
+# try:
+#     from _maix import Display
+#     class dispViewer(ImageShow.UnixViewer):
+#         def get_command_ex(self, file, **options):
+#             print(file, **options)
+#             command = executable = ""
+#             return command, executable
+
+#         def show_file(self, file, **options):
+#             print(file, **options)
+#     ImageShow.register(dispViewer, 0)
+# except ModuleNotFoundError as e:
+#     pass
+# except Exception as e:
+#     pass
+
+# options
+clear_output = True # for jupyter
+sync_show, local_show = True, True
+
 try:
-    # use libmaix on v831
-    from libmaix import disp
-
-    class dispViewer(ImageShow.UnixViewer):
-        def get_command_ex(self, file, **options):
-            print(file, **options)
-            command = executable = ""
-            return command, executable
-
-        def show_file(self, file, **options):
-            print(file, **options)
-    ImageShow.register(dispViewer, 0)
-except ModuleNotFoundError as e:
-    pass
+    __width__, __height__ = (240, 240)
+    env = os.environ
+    __width__, __height__ = (env['_MAIX_WIDTH_'], env['_MAIX_HEIGHT_'])
 except Exception as e:
-    pass
+    print('[display] tips: os.environ not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
+finally:
+    __display__ = Image.new("RGB", (__width__, __height__), (255, 255, 255))
 
-# TODO display size from linux env
-clear_output = True
-local_show = False
-sync_show = True
-# jpeg_quality = 95
+def tobytes():
+    global __display__
+    return __display__.tobytes()
 
-__width__, __height__ = (240, 240)
-__images__, __show__ = None, False  # jupyter
-__display__ = Image.new("RGB", (__width__, __height__))
-
-def resize(size=(640, 480), update=False):
+def set_window(size=(640, 480), update=False):
     global __display__, __width__, __height__
     __width__, __height__ = size
     if update:
@@ -56,9 +62,15 @@ def __thumbnail__(im):
         # print(w, __width__, h, __height__)
         im.thumbnail((__display__.width, __display__.height))
 
+def fill(box=(0, 0), color=(0, 0, 0)):
+    global __display__
+    if len(box) == 2:
+        box = box + __display__.size
+    __display__.paste(color, box)
+
 
 def show(im=None, box=(0, 0)):
-    global __display__, __show__, __images__, local_show, sync_show  # , jpeg_quality
+    global __display__, local_show, sync_show
 
     if local_show:
         if isinstance(im, bytes):
@@ -71,31 +83,11 @@ def show(im=None, box=(0, 0)):
         __display__.show()
 
     if sync_show:
-        try:
-            # __image__ = io.BytesIO()
-            # __display__.save(__image__, format='jpeg', quality=jpeg_quality)
-            # __images__.append(__image__)
-            if isinstance(im, bytes):
-                __images__.append(im)
-            elif isinstance(im, Image.Image):
-                __images__.append(im.tobytes())
-        except Exception as e:
-            # print(e)
-            __images__ = None
-        __show__ = True
-        print(end='') # Give it time
-
-
-def fill(box=(0, 0), color=(0, 0, 0)):
-    global __display__
-    if len(box) == 2:
-        box = box + __display__.size
-    __display__.paste(color, box)
+        pass # send
 
 
 def clear(c=(0, 0, 0)):
     fill(color=c)
-    show()
 
 
 if __name__ == '__main__':

@@ -22,7 +22,7 @@ from setuptools import setup, Extension, find_packages
 
 _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), libraries=['jpeg'])
 
-libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
+# libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 
 setup(
     name='MaixPy3',
@@ -33,10 +33,10 @@ setup(
     url='https://github.com/sipeed/MaixPy3',
     description="MaixPy Python3 library",
     long_description=open('README.md').read(),
-    install_requires=["Pillow"],
+    install_requires=["Pillow", "pexpect", "rpyc"],
     ext_modules=[
         _maix_module,
-        libi2c_module,
+        # libi2c_module,
     ],
     packages = find_packages(), # find __init__.py packages
     classifiers=[

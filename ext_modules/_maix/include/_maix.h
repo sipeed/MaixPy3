@@ -10,6 +10,9 @@ extern "C" {
 PyDoc_STRVAR(Camera_name, "Camera");
 extern PyTypeObject CameraObjectType;
 
+PyDoc_STRVAR(Display_name, "Display");
+extern PyTypeObject DisplayObjectType;
+
 #ifdef  __cplusplus
 }
 #endif

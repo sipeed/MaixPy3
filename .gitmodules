@@ -1,0 +1,3 @@
+[submodule "ext_modules/libmaix"]
+	path = ext_modules/libmaix
+	url = https://github.com/sipeed/libmaix

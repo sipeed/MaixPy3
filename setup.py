@@ -20,7 +20,15 @@ def get_srcs(path):
 
 from setuptools import setup, Extension, find_packages
 
-_maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), libraries=['jpeg'])
+# _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), libraries=['jpeg'])
+_maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), 
+                        libraries=[
+                            "jpeg", "dl", "rt", "log", "ion", "pthread", "cdc_base",
+                            "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",
+                            "mpp_mini", "maix_cam", "maix_disp", "maix_image", "maix_nn",
+                        ],
+                        library_dirs=[ ".", "./libs", ]
+                    )
 
 # libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 

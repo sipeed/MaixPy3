@@ -6,7 +6,7 @@
 
 - [PC x86_64 的 Pyhon3 环境](https://www.python.org/downloads/release/python-380/)
 
-- [Sipeed v831 的 Python3 交叉编译环境](http://pan.sipeed.com/f/3101e3cd8be04e7ea274/?dl=1) & [（微云备用）](https://share.weiyun.com/r7FIaH03)
+- [Sipeed v831 的 Python3 交叉编译环境](http://pan.sipeed.com/f/ee8f6592b01a45089585/) & [（微云备用）](https://share.weiyun.com/ALdx9GQ7)
 
 [toc]
 

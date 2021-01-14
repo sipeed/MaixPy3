@@ -17,22 +17,6 @@ try:
 except ModuleNotFoundError as e:
     pass
 
-# try:
-#     from _maix import Display
-#     class dispViewer(ImageShow.UnixViewer):
-#         def get_command_ex(self, file, **options):
-#             print(file, **options)
-#             command = executable = ""
-#             return command, executable
-
-#         def show_file(self, file, **options):
-#             print(file, **options)
-#     ImageShow.register(dispViewer, 0)
-# except ModuleNotFoundError as e:
-#     pass
-# except Exception as e:
-#     pass
-
 # options
 clear_output = True # for jupyter
 sync_show, local_show = True, True
@@ -68,11 +52,23 @@ def fill(box=(0, 0), color=(0, 0, 0)):
         box = box + __display__.size
     __display__.paste(color, box)
 
+__fastview__ = None
 
-def show(im=None, box=(0, 0)):
+try:
+    from _maix import Display
+    __fastview__ = Display(240, 240)
+    def __draw__():
+        global __display__, __width__, __height__
+        __fastview__.draw(__display__.tobytes(), __width__, __height__)
+except ModuleNotFoundError as e:
+    pass
+except Exception as e:
+    pass
+
+def show(im=None, box=(0, 0), fast=True):
     global __display__, local_show, sync_show
-    if im == None:
-        return
+    if im is None:
+        im = __display__
     if local_show:
         if isinstance(im, bytes):
             im = Image.frombytes("RGB", box, im)
@@ -81,7 +77,10 @@ def show(im=None, box=(0, 0)):
         elif isinstance(im, Image.Image):
             __thumbnail__(im)
             __display__.paste(im, box)
-        __display__.show()
+        if __fastview__ and fast:
+            __draw__() # underlying optimization
+        else:
+            __display__.show()
 
     if sync_show:
         pass # send

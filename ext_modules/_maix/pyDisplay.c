@@ -129,9 +129,11 @@ static PyObject *Display_draw(DisplayObject *self, PyObject *args)
         return Py_None;
     }
     
-    uint8_t *rgb_data = (uint8_t *)PyBytes_AS_STRING(img_bytes);
-    self->disp->draw(self->disp, rgb_data, (self->disp->width - img_width) / 2,(self->disp->height - img_height) / 2, img_width, img_height, 1);
-    
+    if (self->disp->width >= img_width && self->disp->height >= img_height) {
+        uint8_t *rgb_data = (uint8_t *)PyBytes_AS_STRING(img_bytes);
+        self->disp->draw(self->disp, rgb_data, (self->disp->width - img_width) / 2,(self->disp->height - img_height) / 2, img_width, img_height, 1);
+    }
+
     return Py_None;
 }
 

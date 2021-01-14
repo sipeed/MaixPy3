@@ -71,7 +71,8 @@ def fill(box=(0, 0), color=(0, 0, 0)):
 
 def show(im=None, box=(0, 0)):
     global __display__, local_show, sync_show
-
+    if im == None:
+        return
     if local_show:
         if isinstance(im, bytes):
             im = Image.frombytes("RGB", box, im)

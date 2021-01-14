@@ -22,7 +22,7 @@ camera = MaixVideo()
 
 try:
     # use libmaix on v831
-    from libmaix import Camera
+    from _maix import Camera
 
     class V831MaixVideo(MaixVideo):
 
@@ -32,7 +32,17 @@ try:
             self.cam = Camera(self.width, self.height)
 
         def read(self):
-            return self.cam.read()
+            ret, frame = self.cam.read()
+            if ret:
+                return frame # bytes
+            return None
+        
+        def capture(self):
+            from PIL import Image
+            tmp = self.read()
+            if tmp:
+                return Image.frombytes("RGB", (self.width, self.height), tmp)
+            return None
 
         def __del__(self):
             self.cam.close()

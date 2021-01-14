@@ -100,8 +100,36 @@ static PyObject *Camera_str(PyObject *object)
   return dev_desc;
 }
 
+/* file read */
+PyDoc_STRVAR(Camera_read_doc, "read()\n\nRead image(rgb888) bytes data from device.\n");
+static PyObject *Camera_read(CameraObject *self, PyObject *args)
+{
+    PyObject *bytes = NULL;
+
+    int ret = 0;
+    
+    char buf[self->width * self->height * 3]; // rgb888
+    for (size_t i = 0; i < sizeof(buf); i++)
+        buf[i] = random();
+    size_t len = sizeof(buf);
+
+    /* Copy data to bytearray and return */
+    if (buf != NULL) {
+      bytes = PyBytes_FromStringAndSize(buf, len);
+    } else {
+      bytes = Py_None;
+    }
+    // Py_INCREF(bytes); // cancel ref Tag
+    PyObject* list = PyList_New(2);
+    if (!list) Py_RETURN_NONE;
+    PyList_SET_ITEM(list, 0, PyBool_FromLong(!ret));
+    PyList_SET_ITEM(list, 1, bytes);
+    return list;
+}
+
 static PyMethodDef Camera_methods[] = {
 
+    {"read", (PyCFunction)Camera_read, METH_VARARGS, Camera_read_doc},
     {"close", (PyCFunction)Camera_close, METH_NOARGS, Camera_close_doc},
     {"__enter__", (PyCFunction)Camera_enter, METH_NOARGS, NULL},
     {"__exit__", (PyCFunction)Camera_exit, METH_NOARGS, NULL},

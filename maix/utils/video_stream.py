@@ -15,7 +15,7 @@ class VideoStream:
 
     def __init__(self, file_path: str):
         # for simplicity, mjpeg is assumed to be on working directory
-        print(file_path)
+        # print(file_path)
         if file_path == '/dev/display':
             self.TYPE = 0 # display
             self._stream = None

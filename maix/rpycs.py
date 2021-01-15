@@ -11,8 +11,10 @@ from .utils.video_stream import VideoStream
 from .utils.rtsp_packet import RTSPPacket
 from .utils.rtp_packet import RTPPacket
 
+import logging
+logging.basicConfig(level=logging.WARNING)
 
-class Server:
+class RtspServer:
   FRAME_PERIOD = 1000 // VideoStream.DEFAULT_FPS  # in milliseconds
   SESSION_ID = '000001'
   DEFAULT_CHUNK_SIZE = 4 * 1024
@@ -55,11 +57,11 @@ class Server:
               break
           except socket.timeout:
               continue
-      print(f"Received from client: {repr(recv)}")
+      logging.debug(f"Received from client: {repr(recv)}")
       return recv
 
   def _rtsp_send(self, data: bytes) -> int:
-      print(f"Sending to client: {repr(data)}")
+      logging.debug(f"Sending to client: {repr(data)}")
       return self._rtsp_connection.send(data)
 
   def _get_rtsp_packet(self) -> RTSPPacket:
@@ -68,7 +70,7 @@ class Server:
   def _wait_connection(self, sock, addr):
       self._rtsp_connection, self._client_address = sock, addr
       self._rtsp_connection.settimeout(self.RTSP_SOFT_TIMEOUT/1000.)
-      print(
+      logging.debug(
           f"Accepted connection from {self._client_address[0]}:{self._client_address[1]}")
 
   def _wait_setup(self):
@@ -78,7 +80,7 @@ class Server:
           packet = self._get_rtsp_packet()
           if packet.request_type == RTSPPacket.SETUP:
               self.server_state = self.STATE.PAUSED
-              print('State set to PAUSED')
+              logging.debug('State set to PAUSED')
               self._client_address = self._client_address[0], packet.rtp_dst_port
               self._setup_rtp(packet.video_file_path)
               self._send_rtsp_response(packet.sequence_number)
@@ -90,32 +92,32 @@ class Server:
       self._rtp_send_thread.start()
 
   def _setup_rtp(self, video_file_path: str):
-      print(f"Opening up video stream for file {video_file_path}")
+      logging.debug(f"Opening up video stream for file {video_file_path}")
       self._video_stream = VideoStream(video_file_path)
-      print('Setting up RTP socket...')
+      logging.debug('Setting up RTP socket...')
       self._rtp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
       self._start_rtp_send_thread()
 
   def handle_rtsp_requests(self):
-      print("Waiting for RTSP requests...")
+      logging.debug("Waiting for RTSP requests...")
       # main thread will be running here most of the time
       while True:
           packet = self._get_rtsp_packet()
           # assuming state will only ever be PAUSED or PLAYING at this point
           if packet.request_type == RTSPPacket.PLAY:
               if self.server_state == self.STATE.PLAYING:
-                  print('Current state is already PLAYING.')
+                  logging.debug('Current state is already PLAYING.')
                   continue
               self.server_state = self.STATE.PLAYING
-              print('State set to PLAYING.')
+              logging.debug('State set to PLAYING.')
           elif packet.request_type == RTSPPacket.PAUSE:
               if self.server_state == self.STATE.PAUSED:
-                  print('Current state is already PAUSED.')
+                  logging.debug('Current state is already PAUSED.')
                   continue
               self.server_state = self.STATE.PAUSED
-              print('State set to PAUSED.')
+              logging.debug('State set to PAUSED.')
           elif packet.request_type == RTSPPacket.TEARDOWN:
-              print('Received TEARDOWN request, shutting down...')
+              logging.debug('Received TEARDOWN request, shutting down...')
               self._send_rtsp_response(packet.sequence_number)
               self.__del__()
               self.server_state = self.STATE.TEARDOWN
@@ -136,13 +138,13 @@ class Server:
                   self._rtp_socket.sendto(
                       to_send[:self.DEFAULT_CHUNK_SIZE], self._client_address)
           except socket.error as e:
-              print(f"failed to send rtp packet: {e}")
+              logging.debug(f"failed to send rtp packet: {e}")
               return
           # trim bytes sent
           to_send = to_send[self.DEFAULT_CHUNK_SIZE:]
 
   def _handle_video_send(self):
-      print(
+      logging.debug(
           f"Sending video to {self._client_address[0]}:{self._client_address[1]}")
       while True:
           if self.server_state == self.STATE.TEARDOWN:
@@ -151,7 +153,7 @@ class Server:
               time.sleep(0.5)  # diminish cpu hogging
               continue
           if self._video_stream.current_frame_number >= VideoStream.VIDEO_LENGTH-1:  # frames are 0-indexed
-              print('Reached end of file.')
+              logging.debug('Reached end of file.')
               self.server_state = self.STATE.FINISHED
               return
           frame = self._video_stream.get_next_frame()
@@ -162,8 +164,8 @@ class Server:
               timestamp=frame_number*self.FRAME_PERIOD,
               payload=frame
           )
-        #   print(f"Sending packet #{frame_number}")
-        #   print('Packet header:')
+        #   logging.debug(f"Sending packet #{frame_number}")
+        #   logging.debug('Packet header:')
         #   rtp_packet.print_header()
           packet = rtp_packet.get_packet()
           self._send_rtp_packet(packet)
@@ -172,45 +174,66 @@ class Server:
   def _send_rtsp_response(self, sequence_number: int):
       response = RTSPPacket.build_response(sequence_number, self.SESSION_ID)
       self._rtsp_send(response.encode())
-      print('Sent response to client.')
-
-
-class _Rtsp_(BaseRequestHandler):
-  def handle(self):  # from BaseRequestHandler
-    try:
-      s = Server()
-      s._wait_connection(self.request, self.client_address)
-      s._wait_setup()
-      s.handle_rtsp_requests()  # keep rtp udp
-    except BrokenPipeError as e:
-      print(e)
+      logging.debug('Sent response to client.')
 
 class RtspServerThread(Thread):
 
+  class Server(TCPServer):
+
+      allow_reuse_address = True # [Errno 98] Address already in use
+      daemon_threads = True
+      
+      class _Rtsp_(BaseRequestHandler):
+        
+        def handle(self):  # from BaseRequestHandler
+          try:
+            s = RtspServer()
+            s._wait_connection(self.request, self.client_address)
+            s._wait_setup()
+            s.handle_rtsp_requests()  # keep rtp udp
+          except BrokenPipeError as e:
+            logging.debug(e)
+          except Exception as e:
+            logging.debug('_Rtsp_: ' + str(e))
+            
+      def __init__(self, Address):
+          """Set up an initially empty mapping between a user' s nickname
+          and the file-like object used to send data to that user."""
+          TCPServer.__init__(self, Address, RtspServerThread.Server._Rtsp_, bind_and_activate = True)
+
   def __init__(self, name, port):
       super(RtspServerThread, self).__init__()
-      self.HostName, self.RtspPort = name, port
+      self.name, self.port = name, port
+      self.server = None
 
   def run(self):
     try:
-      server = TCPServer((self.HostName, self.RtspPort), _Rtsp_, bind_and_activate=True)
-      server.serve_forever()
+      self.server = RtspServerThread.Server((self.name, self.port))
+      self.server.serve_forever()
     except Exception as e:
-      print(e)
+      logging.debug('run: ' + str(e)) # [Errno 98] Address already in use
+      
+  def __del__(self):
+    if self.server:
+      self.server.shutdown()
+      self.server = None
 
-RtspServer, HostName, RtspPort, RpycPort = None, '0.0.0.0', 18811, 18812
+RtspVar, HostName, RtspPort, RpycPort = None, '0.0.0.0', 18811, 18812
 
 def start_rtsp():
-  global RtspServer
-  if RtspServer == None or RtspServer.isAlive() == False:
-    RtspServer = RtspServerThread(HostName, RtspPort)
-    RtspServer.start()
-  return RtspServer.isAlive()
+  global RtspVar
+  if RtspVar == None or RtspVar.isAlive() == False:
+    RtspVar = RtspServerThread(HostName, RtspPort)
+    RtspVar.start()
+  return RtspVar.isAlive()
 
-def start(host='0.0.0.0', rtsp=18811, rpyc=18812):
+def start(host='0.0.0.0', rtsp=18811, rpyc=18812, debug=False):
   global HostName, RtspPort, RpycPort
-  print(__file__, 'start', host, rtsp, rpyc)
+  logging.debug(__file__, 'start', host, rtsp, rpyc)
   HostName, RtspPort, RpycPort = host, rtsp, rpyc
+
+  if debug:
+    logging.basicConfig(level=logging.DEBUG)
 
   start_rtsp()
 
@@ -218,9 +241,8 @@ def start(host='0.0.0.0', rtsp=18811, rpyc=18812):
       SlaveService, hostname=HostName, port=RpycPort, reuse_addr=True)
   rpyc_server.start()
   
-  global RtspServer
-  RtspServer.server.shutdown()  # close rtsp_server
-
+  global RtspVar
+  RtspVar.__del__()
 
 if __name__ == '__main__':
   start()

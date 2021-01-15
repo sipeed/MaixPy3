@@ -18,7 +18,7 @@ typedef struct
     PyObject_HEAD;
     unsigned int width, height;
 
-    struct libmaix_cam_t *cam;
+    libmaix_cam_t *cam;
     libmaix_image_t* img;
 
 } CameraObject;
@@ -72,7 +72,7 @@ static int Camera_init(CameraObject *self, PyObject *args, PyObject *kwds)
     }
 
     libmaix_image_module_init();
-    self->img = libmaix_image_creat(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    self->img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if(NULL != self->img)
     {
         self->cam = libmaix_cam_creat(self->width, self->height);
@@ -144,8 +144,8 @@ static PyObject *Camera_read(CameraObject *self, PyObject *args)
     ret = self->cam->capture(self->cam, (unsigned char*)self->img->data);
     if(ret == 0)
     {
-      libmaix_image_err_t err0 = self->img->convert(self->img, LIBMAIX_IMAGE_MODE_RGB888, NULL);
-      if(err0 == LIBMAIX_IMAGE_ERR_NONE)
+      libmaix_err_t err0 = self->img->convert(self->img, LIBMAIX_IMAGE_MODE_RGB888, NULL);
+      if(err0 == LIBMAIX_ERR_NONE)
       {
         buf = self->img->data;
       }

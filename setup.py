@@ -28,13 +28,22 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ex
                         libraries=[
                             "jpeg", "dl", "rt", "log", "ion", "pthread", "cdc_base",
                             "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",
-                            "mpp_mini", "maix_cam", "maix_disp", "maix_image", "maix_nn",
+                            "mpp_mini", 
+                            "maix_utils", "maix_cam", "maix_disp", "maix_image", "maix_nn",
                         ],
                         library_dirs=[ "/lib",  "/usr/lib", ext_so, ],
                         # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
                         extra_link_args  = [ "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix" ]
                     )
-
+_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'], 
+                        sources=get_srcs('ext_modules/_maix_nn/src'), 
+                        libraries=[
+                                    "maix_utils", "maix_nn",
+                        ],
+                        library_dirs=[ "/lib",  "/usr/lib", ext_so, ],
+                        # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
+                        extra_link_args  = [ "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix" ]
+                    )
 # libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 
 setup(
@@ -49,6 +58,7 @@ setup(
     install_requires=["Pillow", "pexpect", "rpyc"],
     ext_modules=[
         _maix_module,
+        _maix_nn_module,
         # libi2c_module,
     ],
     packages = find_packages(), # find __init__.py packages

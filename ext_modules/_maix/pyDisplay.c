@@ -17,7 +17,7 @@ typedef struct
     PyObject_HEAD;
     unsigned int width, height;
 
-    struct libmaix_disp_t* disp;
+    libmaix_disp_t* disp;
 
 } DisplayObject;
 

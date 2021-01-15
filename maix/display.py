@@ -24,7 +24,7 @@ local_show = True
 try:
     __width__, __height__ = (240, 240)
     env = os.environ
-    __width__, __height__ = (env['_MAIX_WIDTH_'], env['_MAIX_HEIGHT_'])
+    __width__, __height__ = (int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
 except Exception as e:
     print('[display] tips: os.environ not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:

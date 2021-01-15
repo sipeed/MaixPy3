@@ -29,7 +29,7 @@ static struct PyModuleDef _maix_nn_module = {
     _maix_nn_methods,
 };
 
-PyMODINIT_FUNC PyInit__maix(void)
+PyMODINIT_FUNC PyInit__maix_nn(void)
 {
 
     PyObject *module;

@@ -23,7 +23,8 @@ from setuptools import setup, Extension, find_packages
 ext_so = "./ext_modules/libmaix/components/libmaix/lib/arch/v831"
 
 # _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), libraries=['jpeg'])
-_maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include'], sources=get_srcs('ext_modules/_maix'), 
+_maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ext_modules/libmaix/components/libmaix/include'], 
+                        sources=get_srcs('ext_modules/_maix'), 
                         libraries=[
                             "jpeg", "dl", "rt", "log", "ion", "pthread", "cdc_base",
                             "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",

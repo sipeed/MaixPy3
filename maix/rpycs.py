@@ -185,24 +185,41 @@ class _Rtsp_(BaseRequestHandler):
     except BrokenPipeError as e:
       print(e)
 
+class RtspServerThread(Thread):
 
-def start(HostName='0.0.0.0', RtspPort=18811, RpycPort=18812):
-  print(__file__, 'start', HostName, RtspPort, RpycPort)
+  def __init__(self, name, port):
+      super(RtspServerThread, self).__init__()
+      self.HostName, self.RtspPort = name, port
 
-  class RtspServerThread(Thread):
-    server = TCPServer((HostName, RtspPort), _Rtsp_)
+  def run(self):
+    try:
+      server = TCPServer((self.HostName, self.RtspPort), _Rtsp_, bind_and_activate=True)
+      server.serve_forever()
+    except Exception as e:
+      print(e)
 
-    def run(self):
-      __class__.server.serve_forever()
+RtspServer, HostName, RtspPort, RpycPort = None, '0.0.0.0', 18811, 18812
 
-  rtsp_server = RtspServerThread()
-  rtsp_server.start()
+def start_rtsp():
+  global RtspServer
+  if RtspServer == None or RtspServer.isAlive() == False:
+    RtspServer = RtspServerThread(HostName, RtspPort)
+    RtspServer.start()
+  return RtspServer.isAlive()
+
+def start(host='0.0.0.0', rtsp=18811, rpyc=18812):
+  global HostName, RtspPort, RpycPort
+  print(__file__, 'start', host, rtsp, rpyc)
+  HostName, RtspPort, RpycPort = host, rtsp, rpyc
+
+  start_rtsp()
 
   rpyc_server = ThreadedServer(
       SlaveService, hostname=HostName, port=RpycPort, reuse_addr=True)
   rpyc_server.start()
-
-  rtsp_server.server.shutdown()  # close rtsp_server
+  
+  global RtspServer
+  RtspServer.server.shutdown()  # close rtsp_server
 
 
 if __name__ == '__main__':

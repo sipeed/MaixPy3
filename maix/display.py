@@ -17,25 +17,9 @@ try:
 except ModuleNotFoundError as e:
     pass
 
-# try:
-#     from _maix import Display
-#     class dispViewer(ImageShow.UnixViewer):
-#         def get_command_ex(self, file, **options):
-#             print(file, **options)
-#             command = executable = ""
-#             return command, executable
-
-#         def show_file(self, file, **options):
-#             print(file, **options)
-#     ImageShow.register(dispViewer, 0)
-# except ModuleNotFoundError as e:
-#     pass
-# except Exception as e:
-#     pass
-
 # options
 clear_output = True # for jupyter
-sync_show, local_show = True, True
+local_show = True
 
 try:
     __width__, __height__ = (240, 240)
@@ -68,23 +52,31 @@ def fill(box=(0, 0), color=(0, 0, 0)):
         box = box + __display__.size
     __display__.paste(color, box)
 
+try:
+    __fastview__ = None
+    from _maix import Display
+    __fastview__ = Display(240, 240)
+    def __draw__(im_bytes):
+        __fastview__.draw(im_bytes, __fastview__.width, __fastview__.height)
+except ModuleNotFoundError as e:
+    pass
+except Exception as e:
+    print("link Display.draw fail.")
 
-def show(im=None, box=(0, 0)):
-    global __display__, local_show, sync_show
-    if im == None:
-        return
+def show(im=None, box=(0, 0), fast=True):
+    global __display__, local_show
+    if isinstance(im, bytes):
+        im = Image.frombytes("RGB", box, im)
+        __thumbnail__(im)
+        __display__.paste(im, (0, 0))
+    elif isinstance(im, Image.Image):
+        __thumbnail__(im)
+        __display__.paste(im, box)
     if local_show:
-        if isinstance(im, bytes):
-            im = Image.frombytes("RGB", box, im)
-            __thumbnail__(im)
-            __display__.paste(im, (0, 0))
-        elif isinstance(im, Image.Image):
-            __thumbnail__(im)
-            __display__.paste(im, box)
-        __display__.show()
-
-    if sync_show:
-        pass # send
+        if __fastview__ and fast:
+            __draw__(__display__.tobytes()) # underlying optimization
+        else:
+            __display__.show()
 
 
 def clear(c=(0, 0, 0)):

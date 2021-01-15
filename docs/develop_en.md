@@ -46,3 +46,9 @@ see tox.ini
 add tests/test_xxxx.py
 
 auto run test_xxxx.py
+
+## py call usage
+
+pip install --upgrade xxxx
+
+python -c "import maix"

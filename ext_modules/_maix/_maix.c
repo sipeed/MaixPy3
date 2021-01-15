@@ -41,7 +41,7 @@ static PyMethodDef _maix_methods[] = {
 };
 
 void define_constants(PyObject *module) {
-    PyModule_AddObject(module, "_VERSION_", Py_BuildValue("H", _VERSION_));
+    PyModule_AddObject(module, "_VERSION_", Py_BuildValue("s", _VERSION_));
 }
 
 static struct PyModuleDef _maixmodule = {

@@ -26,7 +26,7 @@ try:
     env = os.environ
     __width__, __height__ = (int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
 except Exception as e:
-    print('[display] tips: os.environ not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
+    print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
     __display__ = Image.new("RGB", (__width__, __height__), (255, 255, 255))
 
@@ -61,7 +61,7 @@ try:
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
-    print("link Display.draw fail.")
+    pass
 
 def show(im=None, box=(0, 0), fast=True):
     global __display__, local_show

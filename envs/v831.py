@@ -35,7 +35,6 @@ _maix_display_module = Extension('_maix_display', include_dirs=['ext_modules/_ma
                         ],
                         library_dirs=[ "/lib",  "/usr/lib", ext_so, ],
                         extra_compile_args=['-DV831Display'],
-                        # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
                         extra_link_args  = [ "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix" ]
                     )
 
@@ -50,6 +49,7 @@ _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/incl
                     )
 
 _maix_modules = [
+  _maix_module,
   _maix_camera_module,
   _maix_display_module,
   _maix_nn_module

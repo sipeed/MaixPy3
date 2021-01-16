@@ -13,7 +13,8 @@ typedef struct
     unsigned int width, height;
 
     libmaix_cam_t *cam;
-    libmaix_image_t* img;
+    libmaix_image_t* yuv_img;
+    libmaix_image_t* rgb_img;
 
 } V831CameraObject;
 
@@ -23,8 +24,13 @@ static PyObject *V831Camera_close(V831CameraObject *self)
 
     if (NULL != self->cam)
         libmaix_cam_destroy(&self->cam);
-    if (NULL != self->img)
-        libmaix_image_destroy(&self->img);
+    if (NULL != self->rgb_img) {
+        libmaix_image_destroy(&self->rgb_img);
+    }
+    if (NULL != self->yuv_img) {
+        libmaix_image_destroy(&self->yuv_img);
+    }
+    
     libmaix_image_module_deinit();
 
     Py_RETURN_NONE;
@@ -64,9 +70,12 @@ static int V831Camera_init(V831CameraObject *self, PyObject *args, PyObject *kwd
     }
 
     libmaix_image_module_init();
-    self->img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
-    if(NULL != self->img)
+    self->yuv_img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    if(NULL != self->yuv_img)
     {
+      self->rgb_img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      if(NULL != self->rgb_img)
+      {
         self->cam = libmaix_cam_creat(self->width, self->height);
         if (NULL != self->cam)
         {
@@ -76,6 +85,7 @@ static int V831Camera_init(V831CameraObject *self, PyObject *args, PyObject *kwd
                 return 0;
             }
         }
+      }
     }
     V831Camera_close(self);
     PyErr_SetFromErrno(PyExc_IOError);
@@ -119,25 +129,23 @@ static PyObject *V831Camera_read(V831CameraObject *self, PyObject *args)
 {
     PyObject *bytes = NULL;
 
-    int ret = 0;
-    
     char *buf = NULL;
     size_t len = self->width * self->height * 3;
-    ret = self->cam->capture(self->cam, (unsigned char*)self->img->data);
-    if(ret == 0)
+    self->yuv_img->mode = LIBMAIX_IMAGE_MODE_YUV420SP_NV21;
+    libmaix_err_t ret = self->cam->capture(self->cam, (unsigned char*)self->yuv_img->data);
+    if(ret == LIBMAIX_ERR_NONE)
     {
-      libmaix_err_t err0 = self->img->convert(self->img, LIBMAIX_IMAGE_MODE_RGB888, NULL);
-      if(err0 == LIBMAIX_ERR_NONE)
+      libmaix_err_t err = self->yuv_img->convert(self->yuv_img, LIBMAIX_IMAGE_MODE_RGB888, &self->rgb_img);
+      if(err == LIBMAIX_ERR_NONE)
       {
-        buf = self->img->data;
+        buf = self->rgb_img->data;
       }
       else
       {
-        // PyErr_Format(PyExc_ValueError, "libmaix_image_get_err_msg (%s)", libmaix_image_get_err_msg(err0));
-        ret = err0;
+        ret = err;
+        // printf("convert fail: %s\n", libmaix_get_err_msg(err));
       }
     }
-
     /* Copy data to bytearray and return */
     if (buf != NULL) {
       bytes = PyBytes_FromStringAndSize(buf, len);

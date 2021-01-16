@@ -1,6 +1,5 @@
 
 import sys
-import _maix
 from maix import camera, display
 
 class VideoStream:
@@ -41,11 +40,13 @@ class VideoStream:
         # - `frame_length` bytes follow, which represent the frame encoded as a JPEG
         # - repeat until EOF
         if self.TYPE == 0:
+            import _maix
             # import random
             # display.clear((random.randint(10, 100), 0, 0))
             frame = _maix.rgb2jpg(display.tobytes(), display.__width__, display.__height__)
             frame_length = len(frame)
         elif self.TYPE == 1:
+            import _maix
             # import io
             # img = self._stream.capture()
             # tmp = io.BytesIO()

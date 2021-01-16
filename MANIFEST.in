@@ -1,2 +1,4 @@
 include ext_modules/libi2c/src/*.h
 include ext_modules/_maix/include/*.h
+
+recursive-exclude envs *

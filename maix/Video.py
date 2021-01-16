@@ -12,8 +12,10 @@ class MaixVideo():
 
     def capture(self):
         from PIL import Image
-        return Image.frombytes(
-            "RGB", (self.width, self.height), self.read())
+        tmp = self.read()
+        if tmp:
+            return Image.frombytes("RGB", (self.width, self.height), tmp)
+        return None
 
     def close(self):
         pass  # for file
@@ -37,13 +39,6 @@ try:
                 return frame # bytes
             return None
         
-        def capture(self):
-            from PIL import Image
-            tmp = self.read()
-            if tmp:
-                return Image.frombytes("RGB", (self.width, self.height), tmp)
-            return None
-
         def __del__(self):
             self.cam.close()
 

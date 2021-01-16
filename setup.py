@@ -12,13 +12,12 @@ data_files = []
 
 if 'v831' in sys.argv:
   sys.argv.remove('v831')
-  from envs import v831
-  ext_modules.extend(v831._maix_modules)
-  data_files.extend(v831._maix_data_files)
+  from envs.v831 import _maix_modules, _maix_data_files
 else:
-  from envs import general
-  ext_modules.extend(general._maix_modules)
-  data_files.extend(general._maix_data_files)
+  from envs.general import _maix_modules, _maix_data_files
+  
+ext_modules.extend(_maix_modules)
+data_files.extend(_maix_data_files)
 
 setup(
     name='MaixPy3',

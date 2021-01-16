@@ -57,14 +57,6 @@ PyMODINIT_FUNC PyInit__maix(void)
 
     PyObject *module;
 
-    if (PyType_Ready(&CameraObjectType) < 0) {
-        return NULL;
-    }
-
-    if (PyType_Ready(&DisplayObjectType) < 0) {
-        return NULL;
-    }
-
     module = PyModule_Create(&_maixmodule);
     PyObject *version = PyUnicode_FromString(_VERSION_);
 
@@ -75,14 +67,6 @@ PyMODINIT_FUNC PyInit__maix(void)
     PyObject *dict = PyModule_GetDict(module);
     PyDict_SetItemString(dict, "__version__", version);
     Py_DECREF(version);
-
-    /* Register CameraObjectType */
-    Py_INCREF(&CameraObjectType);
-    PyModule_AddObject(module, Camera_name, (PyObject *)&CameraObjectType);
-
-    /* Register DisplayObjectType */
-    Py_INCREF(&DisplayObjectType);
-    PyModule_AddObject(module, Display_name, (PyObject *)&DisplayObjectType);
 
     return module;
 }

@@ -1,17 +1,11 @@
 
-#include "_maix.h"
+#include "_maix_display.h"
+
+#ifdef V831Display
 
 #include "libmaix_disp.h"
 
-/* Macros needed for Python 3 */
-#ifndef PyInt_Check
-#define PyInt_Check PyLong_Check
-#define PyInt_FromLong PyLong_FromLong
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_Type PyLong_Type
-#endif
-
-PyDoc_STRVAR(DisplayObject_type_doc, "Display(width, height) -> Display object.\n");
+PyDoc_STRVAR(V831DisplayObject_type_doc, "V831Display(width, height) -> V831Display object.\n");
 typedef struct
 {
     PyObject_HEAD;
@@ -19,40 +13,39 @@ typedef struct
 
     libmaix_disp_t* disp;
 
-} DisplayObject;
+} V831DisplayObject;
 
-PyDoc_STRVAR(Display_close_doc, "close()\n\nClose Display device.\n");
-static PyObject *Display_close(DisplayObject *self)
+PyDoc_STRVAR(V831Display_close_doc, "close()\n\nClose V831Display device.\n");
+static PyObject *V831Display_close(V831DisplayObject *self)
 {
+
     if (NULL != self->disp)
         libmaix_disp_destroy(&self->disp);
 
-    Py_INCREF(Py_None);
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
-static PyObject *Display_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+static PyObject *V831Display_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
-    DisplayObject *self;
+    V831DisplayObject *self;
 
-    if ((self = (DisplayObject *)type->tp_alloc(type, 0)) == NULL)
+    if ((self = (V831DisplayObject *)type->tp_alloc(type, 0)) == NULL)
     {
         return NULL;
     }
 
-    Py_INCREF(self);
     return (PyObject *)self;
 }
 
-static void Display_free(DisplayObject *self)
+static void V831Display_free(V831DisplayObject *self)
 {
-    PyObject *ref = Display_close(self);
+    PyObject *ref = V831Display_close(self);
     Py_XDECREF(ref);
 
     Py_TYPE(self)->tp_free((PyObject *)self);
 }
 
-static int Display_init(DisplayObject *self, PyObject *args, PyObject *kwds)
+static int V831Display_init(V831DisplayObject *self, PyObject *args, PyObject *kwds)
 {
     // default init value
     self->width = 240, self->height = 240;
@@ -68,17 +61,16 @@ static int Display_init(DisplayObject *self, PyObject *args, PyObject *kwds)
     self->disp = libmaix_disp_creat();
     if(self->disp != NULL) {
         self->disp->swap_rb = 1;
-        Py_INCREF(self);
         return 0;
     }
 
-    Display_close(self);
+    V831Display_close(self);
     PyErr_SetFromErrno(PyExc_IOError);
 
     return -1;
 }
 
-static PyObject *Display_enter(PyObject *self, PyObject *args)
+static PyObject *V831Display_enter(PyObject *self, PyObject *args)
 {
     if (!PyArg_ParseTuple(args, ""))
         return NULL;
@@ -87,7 +79,7 @@ static PyObject *Display_enter(PyObject *self, PyObject *args)
     return self;
 }
 
-static PyObject *Display_exit(DisplayObject *self, PyObject *args)
+static PyObject *V831Display_exit(V831DisplayObject *self, PyObject *args)
 {
     PyObject *exc_type = 0;
     PyObject *exc_value = 0;
@@ -98,28 +90,18 @@ static PyObject *Display_exit(DisplayObject *self, PyObject *args)
         return 0;
     }
 
-    /* Close Display bus */
-    Display_close(self);
-    Py_RETURN_FALSE;
+    V831Display_close(self);
+    Py_XDECREF(self);
+    Py_RETURN_NONE;
 }
 
 /* str */
-static PyObject *Display_str(PyObject *object)
+static PyObject *V831Display_str(PyObject *object)
 {
-  char desc[128];
-  PyObject *dev_desc = NULL;
-  // DisplayObject *self = (DisplayObject *)object;
-  // Display_get_device_desc(&self->dev, desc, sizeof(desc));
-
-  dev_desc = PyUnicode_FromString(desc);
-
-  Py_INCREF(dev_desc);
-  return dev_desc;
+  return PyUnicode_FromString(__FILE__);
 }
-
-/* file draw */
 PyDoc_STRVAR(Display_draw_doc, "draw()\nDraw image(rgb888) bytes data to lcd.\n");
-static PyObject *Display_draw(DisplayObject *self, PyObject *args)
+static PyObject *Display_draw(V831DisplayObject *self, PyObject *args)
 {
     PyObject *img_bytes = NULL;
     int img_width = 0, img_height = 0;
@@ -137,12 +119,12 @@ static PyObject *Display_draw(DisplayObject *self, PyObject *args)
     return Py_None;
 }
 
-static PyMethodDef Display_methods[] = {
+static PyMethodDef V831Display_methods[] = {
 
     {"draw", (PyCFunction)Display_draw, METH_VARARGS, Display_draw_doc},
-    {"close", (PyCFunction)Display_close, METH_NOARGS, Display_close_doc},
-    {"__enter__", (PyCFunction)Display_enter, METH_NOARGS, NULL},
-    {"__exit__", (PyCFunction)Display_exit, METH_NOARGS, NULL},
+    {"close", (PyCFunction)V831Display_close, METH_NOARGS, V831Display_close_doc},
+    {"__enter__", (PyCFunction)V831Display_enter, METH_NOARGS, NULL},
+    {"__exit__", (PyCFunction)V831Display_exit, METH_NOARGS, NULL},
     {NULL},
 };
 
@@ -179,17 +161,16 @@ static int check_user_input(const char *name, PyObject *input, int min, int max)
 }
 
 /* width */
-PyDoc_STRVAR(Display_width_doc, "Display internal operate width.\n\n");
-static PyObject *Display_get_width(DisplayObject *self, void *closure)
+PyDoc_STRVAR(V831Display_width_doc, "V831Display internal operate width.\n\n");
+static PyObject *V831Display_get_width(V831DisplayObject *self, void *closure)
 {
     PyObject *result = Py_BuildValue("i", self->width);
-    Py_INCREF(result);
     return result;
 }
 
-static int Display_set_width(DisplayObject *self, PyObject *value, void *closeure)
+static int V831Display_set_width(V831DisplayObject *self, PyObject *value, void *closeure)
 {
-    if (check_user_input("width", value, 1, 1000) != 0)
+    if (check_user_input("width", value, 640, 480) != 0)
     {
         return -1;
     }
@@ -198,17 +179,16 @@ static int Display_set_width(DisplayObject *self, PyObject *value, void *closeur
 }
 
 /* height */
-PyDoc_STRVAR(Display_height_doc, "Display internal operate height.\n\n");
-static PyObject *Display_get_height(DisplayObject *self, void *closure)
+PyDoc_STRVAR(V831Display_height_doc, "V831Display internal operate height.\n\n");
+static PyObject *V831Display_get_height(V831DisplayObject *self, void *closure)
 {
     PyObject *result = Py_BuildValue("i", self->height);
-    Py_INCREF(result);
     return result;
 }
 
-static int Display_set_height(DisplayObject *self, PyObject *value, void *closeure)
+static int V831Display_set_height(V831DisplayObject *self, PyObject *value, void *closeure)
 {
-    if (check_user_input("height", value, 1, 1000) != 0)
+    if (check_user_input("height", value, 640, 480) != 0)
     {
         return -1;
     }
@@ -216,22 +196,18 @@ static int Display_set_height(DisplayObject *self, PyObject *value, void *closeu
     return 0;
 }
 
-static PyGetSetDef Display_getseters[] = {
-    {"width", (getter)Display_get_width, (setter)Display_set_width, Display_width_doc},
-    {"height", (getter)Display_get_height, (setter)Display_set_height, Display_height_doc},
+static PyGetSetDef V831Display_getseters[] = {
+    {"width", (getter)V831Display_get_width, (setter)V831Display_set_width, V831Display_width_doc},
+    {"height", (getter)V831Display_get_height, (setter)V831Display_set_height, V831Display_height_doc},
     {NULL},
 };
 
-PyTypeObject DisplayObjectType = {
-#if PY_MAJOR_VERSION >= 3
+PyTypeObject V831DisplayObjectType = {
     PyVarObject_HEAD_INIT(NULL, 0)
-#else
-    PyObject_HEAD_INIT(NULL) 0, /* ob_size */
-#endif
-        Display_name,                           /* tp_name */
-    sizeof(DisplayObject),                      /* tp_basicsize */
+    V831Display_name,                           /* tp_name */
+    sizeof(V831DisplayObject),                      /* tp_basicsize */
     0,                                        /* tp_itemsize */
-    (destructor)Display_free,                   /* tp_dealloc */
+    (destructor)V831Display_free,                   /* tp_dealloc */
     0,                                        /* tp_print */
     0,                                        /* tp_getattr */
     0,                                        /* tp_setattr */
@@ -242,27 +218,29 @@ PyTypeObject DisplayObjectType = {
     0,                                        /* tp_as_mapping */
     0,                                        /* tp_hash */
     0,                                        /* tp_call */
-    Display_str,                                /* tp_str */
+    V831Display_str,                                /* tp_str */
     0,                                        /* tp_getattro */
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-    DisplayObject_type_doc,                     /* tp_doc */
+    V831DisplayObject_type_doc,                     /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */
     0,                                        /* tp_weaklistoffset */
     0,                                        /* tp_iter */
     0,                                        /* tp_iternext */
-    Display_methods,                            /* tp_methods */
+    V831Display_methods,                            /* tp_methods */
     0,                                        /* tp_members */
-    Display_getseters,                          /* tp_getset */
+    V831Display_getseters,                          /* tp_getset */
     0,                                        /* tp_base */
     0,                                        /* tp_dict */
     0,                                        /* tp_descr_get */
     0,                                        /* tp_descr_set */
     0,                                        /* tp_dictoffset */
-    (initproc)Display_init,                     /* tp_init */
+    (initproc)V831Display_init,                     /* tp_init */
     0,                                        /* tp_alloc */
-    Display_new,                                /* tp_new */
+    V831Display_new,                                /* tp_new */
 };
+
+#endif

@@ -12,19 +12,17 @@ data_files = []
 
 if 'v831' in sys.argv:
   sys.argv.remove('v831')
-  from envs.v831 import _maix_module, _maix_nn_module, _maix_data_files
-  ext_modules.extend([_maix_module, _maix_nn_module])
-  # print(_maix_module, _maix_nn_module)
-  data_files.extend(_maix_data_files)
-  # print(_maix_data_files)
+  from envs import v831
+  ext_modules.extend(v831._maix_modules)
+  data_files.extend(v831._maix_data_files)
 else:
-  pass
-  # from envs.utils import get_srcs
-  # libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
+  from envs import general
+  ext_modules.extend(general._maix_modules)
+  data_files.extend(general._maix_data_files)
 
 setup(
     name='MaixPy3',
-    version='0.1.2',
+    version='0.1.3',
     license='MIT',
     author='Sipeed',
     author_email="support@sipeed.com",

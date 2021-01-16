@@ -54,8 +54,8 @@ def fill(box=(0, 0), color=(0, 0, 0)):
 
 try:
     __fastview__ = None
-    from _maix import Display
-    __fastview__ = Display(240, 240)
+    from _maix_display import V831Display
+    __fastview__ = V831Display(240, 240)
     def __draw__(im_bytes):
         __fastview__.draw(im_bytes, __fastview__.width, __fastview__.height)
 except ModuleNotFoundError as e:

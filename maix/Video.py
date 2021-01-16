@@ -22,14 +22,14 @@ camera = MaixVideo()
 
 try:
     # use libmaix on v831
-    from _maix import Camera
+    from _maix_camera import V831Camera
 
     class V831MaixVideo(MaixVideo):
 
         def __init__(self, source="/v831", size=(480, 360)):
             super(V831MaixVideo, self).__init__(size)
             self.source = source
-            self.cam = Camera(self.width, self.height)
+            self.cam = V831Camera(self.width, self.height)
 
         def read(self):
             ret, frame = self.cam.read()

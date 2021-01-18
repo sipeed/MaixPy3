@@ -1,12 +1,10 @@
 
 import sys
-from maix import camera, display
 
 class VideoStream:
     FRAME_HEADER_LENGTH = 5
-    DEFAULT_IMAGE_SHAPE = (380, 280)
     VIDEO_LENGTH = 500
-    DEFAULT_FPS = 30 # 24 fps
+    DEFAULT_FPS = 40 # 24 fps
 
     # if it's present at the end of chunk,
     # it's the last chunk for current jpeg (end of frame)
@@ -20,6 +18,7 @@ class VideoStream:
             self._stream = None
             __class__.VIDEO_LENGTH = sys.maxsize
         elif file_path == '/dev/camera':
+            from maix import camera
             self._stream = camera
             self.TYPE = 1 # camera
             __class__.VIDEO_LENGTH = sys.maxsize
@@ -41,9 +40,11 @@ class VideoStream:
         # - repeat until EOF
         if self.TYPE == 0:
             import _maix
+            from maix import display
             # import random
             # display.clear((random.randint(10, 100), 0, 0))
-            frame = _maix.rgb2jpg(display.tobytes(), display.__width__, display.__height__)
+            tmp = display.__display__
+            frame = _maix.rgb2jpg(tmp.tobytes(), tmp.width, tmp.height)
             frame_length = len(frame)
         elif self.TYPE == 1:
             import _maix
@@ -52,8 +53,12 @@ class VideoStream:
             # tmp = io.BytesIO()
             # img.save(tmp, format='jpeg', quality=75)
             # frame = tmp.getvalue()
-            frame = _maix.rgb2jpg(self._stream.read(), self._stream.width, self._stream.height)
-            frame_length = len(frame)
+            tmp = self._stream.read()
+            if tmp:
+              frame = _maix.rgb2jpg(tmp, self._stream.width, self._stream.height)
+              frame_length = len(frame)
+            else:
+              return None
         elif self.TYPE == 2:
             try:
                 frame_length = self._stream.read(self.FRAME_HEADER_LENGTH)

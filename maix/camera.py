@@ -1,24 +1,4 @@
-
-class MaixVideo():
-
-    def __init__(self, size=(640, 480)):
-        self.width, self.height = size
-
-    def write(self):
-        pass  # for file
-
-    def read(self):
-        return b'\xFF\x00\x00' * (self.width * self.height)
-
-    def capture(self):
-        from PIL import Image
-        tmp = self.read()
-        if tmp:
-            return Image.frombytes("RGB", (self.width, self.height), tmp)
-        return None
-
-    def close(self):
-        pass  # for file
+from .video import MaixVideo
 
 camera = MaixVideo()
 
@@ -70,8 +50,12 @@ try:
 except Exception as e:
     pass
 
+# registered interface
+capture = camera.capture
+read = camera.read
+
 if __name__ == '__main__':
-    import display
+    from maix import display
     display.clear((255, 0, 0))
     display.show(camera.capture())
     # tmp = camera.read()

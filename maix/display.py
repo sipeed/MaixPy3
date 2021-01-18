@@ -21,24 +21,25 @@ except ModuleNotFoundError as e:
 remote = None
 
 
-def clear_output(value=True):
+def hook(clear_output=True):
   global remote
   try:
     if remote != None:
-      remote.clear_output = value
+      remote.clear_output = clear_output
+      remote._start_display()
   except Exception as e:
     remote = None
 
 
 try:
-    __width__, __height__ = (240, 240)
+    __width__, __height__ = (640, 480)
     env = os.environ
     __width__, __height__ = (
         int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
 except Exception as e:
     print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (255, 255, 255))
+    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
 
 
 def tobytes():
@@ -49,7 +50,7 @@ def tobytes():
 def set_window(size=(640, 480)):
     global __display__, __width__, __height__
     __width__, __height__ = size
-    __display__ = Image.new("RGB", size)
+    __display__ = Image.new("RGB", size, (0, 0, 0))
 
 
 def __thumbnail__(src, dst):
@@ -71,8 +72,11 @@ try:
     __fastview__ = V831Display(240, 240)
 
     def __draw__(im):
-        __thumbnail__(im, __fastview__)
-        __fastview__.draw(im.to_bytes(), __fastview__.width, __fastview__.height)
+        global __fastview__
+        im = im.resize(
+            (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
+        __fastview__.draw(im.tobytes(), __fastview__.width,
+                          __fastview__.height)
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
@@ -87,24 +91,21 @@ def local_show(value=True):
 
 
 def show(im=None, box=(0, 0), fast=True):
-    global __display__, local_show, remote
-    if isinstance(im, bytes):
+    global __display__, local_show
+    if __fastview__ and fast:
+      __display__ = im
+      if _local_show and isinstance(im, Image.Image):
+        __draw__(im)  # underlying optimization
+    else:
+      if isinstance(im, bytes):
         im = Image.frombytes("RGB", box, im)
         __thumbnail__(im, __display__)
         __display__.paste(im, (0, 0))
-    elif isinstance(im, Image.Image):
+      elif isinstance(im, Image.Image):
         __thumbnail__(im, __display__)
         __display__.paste(im, box)
-    if _local_show:
-        if __fastview__ and fast:
-            __draw__(__display__)  # underlying optimization
-        else:
-            __display__.show()
-    try:
-      if remote != None:
-        remote._update_display()
-    except Exception as e:
-      remote = None
+      if _local_show:
+        __display__.show()
 
 
 def clear(c=(0, 0, 0)):

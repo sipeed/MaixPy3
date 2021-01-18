@@ -132,18 +132,29 @@ static PyObject *V831Camera_read(V831CameraObject *self, PyObject *args)
     char *buf = NULL;
     size_t len = self->width * self->height * 3;
     self->yuv_img->mode = LIBMAIX_IMAGE_MODE_YUV420SP_NV21;
-    libmaix_err_t ret = self->cam->capture(self->cam, (unsigned char*)self->yuv_img->data);
-    if(ret == LIBMAIX_ERR_NONE)
+    libmaix_err_t ret = LIBMAIX_ERR_NONE;
+    for (size_t i = 0; i < 10; i++)
     {
-      libmaix_err_t err = self->yuv_img->convert(self->yuv_img, LIBMAIX_IMAGE_MODE_RGB888, &self->rgb_img);
-      if(err == LIBMAIX_ERR_NONE)
+      ret = self->cam->capture(self->cam, (unsigned char*)self->yuv_img->data);
+      // not ready， sleep to release CPU
+      if(ret == LIBMAIX_ERR_NOT_READY)
       {
-        buf = self->rgb_img->data;
+          usleep(10 * 1000);
+          continue;
       }
-      else
+      if(ret == LIBMAIX_ERR_NONE)
       {
-        ret = err;
-        // printf("convert fail: %s\n", libmaix_get_err_msg(err));
+        libmaix_err_t err = self->yuv_img->convert(self->yuv_img, LIBMAIX_IMAGE_MODE_RGB888, &self->rgb_img);
+        if(err == LIBMAIX_ERR_NONE)
+        {
+          buf = self->rgb_img->data;
+        }
+        else
+        {
+          ret = err;
+          // printf("convert fail: %s\n", libmaix_get_err_msg(err));
+        }
+        break;
       }
     }
     /* Copy data to bytearray and return */

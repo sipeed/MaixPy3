@@ -2,7 +2,7 @@ import py
 import pytest
 
 def test_import():
-  from maix import display, Video, rpycs
+  from maix import display, video, rpycs, camera
 
 def test_display():
   from maix import display

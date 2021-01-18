@@ -1,6 +1,7 @@
 from socketserver import BaseRequestHandler, TCPServer
 import socket
 import time
+import platform
 
 from threading import Thread
 
@@ -17,7 +18,7 @@ logging.basicConfig(level=logging.WARNING)
 class RtspServer:
   FRAME_PERIOD = 1000 // VideoStream.DEFAULT_FPS  # in milliseconds
   SESSION_ID = '000001'
-  DEFAULT_CHUNK_SIZE = 4 * 1024
+  DEFAULT_CHUNK_SIZE = 128 * 1024
 
   # for allowing simulated non-blocking operations
   # (useful for keyboard break)
@@ -57,11 +58,11 @@ class RtspServer:
               break
           except socket.timeout:
               continue
-      logging.debug(f"Received from client: {repr(recv)}")
+      # logging.debug(f"Received from client: {repr(recv)}")
       return recv
 
   def _rtsp_send(self, data: bytes) -> int:
-      logging.debug(f"Sending to client: {repr(data)}")
+      # logging.debug(f"Sending to client: {repr(data)}")
       return self._rtsp_connection.send(data)
 
   def _get_rtsp_packet(self) -> RTSPPacket:
@@ -70,8 +71,7 @@ class RtspServer:
   def _wait_connection(self, sock, addr):
       self._rtsp_connection, self._client_address = sock, addr
       self._rtsp_connection.settimeout(self.RTSP_SOFT_TIMEOUT/1000.)
-      logging.debug(
-          f"Accepted connection from {self._client_address[0]}:{self._client_address[1]}")
+      # logging.debug(f"Accepted connection from {self._client_address[0]}:{self._client_address[1]}")
 
   def _wait_setup(self):
       if self.server_state != self.STATE.INIT:
@@ -80,7 +80,7 @@ class RtspServer:
           packet = self._get_rtsp_packet()
           if packet.request_type == RTSPPacket.SETUP:
               self.server_state = self.STATE.PAUSED
-              logging.debug('State set to PAUSED')
+              # logging.debug('State set to PAUSED')
               self._client_address = self._client_address[0], packet.rtp_dst_port
               self._setup_rtp(packet.video_file_path)
               self._send_rtsp_response(packet.sequence_number)
@@ -92,32 +92,32 @@ class RtspServer:
       self._rtp_send_thread.start()
 
   def _setup_rtp(self, video_file_path: str):
-      logging.debug(f"Opening up video stream for file {video_file_path}")
+      # logging.debug(f"Opening up video stream for file {video_file_path}")
       self._video_stream = VideoStream(video_file_path)
-      logging.debug('Setting up RTP socket...')
+      # logging.debug('Setting up RTP socket...')
       self._rtp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
       self._start_rtp_send_thread()
 
   def handle_rtsp_requests(self):
-      logging.debug("Waiting for RTSP requests...")
+      # logging.debug("Waiting for RTSP requests...")
       # main thread will be running here most of the time
       while True:
           packet = self._get_rtsp_packet()
           # assuming state will only ever be PAUSED or PLAYING at this point
           if packet.request_type == RTSPPacket.PLAY:
               if self.server_state == self.STATE.PLAYING:
-                  logging.debug('Current state is already PLAYING.')
+                  # logging.debug('Current state is already PLAYING.')
                   continue
               self.server_state = self.STATE.PLAYING
-              logging.debug('State set to PLAYING.')
+              # logging.debug('State set to PLAYING.')
           elif packet.request_type == RTSPPacket.PAUSE:
               if self.server_state == self.STATE.PAUSED:
-                  logging.debug('Current state is already PAUSED.')
+                  # logging.debug('Current state is already PAUSED.')
                   continue
               self.server_state = self.STATE.PAUSED
-              logging.debug('State set to PAUSED.')
+              # logging.debug('State set to PAUSED.')
           elif packet.request_type == RTSPPacket.TEARDOWN:
-              logging.debug('Received TEARDOWN request, shutting down...')
+              # logging.debug('Received TEARDOWN request, shutting down...')
               self._send_rtsp_response(packet.sequence_number)
               self.__del__()
               self.server_state = self.STATE.TEARDOWN
@@ -131,6 +131,7 @@ class RtspServer:
           self._send_rtsp_response(packet.sequence_number)
 
   def _send_rtp_packet(self, packet: bytes):
+      # logging.debug(f"_client_address: {self._client_address}")
       to_send = packet[:]
       while to_send:
           try:
@@ -138,43 +139,50 @@ class RtspServer:
                   self._rtp_socket.sendto(
                       to_send[:self.DEFAULT_CHUNK_SIZE], self._client_address)
           except socket.error as e:
-              logging.debug(f"failed to send rtp packet: {e}")
+              # logging.debug(f"failed to send rtp packet: {e}")
               return
           # trim bytes sent
           to_send = to_send[self.DEFAULT_CHUNK_SIZE:]
 
   def _handle_video_send(self):
-      logging.debug(
-          f"Sending video to {self._client_address[0]}:{self._client_address[1]}")
-      while True:
-          if self.server_state == self.STATE.TEARDOWN:
-              return
-          if self.server_state != self.STATE.PLAYING:
-              time.sleep(0.5)  # diminish cpu hogging
-              continue
-          if self._video_stream.current_frame_number >= VideoStream.VIDEO_LENGTH-1:  # frames are 0-indexed
-              logging.debug('Reached end of file.')
-              self.server_state = self.STATE.FINISHED
-              return
-          frame = self._video_stream.get_next_frame()
-          frame_number = self._video_stream.current_frame_number
-          rtp_packet = RTPPacket(
-              payload_type=RTPPacket.TYPE.MJPEG,
-              sequence_number=frame_number,
-              timestamp=frame_number*self.FRAME_PERIOD,
-              payload=frame
-          )
-        #   logging.debug(f"Sending packet #{frame_number}")
-        #   logging.debug('Packet header:')
-        #   rtp_packet.print_header()
-          packet = rtp_packet.get_packet()
-          self._send_rtp_packet(packet)
-          time.sleep(self.FRAME_PERIOD/1000.)
+      # logging.debug(f"Sending video to {self._client_address[0]}:{self._client_address[1]}")
+      while self._video_stream:
+          try:
+              if self.server_state == self.STATE.TEARDOWN:
+                return
+              if self.server_state != self.STATE.PLAYING:
+                time.sleep(0.5)  # diminish cpu hogging
+                continue
+              if self._video_stream.current_frame_number >= VideoStream.VIDEO_LENGTH-1:  # frames are 0-indexed
+                # logging.debug('Reached end of file.')
+                self.server_state = self.STATE.FINISHED
+                return
+              frame = self._video_stream.get_next_frame()
+              if frame:
+                frame_number = self._video_stream.current_frame_number
+                rtp_packet = RTPPacket(
+                    payload_type=RTPPacket.TYPE.MJPEG,
+                    sequence_number=frame_number,
+                    timestamp=frame_number*self.FRAME_PERIOD,
+                    payload=frame
+                )
+                # logging.debug(f"Sending packet #{frame_number}")
+                # # logging.debug('Packet header:')
+                #   rtp_packet.print_header()
+              packet = rtp_packet.get_packet()
+              self._send_rtp_packet(packet)
+              if 'x86_64' == platform.machine():
+                time.sleep(self.FRAME_PERIOD/1000.)
+              else:
+                pass # for armv7l or low-level machine
+          except Exception as e:
+            # logging.debug(f"Exception #{e}")
+            pass
 
   def _send_rtsp_response(self, sequence_number: int):
       response = RTSPPacket.build_response(sequence_number, self.SESSION_ID)
       self._rtsp_send(response.encode())
-      logging.debug('Sent response to client.')
+      # logging.debug('Sent response to client.')
 
 class RtspServerThread(Thread):
 
@@ -192,9 +200,11 @@ class RtspServerThread(Thread):
             s._wait_setup()
             s.handle_rtsp_requests()  # keep rtp udp
           except BrokenPipeError as e:
-            logging.debug(e)
+            # logging.debug(e)
+            pass
           except Exception as e:
-            logging.debug('_Rtsp_: ' + str(e))
+            # logging.debug('_Rtsp_: ' + str(e))
+            pass
             
       def __init__(self, Address):
           """Set up an initially empty mapping between a user' s nickname
@@ -211,7 +221,8 @@ class RtspServerThread(Thread):
       self.server = RtspServerThread.Server((self.name, self.port))
       self.server.serve_forever()
     except Exception as e:
-      logging.debug('run: ' + str(e)) # [Errno 98] Address already in use
+      # logging.debug('run: ' + str(e)) # [Errno 98] Address already in use
+      pass
       
   def __del__(self):
     if self.server:
@@ -229,11 +240,11 @@ def start_rtsp():
 
 def start(host='0.0.0.0', rtsp=18811, rpyc=18812, debug=False):
   global HostName, RtspPort, RpycPort
-  logging.debug(__file__, 'start', host, rtsp, rpyc)
+  # logging.debug('start %s %s %s %s' % (__file__, host, rtsp, rpyc))
   HostName, RtspPort, RpycPort = host, rtsp, rpyc
 
   if debug:
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.debug)
 
   start_rtsp()
 

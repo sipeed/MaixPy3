@@ -54,7 +54,7 @@ setup(
 以 maix 模块为例，完全用 Python 实现的模块需要按以下结构进行构建。
 
 - maix/`__init__.py`
-- maix/Video.py
+- maix/video.py
 - maix/xxxxx.py
 
 首先 setuptools 打包系统会找到该模块的 maix 文件夹并将其安装到 `site-packages/maix` 下，这样用户就可以在 Python3 中 `import maix` 了，注意它与 setup.py 的相对目录（`/maix`）与安装目录（`site-packages/maix`）位置保持一致。
@@ -62,10 +62,10 @@ setup(
 如何控制 from maix import * 的内容可以看 `__init__.py` 了解。
 
 ```python
-from .Video import camera
+from .video import camera
 from .import display
 
-__all__ = ['display', 'Video', 'camera']
+__all__ = ['display', 'video', 'camera']
 ```
 
 其中 `__all__` 可以控制 import 加载的模块、对象或变量，这样一个最基本的 Python 模块就制作完成了。

@@ -1,50 +1,49 @@
-
-import shutil
 import io
 import os
 
-from PIL import Image, ImageShow
+from PIL import Image
+
+# remote jupyter options
+remote = None
+
+
+def hook(clear_output=True):
+  global remote
+  try:
+    if remote != None:
+      remote.clear_output = clear_output
+      remote._start_display()
+  except Exception as e:
+    remote = None
+
 
 try:
-    # use fbviewer on linux
-    # os.system('ln -s /usr/sbin/fbviewer /usr/sbin/display')
-    if shutil.which("fbviewer"):
-        class fbViewer(ImageShow.UnixViewer):
-            def get_command_ex(self, file, **options):
-                command = executable = "fbviewer"
-                return command, executable
-        ImageShow.register(fbViewer, 0)
-except ModuleNotFoundError as e:
-    pass
-
-# options
-clear_output = True # for jupyter
-local_show = True
-
-try:
-    __width__, __height__ = (240, 240)
+    __width__, __height__ = (640, 480)
     env = os.environ
-    __width__, __height__ = (int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
+    __width__, __height__ = (
+        int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
 except Exception as e:
-    print('[display] tips: os.environ not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
+    print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (255, 255, 255))
+    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
+
 
 def tobytes():
     global __display__
     return __display__.tobytes()
 
-def set_window(size=(640, 480), update=False):
+
+def set_window(size=(640, 480)):
     global __display__, __width__, __height__
     __width__, __height__ = size
-    if update:
-        __display__ = Image.new("RGB", size)
+    __display__ = Image.new("RGB", size, (0, 0, 0))
 
-def __thumbnail__(im):
-    w, h = im.size
-    if w > __display__.width or h > __display__.height:
-        # print(w, __width__, h, __height__)
-        im.thumbnail((__display__.width, __display__.height))
+
+def __thumbnail__(src, dst):
+    w, h = src.size
+    if w > dst.width or h > dst.height:
+        src.thumbnail((dst.width, dst.height))
+
 
 def fill(box=(0, 0), color=(0, 0, 0)):
     global __display__
@@ -52,35 +51,52 @@ def fill(box=(0, 0), color=(0, 0, 0)):
         box = box + __display__.size
     __display__.paste(color, box)
 
+
 try:
     __fastview__ = None
-    from _maix import Display
-    __fastview__ = Display(240, 240)
-    def __draw__(im_bytes):
-        __fastview__.draw(im_bytes, __fastview__.width, __fastview__.height)
+    from _maix_display import V831Display
+    __fastview__ = V831Display(240, 240)
+
+    def __draw__(im):
+        global __fastview__
+        im = im.resize(
+            (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
+        __fastview__.draw(im.tobytes(), __fastview__.width,
+                          __fastview__.height)
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
-    print("link Display.draw fail.")
+    pass
+
+_local_show = True
+
+
+def local_show(value=True):
+  global _local_show
+  _local_show = value
+
 
 def show(im=None, box=(0, 0), fast=True):
     global __display__, local_show
-    if isinstance(im, bytes):
+    if __fastview__ and fast:
+      __display__ = im
+      if _local_show and isinstance(im, Image.Image):
+        __draw__(im)  # underlying optimization
+    else:
+      if isinstance(im, bytes):
         im = Image.frombytes("RGB", box, im)
-        __thumbnail__(im)
+        __thumbnail__(im, __display__)
         __display__.paste(im, (0, 0))
-    elif isinstance(im, Image.Image):
-        __thumbnail__(im)
+      elif isinstance(im, Image.Image):
+        __thumbnail__(im, __display__)
         __display__.paste(im, box)
-    if local_show:
-        if __fastview__ and fast:
-            __draw__(__display__.tobytes()) # underlying optimization
-        else:
-            __display__.show()
+      if _local_show:
+        __display__.show()
 
 
 def clear(c=(0, 0, 0)):
     fill(color=c)
+    show()
 
 
 if __name__ == '__main__':
@@ -115,4 +131,3 @@ if __name__ == '__main__':
     draw.text((0, 0), u'hello world', (0, 0, 0))
     # image.show()
     show(image)
-

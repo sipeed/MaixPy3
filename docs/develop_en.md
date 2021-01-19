@@ -14,6 +14,10 @@ see setup.py
 
 - python3.8 setup.py bdist_wheel
 
+- python3.8 setup.py bdist_egg
+
+- python3.8 setup.py bdist
+
 add xxxx/__init__.py
 
 ## Py Call C module
@@ -49,6 +53,22 @@ auto run test_xxxx.py
 
 ## py call usage
 
-pip install --upgrade xxxx
+- pip install --upgrade xxxx
 
-python -c "import maix"
+- python -c "import maix"
+
+## clean cmd
+
+- find . -name '__pycache__' -type d -exec rm -rf {} \;
+
+- python3 setup.py clean --all
+
+## build cmd
+
+your x86
+
+- python setup.py build
+
+your arm
+
+- python3.8 setup.py build v831

@@ -1,35 +1,17 @@
-
-class MaixVideo():
-
-    def __init__(self, size=(640, 480)):
-        self.width, self.height = size
-
-    def write(self):
-        pass  # for file
-
-    def read(self):
-        return b'\xFF\x00\x00' * (self.width * self.height)
-
-    def capture(self):
-        from PIL import Image
-        return Image.frombytes(
-            "RGB", (self.width, self.height), self.read())
-
-    def close(self):
-        pass  # for file
+from .video import MaixVideo
 
 camera = MaixVideo()
 
 try:
     # use libmaix on v831
-    from _maix import Camera
+    from _maix_camera import V831Camera
 
     class V831MaixVideo(MaixVideo):
 
         def __init__(self, source="/v831", size=(480, 360)):
             super(V831MaixVideo, self).__init__(size)
             self.source = source
-            self.cam = Camera(self.width, self.height)
+            self.cam = V831Camera(self.width, self.height)
 
         def read(self):
             ret, frame = self.cam.read()
@@ -37,13 +19,6 @@ try:
                 return frame # bytes
             return None
         
-        def capture(self):
-            from PIL import Image
-            tmp = self.read()
-            if tmp:
-                return Image.frombytes("RGB", (self.width, self.height), tmp)
-            return None
-
         def __del__(self):
             self.cam.close()
 
@@ -75,8 +50,12 @@ try:
 except Exception as e:
     pass
 
+# registered interface
+capture = camera.capture
+read = camera.read
+
 if __name__ == '__main__':
-    import display
+    from maix import display
     display.clear((255, 0, 0))
     display.show(camera.capture())
     # tmp = camera.read()

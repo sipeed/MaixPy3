@@ -13,6 +13,8 @@ extern "C" {
 PyDoc_STRVAR(_maix_nn_doc, "MaixPy Python3 nn(neural network) module.\n");
 /////////////////////////////
 
+PyDoc_STRVAR(maix_nn_model_type_name, "Model");
+extern PyTypeObject PyMaix_NN_Model_Type;
 
 #ifdef  __cplusplus
 }

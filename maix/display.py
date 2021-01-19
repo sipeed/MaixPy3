@@ -1,21 +1,7 @@
-
-import shutil
 import io
 import os
 
-from PIL import Image, ImageShow
-
-try:
-    # use fbviewer on linux
-    # os.system('ln -s /usr/sbin/fbviewer /usr/sbin/display')
-    if shutil.which("fbviewer"):
-        class fbViewer(ImageShow.UnixViewer):
-            def get_command_ex(self, file, **options):
-                command = executable = "fbviewer"
-                return command, executable
-        ImageShow.register(fbViewer, 0)
-except ModuleNotFoundError as e:
-    pass
+from PIL import Image
 
 # remote jupyter options
 remote = None

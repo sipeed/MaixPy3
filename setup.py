@@ -27,7 +27,7 @@ setup(
     author_email="support@sipeed.com",
     url='https://github.com/sipeed/MaixPy3',
     description="MaixPy Python3 library",
-    long_description=open('README.md').read(),
+    long_description=open('README.md', 'r', encoding='UTF-8').read(),
     install_requires=["Pillow", "pexpect", "rpyc"],
     ext_modules=ext_modules,
     packages = find_packages(

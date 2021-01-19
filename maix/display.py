@@ -96,6 +96,7 @@ def show(im=None, box=(0, 0), fast=True):
 
 def clear(c=(0, 0, 0)):
     fill(color=c)
+    show()
 
 
 if __name__ == '__main__':

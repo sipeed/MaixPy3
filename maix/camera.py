@@ -8,19 +8,30 @@ try:
 
     class V831MaixVideo(MaixVideo):
 
-        def __init__(self, source="/v831", size=(480, 360)):
-            super(V831MaixVideo, self).__init__(size)
+        def __init__(self, source="/v831"):
             self.source = source
-            self.cam = V831Camera(self.width, self.height)
+            self.cam = None
+
+        def config(self, size=(480, 360)):
+            if self.cam == None:
+                super(V831MaixVideo, self).__init__(size)
+                self.cam = V831Camera(self.width, self.height)
+                print('[camera] config input size(%d, %d)', self.width, self.height)
 
         def read(self):
-            ret, frame = self.cam.read()
-            if ret:
-                return frame # bytes
+            if self.cam:
+                ret, frame = self.cam.read()
+                if ret:
+                    return frame # bytes
+            else:
+                print('[camera] run config(size=(w, h)) before capture.')
+                self.config()
             return None
-        
+
         def __del__(self):
-            self.cam.close()
+            if self.cam:
+                self.cam.close()
+                self.cam = None
 
     camera = V831MaixVideo()
 except Exception as e:
@@ -31,8 +42,8 @@ try:
 
     class CvMaixVideo(MaixVideo):
 
-        def __init__(self, source=0, size=(640, 480)):
-            super(CvMaixVideo, self).__init__(size)
+        def __init__(self, source=0):
+            super(CvMaixVideo, self).__init__((640, 480))
             self.source = source
             self.cam = VideoCapture(0)
 
@@ -53,8 +64,10 @@ except Exception as e:
 # registered interface
 capture = camera.capture
 read = camera.read
+config = camera.config
 
 if __name__ == '__main__':
+    camera.config((224, 224))
     from maix import display
     display.clear((255, 0, 0))
     display.show(camera.capture())

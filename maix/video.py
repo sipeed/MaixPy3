@@ -10,6 +10,9 @@ class MaixVideo():
     def read(self):
         return b'\xFF\x00\x00' * (self.width * self.height)
 
+    def config(self, size):
+        pass
+
     def capture(self):
         from PIL import Image
         tmp = self.read()

@@ -93,5 +93,10 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
         return NULL;
     }
 
+    /* Add class*/
+    PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);
+    PyModule_AddObject(module, "F", functional_module);
+    PyModule_AddObject(module, "functional", functional_module);
+
     return module;
 }

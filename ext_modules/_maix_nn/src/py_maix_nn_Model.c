@@ -13,6 +13,7 @@ typedef struct
     float*        out_buffer;
     PyObject*     inputs;
     PyObject*     outputs;
+    PyObject*     m_numpy;
 } ModelObject;
 
 PyDoc_STRVAR(Maix_NN_Object_type_doc, "neural network model object.\n");
@@ -36,7 +37,6 @@ static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static void Model_del(ModelObject *self)
 {
-    printf("model del\n");
     if(self->nn)
     {
         libmaix_nn_destroy(&(self->nn));
@@ -54,6 +54,12 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     PyObject *o_model_path = NULL;
     PyObject *o_opt        = NULL;
     libmaix_err_t err = LIBMAIX_ERR_NONE;
+    self->m_numpy = PyImport_ImportModule("numpy");
+    if(!self->m_numpy)
+    {
+        PyErr_SetString(PyExc_EnvironmentError, "need numpy module");
+        return -1;
+    }
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "O|$O:__init__", kwlist,
                                      &o_model_path, &o_opt))
@@ -191,7 +197,6 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             PyErr_Format(PyExc_Exception, "libmaix_nn init fail: %s\n", libmaix_get_err_msg(err));
             goto end;
         }
-        printf("-----load now----\n");
         err = self->nn->load(self->nn, &model_path, &opt_param);
         if(err != LIBMAIX_ERR_NONE)
         {
@@ -378,13 +383,10 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         return NULL;
     }
     PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap.data, _size);
-    PyObject* numpy = PyImport_ImportModule("numpy");
-    if (numpy == NULL)
-        return NULL;
     PyObject *call_args = Py_BuildValue("(O)", result_bytes);
     PyObject *call_keywords = PyDict_New();
     PyDict_SetItemString(call_keywords, "dtype", PyUnicode_FromString("float32"));
-    PyObject* o_result_numpy = PyObject_Call(PyObject_GetAttrString(numpy, "frombuffer"), call_args, call_keywords);
+    PyObject* o_result_numpy = PyObject_Call(PyObject_GetAttrString(self->m_numpy, "frombuffer"), call_args, call_keywords);
     Py_DECREF(call_args);
     Py_DECREF(call_keywords);
     return o_result_numpy;

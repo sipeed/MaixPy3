@@ -1,5 +1,19 @@
 # MaixPy3
 
+## install to your machine
+
+- pip3 install maixpy3
+
+- python3 -c "from maix import rpycs; rpycs.start()" &
+
+## jupyter to your computer
+
+- pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install
+
+- jupyter notebook (jupyter lab)
+
+> more see https://github.com/sipeed/rpyc_ikernel
+
 ## example
 
 ```python

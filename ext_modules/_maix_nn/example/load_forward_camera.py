@@ -1,14 +1,14 @@
 from maix import nn
 from PIL import Image, ImageDraw
-from maix import display
-from classes_label import labels
-import time
+from maix import camera, display
 
 test_jpg = "/root/test_input/input.jpg"
 model = {
     "param": "/root/models/resnet_awnn.param",
     "bin": "/root/models/resnet_awnn.bin"
 }
+
+camera.config(size=(224, 224))
 
 options = {
     "model_type":  "awnn",
@@ -36,17 +36,17 @@ print("-- out:", out.shape)
 out = nn.F.softmax(out)
 print(out.max(), out.argmax())
 
+from classes_label import labels
 while 1:
-    t = time.time()
+    img = camera.capture()
+    if not img:
+        time.sleep(0.02)
+        continue
     out = m.forward(img, quantize=True)
-    t = time.time() - t
-    print("-- forward time: {}s".format(t))
-    t = time.time()
-    out2 = nn.F.softmax(out)
-    t = time.time() - t
-    print("-- softmax time: {}s".format(t))
+    out = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out.max(), labels[out.argmax()])
     print(msg)
     draw = ImageDraw.Draw(img)
     draw.text((0, 0), msg, fill=(255, 0, 0))
+    display.show(img)
 

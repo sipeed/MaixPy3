@@ -45,10 +45,11 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
     PyObject *call_args = Py_BuildValue("(O)", model_path);
     PyObject *call_keywords = PyDict_New();
     PyDict_SetItemString(call_keywords, "opt", opt);
-
-    PyObject* ret = PyObject_Call(PyObject_GetAttrString(model_obj, "__init__"), call_args, call_keywords);
+    PyObject *o_init_func = PyObject_GetAttrString(model_obj, "__init__");
+    PyObject* ret = PyObject_Call(o_init_func, call_args, call_keywords);
     Py_DECREF(call_args);
     Py_DECREF(call_keywords);
+    Py_DECREF(o_init_func);
     if( ret == NULL)
     {
         return NULL;

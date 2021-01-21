@@ -89,6 +89,7 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
     }
     if(o_input->ob_type == o_ndarray)
     {
+        Py_DECREF(o_ndarray);
         int dtype = -1;
         PyObject* o_dtype = PyObject_GetAttrString(o_input, "dtype");
         if(o_dtype == NULL)
@@ -96,6 +97,7 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
             return NULL;
         }
         PyObject* o_dtype_name = PyObject_GetAttrString(o_dtype, "name");
+        Py_DECREF(o_dtype);
         if(o_dtype_name == NULL)
         {
             return NULL;
@@ -111,12 +113,14 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
         }
         else
         {
+            Py_DECREF(o_dtype_name);
             PyErr_SetString(PyExc_ValueError, "only support float32 and float64 dtype");
             return NULL;
         }
         PyObject* o_bytes = PyObject_CallMethod(o_input, "tobytes", NULL);
         if(o_bytes == NULL)
         {
+            Py_DECREF(o_dtype_name);
             return NULL;
         }
         Py_ssize_t bytes_len = PyBytes_Size(o_bytes);
@@ -130,7 +134,7 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
                 maix_nn_functional_softmax_double((double*)bytes, bytes_len/4, NULL, 1);
                 break;
             default:
-                PyErr_SetString(PyExc_ValueError, "only support float32 and float64 dtype");
+                assert(false); // should never here
                 return NULL;
         }
         PyObject *call_args = Py_BuildValue("(O)", o_bytes);
@@ -139,10 +143,13 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
         PyObject* o_result_numpy = PyObject_Call(PyObject_GetAttrString(m_numpy, "frombuffer"), call_args, call_keywords);
         Py_DECREF(call_args);
         Py_DECREF(call_keywords);
+        Py_DECREF(o_dtype_name);
+        Py_DECREF(o_bytes);
         return o_result_numpy;
     }
     else
     {
+        Py_DECREF(o_ndarray);
         PyErr_SetString(PyExc_NotImplementedError, "only support numpy object");
         return NULL;
     }

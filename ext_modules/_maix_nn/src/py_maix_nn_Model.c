@@ -56,6 +56,16 @@ static void Model_del(ModelObject *self)
     {
         Py_TYPE(self)->tp_free((PyObject *)self);
     }
+    if(self->inputs)
+    {
+        Py_DECREF(self->inputs);
+        self->inputs = NULL;
+    }
+    if(self->outputs)
+    {
+        Py_DECREF(self->outputs);
+        self->outputs = NULL;
+    }
 }
 
 static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
@@ -159,6 +169,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             PyErr_SetString(PyExc_ValueError, "arg model_path need bin key, value is str");
             return -1;
         }
+        Py_INCREF(self->inputs);
+        Py_INCREF(self->outputs);
 
         /* load by libmaix API */
         libmaix_nn_module_init();
@@ -213,6 +225,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             PyErr_Format(PyExc_Exception, "libmaix_nn load fail: %s\n", libmaix_get_err_msg(err));
             goto end;
         }
+        Py_DECREF(keys_inputs);
+        Py_DECREF(keys_outputs);
         /* load by libmaix API end */
     }
     else
@@ -281,6 +295,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     char* input_bytes = PyBytes_AsString(o_input_bytes);
     if(input_bytes == NULL)
     {
+        Py_DECREF(o_input_bytes);
         PyErr_SetString(PyExc_ValueError, "get bytes data error");
         return NULL;
     }
@@ -322,6 +337,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         input_h = PyLong_AsLong(PyList_GetItem(o_input_shape, 0));
         input_c = PyLong_AsLong(PyList_GetItem(o_input_shape, 2));
     }
+    Py_DECREF(o_inputs_shape);
     if(input_w != input_width || input_h != input_height || input_c != input_channel)
     {
         PyErr_Format(PyExc_ValueError, "input shape error, need:(%d, %d, %d), but(%d, %d, %d)", input_h, input_w, input_c, input_height, input_width, input_channel);
@@ -353,6 +369,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         output_h = PyLong_AsLong(PyList_GetItem(o_output_shape, 0));
         output_c = PyLong_AsLong(PyList_GetItem(o_output_shape, 2));
     }
+    Py_DECREF(o_outputs_shape);
     libmaix_nn_layer_t out_fmap = {
         .w = output_w,
         .h = output_h,
@@ -399,6 +416,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     PyObject* o_result_numpy = PyObject_Call(PyObject_GetAttrString(self->m_numpy, "frombuffer"), call_args, call_keywords);
     Py_DECREF(call_args);
     Py_DECREF(call_keywords);
+    Py_DECREF(result_bytes);
+
+    Py_DECREF(o_input_bytes);
+    Py_DECREF(o_width);
+    Py_DECREF(o_height);
+    Py_DECREF(o_mode);
     return o_result_numpy;
 }
 static PyMethodDef Model_methods[] = {

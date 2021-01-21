@@ -2,11 +2,11 @@
 
 ## install to your machine
 
-- ifconfig (get your ip address)
+- `ifconfig` (get your ip address)
 
-- pip3 install maixpy3
+- `pip3 install maixpy3`
 
-- python3 -c "from maix import rpycs; rpycs.start()" &
+- `python3 -c "from maix import rpycs; rpycs.start()" &`
 
 ## jupyter to your computer
 

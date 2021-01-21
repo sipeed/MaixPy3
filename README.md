@@ -10,7 +10,9 @@
 
 ## jupyter to your computer
 
-- pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install
+- windows user can install [Anaconda3](https://www.anaconda.com/download) bring jupyter notebook & python3 & pip3 & more!.
+
+- `pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install`
 
 - jupyter notebook (or `jupyter lab`)
 

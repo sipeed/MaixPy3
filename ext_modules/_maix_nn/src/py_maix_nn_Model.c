@@ -37,6 +37,16 @@ static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 
 static void Model_del(ModelObject *self)
 {
+    if(self->out_buffer)
+    {
+        free(self->out_buffer);
+        self->out_buffer = NULL;
+    }
+    if(self->quantize_buffer)
+    {
+        free(self->quantize_buffer);
+        self->quantize_buffer = NULL;
+    }
     if(self->nn)
     {
         libmaix_nn_destroy(&(self->nn));

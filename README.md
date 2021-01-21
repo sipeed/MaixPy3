@@ -1,5 +1,21 @@
 # MaixPy3
 
+## install to your machine
+
+- ifconfig (get your ip address)
+
+- pip3 install maixpy3
+
+- python3 -c "from maix import rpycs; rpycs.start()" &
+
+## jupyter to your computer
+
+- pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install
+
+- jupyter notebook (or `jupyter lab`)
+
+> more see https://github.com/sipeed/rpyc_ikernel
+
 ## example
 
 ```python
@@ -20,7 +36,7 @@ while True:
     display.show(tmp)
 ```
 
-```
+```python
 import numpy as np
 array = np.array([[1,2,3],[4,5,6]])
 print(array)

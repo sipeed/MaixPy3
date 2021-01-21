@@ -2,15 +2,35 @@
 
 ## install to your machine
 
-- ifconfig (get your ip address)
+- `ifconfig` (get your ip address)
 
-- pip3 install maixpy3
+- `pip3 install maixpy3`
 
-- python3 -c "from maix import rpycs; rpycs.start()" &
+- `python3 -c "from maix import rpycs; rpycs.start()" &`
 
 ## jupyter to your computer
 
-- pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install
+- windows user can install [Anaconda3](https://www.anaconda.com/download) bring jupyter notebook & python3 & pip3 & more!.
+
+- `pip3 install rpyc_ikernel
+
+- check python >= 3.8.5
+
+```shell
+(base) PS C:\Users\dls> python -V
+Python 3.8.5
+```
+
+- `python -m rpyc_ikernel.install`
+
+```shell
+(base) PS C:\Users\dls> python -m rpyc_ikernel.install
+Installing IPython kernel spec of RPyc
+C:\Users\dls\anaconda3\lib\site-packages\rpyc_ikernel\install.py:30: DeprecationWarning: replace is ignored. Installing a kernelspec always replaces an existing installation
+  k.install_kernel_spec(td, 'RPyc', user=user,
+...into C:\Users\dls\AppData\Roaming\jupyter\kernels\rpyc
+(base) PS C:\Users\dls>
+```
 
 - jupyter notebook (or `jupyter lab`)
 

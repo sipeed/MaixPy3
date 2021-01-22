@@ -60,7 +60,7 @@ def config_source():
 def config_maixpy3():
   # /etc/init.d/S40network replace
   start_old = 'tcpsvd -vE 0.0.0.0 21 ftpd -w / &'
-  start_cfg = start_old + ' & python3 -c "from maix import rpycs; rpycs.start()" &'
+  start_cfg = start_old + ' python3 -c "from maix import rpycs; rpycs.start()" &'
   stop_old = 'ps | grep ftpd |awk "{print $1}"|xargs kill -9'
   stop_cfg = 'ps | grep -e "ftpd" -e "rpycs" |awk "{print $1}"|xargs kill -9'
 

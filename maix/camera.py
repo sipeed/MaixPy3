@@ -16,7 +16,7 @@ try:
             if self.cam == None:
                 super(V831MaixVideo, self).__init__(size)
                 self.cam = V831Camera(self.width, self.height)
-                print('[camera] config input size(%d, %d)', self.width, self.height)
+                print('[camera] config input size(%d, %d)' % (self.width, self.height))
 
         def read(self):
             if self.cam:

@@ -247,10 +247,13 @@ def start(host='0.0.0.0', rtsp=18811, rpyc=18812, debug=False):
     logging.basicConfig(level=logging.debug)
 
   start_rtsp()
-
-  rpyc_server = ThreadedServer(
-      SlaveService, hostname=HostName, port=RpycPort, reuse_addr=True)
-  rpyc_server.start()
+  try:
+    rpyc_server = ThreadedServer(
+        SlaveService, hostname=HostName, port=RpycPort, reuse_addr=True)
+    rpyc_server.start()
+  except OSError as e:
+    # logging.debug('[%s] OSError: %s' % (__file__, str(e))) # [Errno 98] Address already in use
+    exit(0)
   
   global RtspVar
   RtspVar.__del__()

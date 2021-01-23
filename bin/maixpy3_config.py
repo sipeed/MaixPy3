@@ -4,6 +4,10 @@ import argparse
 import time
 
 
+class state:
+  network = False  # [2021-01-23] only get ip not ping
+
+
 def get_ipconfig():
   ADDR = None
   cmd = os.popen('ifconfig')
@@ -12,8 +16,10 @@ def get_ipconfig():
           ADDR = i
           break
   if ADDR:
+    state.network = True
     print("\n[wifi] The IP address of your device, please remember.\r\n\r\n", ADDR)
   else:
+    state.network = False
     print("\n[wifi] Your device is not connected to the Internet, shell input >>> maixpy3_config.py -ssid wifi_name -pasw wifi_pasw")
 
 
@@ -35,8 +41,6 @@ def set_wifi(SSID="Sipeed_2.4G", PASW="Sipeed123."):
 
 def config_wifi():
 
-  get_ipconfig()
-
   if args.ssid and args.pasw:
     set_wifi(args.ssid, args.pasw)
   else:
@@ -48,6 +52,8 @@ def config_wifi():
     except KeyboardInterrupt as e:
       pass
 
+  get_ipconfig()
+
 
 def config_time():
   pass
@@ -58,9 +64,12 @@ def config_source():
 
 
 def config_maixpy3():
+  if state.network == False:
+    print('\n[maixpy3] No Connect Network ...\n')
+    return
   # /etc/init.d/S40network replace
   start_old = 'tcpsvd -vE 0.0.0.0 21 ftpd -w / &'
-  start_cfg = start_old + ' python3 -c "from maix import rpycs; rpycs.start()" &'
+  start_cfg = start_old + ' & python3 -c "from maix import rpycs; rpycs.start()" &'
   stop_old = 'ps | grep ftpd |awk "{print $1}"|xargs kill -9'
   stop_cfg = 'ps | grep -e "ftpd" -e "rpycs" |awk "{print $1}"|xargs kill -9'
 
@@ -83,6 +92,7 @@ def config_maixpy3():
   except KeyboardInterrupt as e:
     pass
   except Exception as e:
+    print('\n[maixpy3] have bug %s' % str(e))
     print('\n[maixpy3] cp /etc/init.d/S40network.old /etc/init.d/S40network')
     os.system('cp /etc/init.d/S40network.old /etc/init.d/S40network')
 
@@ -103,7 +113,9 @@ if __name__ == '__main__':
 
   config_maixpy3()
 
-  print('\n[update] opkg update')
-  os.system('opkg update')
+  if state.network:
+
+    print('\n[update] opkg update')
+    os.system('opkg update')
 
   print('\n[config] The configuration is finished, thanks for using.', time.asctime())

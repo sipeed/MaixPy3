@@ -1,40 +1,6 @@
 # MaixPy3
 
-## install to your machine
-
-- `ifconfig` (get your ip address)
-
-- `pip3 install maixpy3`
-
-- `python3 -c "from maix import rpycs; rpycs.start()" &`
-
-## jupyter to your computer
-
-- windows user can install [Anaconda3](https://www.anaconda.com/download) bring jupyter notebook & python3 & pip3 & more!.
-
-- `pip3 install rpyc_ikernel
-
-- check python >= 3.8.5
-
-```shell
-(base) PS C:\Users\dls> python -V
-Python 3.8.5
-```
-
-- `python -m rpyc_ikernel.install`
-
-```shell
-(base) PS C:\Users\dls> python -m rpyc_ikernel.install
-Installing IPython kernel spec of RPyc
-C:\Users\dls\anaconda3\lib\site-packages\rpyc_ikernel\install.py:30: DeprecationWarning: replace is ignored. Installing a kernelspec always replaces an existing installation
-  k.install_kernel_spec(td, 'RPyc', user=user,
-...into C:\Users\dls\AppData\Roaming\jupyter\kernels\rpyc
-(base) PS C:\Users\dls>
-```
-
-- jupyter notebook (or `jupyter lab`)
-
-> more see https://github.com/sipeed/rpyc_ikernel
+a cross-platform MaixPy for Python3, let's play with edge AI easier! 
 
 ## example
 
@@ -50,7 +16,8 @@ while True:
 from maix import display, camera
 from PIL import ImageDraw
 while True:
-    tmp = (camera.capture())
+  tmp = camera.capture()
+  if tmp:
     draw = ImageDraw.Draw(tmp)
     draw.text((10, 10), str(time.asctime()), (255, 255, 255))
     display.show(tmp)
@@ -65,11 +32,25 @@ print('shape:',array.shape)
 print('size:',array.size)
 ```
 
+## Remote Procedure Call Python Code
+
+### install maixpy3 to your machine
+
+- use `ifconfig` at linux. (get your ip address)
+
+- `pip3 install maixpy3`
+
+- `python3 -c "from maix import rpycs; rpycs.start()" &`
+
+### install jupyter to your computer
+
+- [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel)
+
 ## help
 
-- [MaixPy3 CPython 开发文档](./docs/develop_zh.md)
+- [MaixPy3 CPython 开发文档](https://github.com/sipeed/MaixPy3/tree/main/docs/develop_zh.md)
 
-- [MaixPy3 CPython develop_en.md](./docs/develop_en.md)
+- [MaixPy3 CPython develop_en.md](.https://github.com/sipeed/MaixPy3/tree/main/docs/develop_en.md)
 
 ## pass
 
@@ -77,6 +58,8 @@ print('size:',array.size)
 
 ## usage
 
-- python3 setup.py build
+- python3 setup.py build (for your linux x86)
 
-- python3.8 setup.py build v831
+- python3.8 setup.py build v831 (for your linux arm)
+
+- more linux

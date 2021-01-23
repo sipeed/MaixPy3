@@ -72,3 +72,12 @@ your x86
 your arm
 
 - python3.8 setup.py build v831
+
+## pypi upload
+
+- python3 setup.py sdist build
+- python3.8 setup.py bdist_wheel v831
+
+> pip install twine
+
+- twine upload dist/* --verbose

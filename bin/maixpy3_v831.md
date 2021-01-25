@@ -1,6 +1,24 @@
-# maixpy_config.py
+# Sipeed V831 使用文档（初稿）
 
-- 目前适用 V831 。
+| 日期          | 编辑人 | 备注                                     |
+| ------------- | ------ | ---------------------------------------- |
+| 2021年1月21日 | 大佬鼠 | 该版本仅在交流群范围内使用，不对外流通。 |
+| 2021年1月21日 | 大佬鼠 | 增加更多讯息 |
+
+## 检查硬件
+
+当你拿到硬件，先检查外观是否有破损，请先确认天线/屏幕/摄像头均无破损，通电后电源红灯（power）亮起，表示硬件进入工作状态，注意两个 TypeC 口的用途不同的。
+
+### 如何连接串口？
+
+- 确保插入电脑通电后硬件可以被识别成串口设备。
+
+- 参考  [Maix USB 驱动安装 ](https://maixpy.sipeed.com/zh/get_started/install_driver/nano.html?h=%E5%AE%89%E8%A3%85%E9%A9%B1%E5%8A%A8) 完成驱动的安装。
+- 懒人就用  [V831>驱动精灵](https://share.weiyun.com/9H2RSOND) 自动安装驱动。
+
+## 给 V831 烧录系统
+
+请参考 [V831 镜像烧录](https://thoughts.teambition.com/share/5ff5aa2068c1c000466f61f3) 完成系统的烧写。
 
 ## 配置你的 linux 系统
 
@@ -10,7 +28,7 @@
 
 进入系统后看到 `root@sipeed:/#` 提示就可以进行 linux 系统交互操作，输入命令 `maixpy3_config.py` 进行系统配置，有如下配置。
 
-- 配置你的 root 用户的密码，与 ssh & ftp 共用。
+- 配置你的 root 用户的密码（默认:`123`），与 ssh & ftp 共用。
 - 配置你的 WIFI 热点账号（ssid）密码（pasw）
 
 > WIFI 配置文件位于 `/etc/wpa_supplicant.conf` 。
@@ -164,7 +182,7 @@ root@sipeed:/#
 
 输入 `ifconfig` 命令即可出现你的 IP 地址即可，在上述配置过程中也可以看到。
 
-Windows 用户提前安装 anaconda 即可完成 Python3 & Jupyter 的环境安装。
+Windows 用户安装 [anaconda](https://www.anaconda.com/download/) 软件，国内下载推荐[清华源](https://mirror.tuna.tsinghua.edu.cn/help/anaconda/)，安装后系统就会添加 `python / pip / jupyter` 等命令。
 
 - 在 Linux 下运行 `pip3 install rpyc_ikernel && python3 -m rpyc_ikernel.install`
 - 在 Windows 下运行 `pip install rpyc_ikernel && python -m rpyc_ikernel.install`
@@ -234,3 +252,15 @@ root@sipeed:/#
 ```
 
 如果有其他问题可以提交到社区帖子进行反馈。
+
+## 相关参考资料
+
+- [MaixII_Dock(V831)_WIFI_使用/测试标准](https://thoughts.teambition.com/share/5ffd4d100d65cf00467d502c)
+
+- [v831_PIN_引脚和（GPIO）功能的使用](https://thoughts.teambition.com/share/600659e9823a3d004a4e1c7a)
+
+- [I2C_功能测试](https://thoughts.teambition.com/share/600950323cf39100462f8782)
+
+- [CPython3 MaixPy3](https://github.com/sipeed/MaixPy3)
+
+- [jupyter rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel)

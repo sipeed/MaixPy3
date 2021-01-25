@@ -90,7 +90,7 @@ def config_maixpy3():
     with open('/etc/init.d/S40network', 'w') as f:
         f.write(config)
   except KeyboardInterrupt as e:
-    pass
+    raise Exception('[maixpy3] restore config...')
   except Exception as e:
     print('\n[maixpy3] have bug %s' % str(e))
     print('\n[maixpy3] cp /etc/init.d/S40network.old /etc/init.d/S40network')

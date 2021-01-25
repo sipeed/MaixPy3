@@ -76,7 +76,7 @@ def local_show(value=True):
   _local_show = value
 
 
-def show(im=None, box=(0, 0), fast=True):
+def show(im, box=(0, 0), fast=True):
     global __display__, local_show
     if __fastview__ and fast:
       __display__ = im
@@ -95,8 +95,9 @@ def show(im=None, box=(0, 0), fast=True):
 
 
 def clear(c=(0, 0, 0)):
+    global __display__
     fill(color=c)
-    show()
+    show(__display__)
 
 
 if __name__ == '__main__':

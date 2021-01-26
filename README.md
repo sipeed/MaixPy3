@@ -50,7 +50,7 @@ print('size:',array.size)
 
 - [MaixPy3 CPython 开发文档](https://github.com/sipeed/MaixPy3/tree/main/docs/develop_zh.md)
 
-- [MaixPy3 CPython develop_en.md](.https://github.com/sipeed/MaixPy3/tree/main/docs/develop_en.md)
+- [MaixPy3 CPython develop_en.md](https://github.com/sipeed/MaixPy3/tree/main/docs/develop_en.md)
 
 ## pass
 

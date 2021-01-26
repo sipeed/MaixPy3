@@ -95,10 +95,10 @@ static PyObject *Display_draw(VirtualDisplayObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "Oii", &img_bytes, &img_width, &img_height))
     {
-        return Py_None;
+        return NULL;
     }
     
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef VirtualDisplay_methods[] = {

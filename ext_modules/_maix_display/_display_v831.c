@@ -108,15 +108,19 @@ static PyObject *Display_draw(V831DisplayObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "Oii", &img_bytes, &img_width, &img_height))
     {
-        return Py_None;
+        return NULL;
     }
     
-    if (self->disp->width >= img_width && self->disp->height >= img_height) {
-        uint8_t *rgb_data = (uint8_t *)PyBytes_AS_STRING(img_bytes);
-        self->disp->draw(self->disp, rgb_data, (self->disp->width - img_width) / 2,(self->disp->height - img_height) / 2, img_width, img_height, 1);
+    if (NULL != self->disp) {
+      if (self->disp->width >= img_width && self->disp->height >= img_height) {
+          uint8_t *rgb_data = (uint8_t *)PyBytes_AS_STRING(img_bytes);
+          if (rgb_data != NULL) {
+            self->disp->draw(self->disp, rgb_data, (self->disp->width - img_width) / 2,(self->disp->height - img_height) / 2, img_width, img_height, 1);
+          }
+      }
     }
 
-    return Py_None;
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef V831Display_methods[] = {

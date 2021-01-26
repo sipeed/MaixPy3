@@ -102,7 +102,9 @@ static PyObject *VirtualCamera_read(VirtualCameraObject *self, PyObject *args)
     // Py_INCREF(bytes); // cancel ref Tag
     PyObject* list = PyList_New(2);
     if (!list) Py_RETURN_NONE;
-    PyList_SET_ITEM(list, 0, PyBool_FromLong(!ret));
+    PyObject* tmp = PyInt_FromLong(!ret);
+    PyList_SetItem(list, 0, tmp);
+    Py_DECREF(tmp);
     PyList_SET_ITEM(list, 1, bytes);
     return list;
 }

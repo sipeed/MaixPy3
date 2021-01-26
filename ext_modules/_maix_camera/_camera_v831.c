@@ -133,13 +133,13 @@ static PyObject *V831Camera_read(V831CameraObject *self, PyObject *args)
     size_t len = self->width * self->height * 3;
     self->yuv_img->mode = LIBMAIX_IMAGE_MODE_YUV420SP_NV21;
     libmaix_err_t ret = LIBMAIX_ERR_NONE;
-    for (size_t i = 0; i < 10; i++)
+    for (size_t i = 0; i < 5; i++)
     {
       ret = self->cam->capture(self->cam, (unsigned char*)self->yuv_img->data);
       // not ready， sleep to release CPU
       if(ret == LIBMAIX_ERR_NOT_READY)
       {
-          usleep(10 * 1000);
+          usleep(20 * 1000);
           continue;
       }
       if(ret == LIBMAIX_ERR_NONE)
@@ -166,7 +166,9 @@ static PyObject *V831Camera_read(V831CameraObject *self, PyObject *args)
     // Py_INCREF(bytes); // cancel ref Tag
     PyObject* list = PyList_New(2);
     if (!list) Py_RETURN_NONE;
-    PyList_SET_ITEM(list, 0, PyBool_FromLong(!ret));
+    PyObject* tmp = PyInt_FromLong(!ret);
+    PyList_SetItem(list, 0, tmp);
+    Py_DECREF(tmp);
     PyList_SET_ITEM(list, 1, bytes);
     return list;
 }

@@ -189,7 +189,7 @@ Windows 用户安装 [anaconda](https://www.anaconda.com/download/) 软件，国
 
 确保有环境后，输入 `jupyter notebook` 启动编辑器，选中 RPyC 内核即可。
 
-> 你也可以使用 jupyter lab 来启动，或是直接在 VSCode 里运行。
+> 你也可以使用 jupyter lab 来启动，或是在 VSCode 里直接打开 jupyter 文档运行代码（不需要额外执行 jupyter notebook）。
 
 更详细的可以参考 [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) 仓库说明。
 

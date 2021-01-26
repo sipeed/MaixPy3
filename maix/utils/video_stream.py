@@ -19,6 +19,7 @@ class VideoStream:
             __class__.VIDEO_LENGTH = sys.maxsize
         elif file_path == '/dev/camera':
             from maix import camera
+            # tmp = camera.read() # test camera work
             self._stream = camera
             self.TYPE = 1 # camera
             __class__.VIDEO_LENGTH = sys.maxsize
@@ -55,7 +56,7 @@ class VideoStream:
             # frame = tmp.getvalue()
             tmp = self._stream.read()
             if tmp:
-              frame = _maix.rgb2jpg(tmp, self._stream.width, self._stream.height)
+              frame = _maix.rgb2jpg(tmp, self._stream.width(), self._stream.height())
               frame_length = len(frame)
             else:
               return None

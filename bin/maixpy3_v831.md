@@ -225,6 +225,8 @@ while True:
 
 如需实时图传到本机，请查阅该文档[examples/usage_entry.ipynb](https://github.com/sipeed/rpyc_ikernel/blob/master/examples/usage_entry.ipynb)获取使用方法，运行它会把屏幕显示的图像传到浏览器的 jupyter notebook 编辑框中，在谷歌内核或360极速浏览器上测试通过。
 
+> 想要提升性能需要用外部的图传客户端。
+
 ## 常见问题
 
 - 系统烧录步骤严格按照，先打开软件，拔 SD 卡后插入电脑，等待提示确认后再插入 SD 卡自动完成安装。
@@ -268,3 +270,5 @@ root@sipeed:/#
 - [CPython3 MaixPy3](https://github.com/sipeed/MaixPy3)
 
 - [jupyter rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel)
+
+- [rtsp_pyqt 图传客户端](https://github.com/sipeed/MaixPy3/tree/main/bin/rtsp_pyqt)

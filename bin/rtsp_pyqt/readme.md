@@ -1,4 +1,4 @@
-# how to get rtps
+# how to get rtsp
 
 It need ptqt5 & maixpy3.
 
@@ -8,4 +8,4 @@ cd MaixPy3
 
 then run your rtsp client on pyqt or other.
 
-- shell `python3 ./bin/rtsp_pyqt/main_client.py /dev/camera 192.168.0.156 18811 18813` on MaixPy3/bin/rtpsc_pyqt.
+- shell `python3 ./bin/rtsp_pyqt/main_client.py /dev/camera 192.168.0.156 18811 18813` on MaixPy3/bin/rtspc_pyqt.

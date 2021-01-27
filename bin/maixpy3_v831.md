@@ -22,7 +22,7 @@
 
 ## 配置你的 linux 系统
 
-使用 [V831>MobaXterm_20.0汉化](https://share.weiyun.com/9H2RSOND) 连接设备串口（serial）进行系统的配置。
+使用 [V831>MobaXterm_20.0汉化](https://share.weiyun.com/9H2RSOND) 连接设备串口（serial）进行系统的配置，串口设置为 115200 波特率。
 
 > 截至 021-01-26 的 V831 M2DOCK 采用的是双串口固件，可以在进入串口后按回车确认是否选对串口，若没有反应可以按复位键确认，仍然不对，则需要切换串口再试。
 

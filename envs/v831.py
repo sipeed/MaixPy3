@@ -2,6 +2,8 @@
 from setuptools import Extension
 from .utils import get_srcs
 
+libi2c_module = Extension('pylibi2c',  include_dirs=['ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
+
 ext_so = "./ext_modules/libmaix/components/libmaix/lib/arch/v831"
 
 _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ext_modules/libmaix/components/libmaix/include'], 
@@ -49,6 +51,7 @@ _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/incl
                     )
 
 _maix_modules = [
+  libi2c_module,
   _maix_module,
   _maix_camera_module,
   _maix_display_module,

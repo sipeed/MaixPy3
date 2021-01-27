@@ -1,5 +1,4 @@
-
-__all__ = []
+import pylibi2c as i2c
 
 # try:
 #   # from .video import camera
@@ -27,3 +26,5 @@ try:
         ImageShow.register(fbViewer, 0)
 except ModuleNotFoundError as e:
     pass
+
+__all__ = ['i2c']

@@ -21,7 +21,7 @@ data_files.extend(_maix_data_files)
 
 setup(
   name='MaixPy3',
-  version='0.2.3',
+  version='0.2.4',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",

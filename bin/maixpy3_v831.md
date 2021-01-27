@@ -225,7 +225,7 @@ while True:
       display.show(im)
 ```
 
-如需实时图传到本机，请查阅该文档[examples/usage_entry.ipynb](https://github.com/sipeed/rpyc_ikernel/blob/master/examples/usage_entry.ipynb)获取使用方法，运行它会把屏幕显示的图像传到浏览器的 jupyter notebook 编辑框中，在谷歌内核或360极速浏览器上测试通过。
+如需实时图传到本机，请查阅该文档 [examples/usage_display.ipynb](https://github.com/sipeed/rpyc_ikernel/blob/master/examples/usage_display.ipynb) 获取使用方法，运行它会把屏幕显示的图像传到浏览器的 jupyter notebook 编辑框中，在谷歌内核或360极速浏览器上测试通过。
 
 > 想要提升性能需要用外部的图传客户端。
 

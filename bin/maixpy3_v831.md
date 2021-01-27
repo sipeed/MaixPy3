@@ -22,7 +22,7 @@
 
 ## 配置你的 linux 系统
 
-使用 [V831>MobaXterm_20.0汉化](https://share.weiyun.com/9H2RSOND) 连接设备串口进行系统的配置。
+使用 [V831>MobaXterm_20.0汉化](https://share.weiyun.com/9H2RSOND) 连接设备串口（serial）进行系统的配置。
 
 > 截至 021-01-26 的 V831 M2DOCK 采用的是双串口固件，可以在进入串口后按回车确认是否选对串口，若没有反应可以按复位键确认，仍然不对，则需要切换串口再试。
 
@@ -181,6 +181,8 @@ root@sipeed:/#
 > 上述每个步骤不想配置就可以用 [Ctrl + C] 跳过。
 
 最后使用命令 `reboot` 重启机器，此后系统会开机启动远程调用服务（RPyC），你可以在 `ps` 命令中得知。
+
+**注：使用 MobaXterm 连接 Serial、ssh、FTP 等服务，账号和密码与上述设置的一致。**
 
 ## 启动 jupyter 软件
 

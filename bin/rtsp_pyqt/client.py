@@ -272,7 +272,7 @@ class Client:
     RTP_SOFT_TIMEOUT = 5  # in milliseconds
     # for allowing simulated non-blocking operations
     # (useful for keyboard break)
-    RTSP_SOFT_TIMEOUT = 100  # in milliseconds
+    RTSP_SOFT_TIMEOUT = 1# in milliseconds
     # if it's present at the end of chunk, client assumes
     # it's the last chunk for current frame (end of frame)
     PACKET_HEADER_LENGTH = 5

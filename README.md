@@ -32,6 +32,17 @@ print('shape:',array.shape)
 print('size:',array.size)
 ```
 
+```python
+from maix import i2c
+i2c = i2c.I2CDevice('/dev/i2c-2', 0x26)
+
+i2c.delay = 10
+# i2c.page_bytes = 16
+data = i2c.ioctl_read(0x1, 1)
+print(data)
+print(i2c.read(0x1, 1))
+```
+
 ## Remote Procedure Call Python Code
 
 ### install maixpy3 to your machine

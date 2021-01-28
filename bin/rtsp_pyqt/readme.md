@@ -8,3 +8,5 @@ cd MaixPy3
 
 
 then open mainLogic.py and run it 
+or 
+- shell `python3  mainLogic.py `

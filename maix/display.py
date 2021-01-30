@@ -45,23 +45,16 @@ def __thumbnail__(src, dst):
         src.thumbnail((dst.width, dst.height))
 
 
-def fill(box=(0, 0), color=(0, 0, 0)):
-    global __display__
-    if len(box) == 2:
-        box = box + __display__.size
-    __display__.paste(color, box)
-
-
 try:
     __fastview__ = None
     from _maix_display import V831Display
     __fastview__ = V831Display(240, 240)
 
-    def __draw__(im):
+    def __draw__(img):
         global __fastview__
-        im = im.resize(
+        img = img.resize(
             (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
-        __fastview__.draw(im.tobytes(), __fastview__.width,
+        __fastview__.draw(img.tobytes(), __fastview__.width,
                           __fastview__.height)
 except ModuleNotFoundError as e:
     pass
@@ -76,28 +69,35 @@ def local_show(value=True):
   _local_show = value
 
 
-def show(im, box=(0, 0), fast=True):
+def show(img, box=(0, 0), fast=True):
     global __display__, local_show
     if __fastview__ and fast:
-      __display__ = im
-      if _local_show and isinstance(im, Image.Image):
-        __draw__(im)  # underlying optimization
+      __display__ = img
+      if _local_show and isinstance(img, Image.Image):
+        __draw__(img)  # underlying optimization
     else:
-      if isinstance(im, bytes):
-        im = Image.frombytes("RGB", box, im)
-        __thumbnail__(im, __display__)
-        __display__.paste(im, (0, 0))
-      elif isinstance(im, Image.Image):
-        __thumbnail__(im, __display__)
-        __display__.paste(im, box)
+      if isinstance(img, bytes):
+        img = Image.frombytes("RGB", box, img)
+        __thumbnail__(img, __display__)
+        __display__.paste(img, (0, 0))
+      elif isinstance(img, Image.Image):
+        __thumbnail__(img, __display__)
+        __display__.paste(img, box)
       if _local_show:
         __display__.show()
+
+
+def fill(box=(0, 0), color=(0, 0, 0)):
+    global __display__
+    if len(box) == 2:
+        box = box + __display__.size
+    __display__.paste(color, box)
+    show(__display__)
 
 
 def clear(c=(0, 0, 0)):
     global __display__
     fill(color=c)
-    show(__display__)
 
 
 if __name__ == '__main__':

@@ -9,7 +9,6 @@ def test_display():
   display.clear((255, 0, 0))
   display.fill((20, 20, 220, 220), (0, 0, 0))
   display.fill((40, 40, 200, 200), (0, 0, 255))
-  display.show()
 
 def test_image():
   from PIL import Image, ImageDraw

@@ -68,10 +68,10 @@ def config_maixpy3():
     print('\n[maixpy3] No Connect Network ...\n')
     return
   # /etc/init.d/S40network replace
-  start_old = 'tcpsvd -vE 0.0.0.0 21 ftpd -w / &'
+  start_old = 'tcpsvd -E 0.0.0.0 21 ftpd -w / &'
   start_cfg = start_old + ' python3 -c "from maix import rpycs; rpycs.start()" &'
-  stop_old = 'ps | grep ftpd |awk "{print $1}"|xargs kill -9'
-  stop_cfg = 'ps | grep -e "ftpd" -e "rpycs" |awk "{print $1}"|xargs kill -9'
+  stop_old = 'killall tcpsvd &'
+  stop_cfg = stop_old + ' killall python3 &'
 
   try:
     print('\nconfig your maxipy3... [Ctrl + C > Exit]\n')
@@ -95,6 +95,8 @@ def config_maixpy3():
     print('\n[maixpy3] have bug %s' % str(e))
     print('\n[maixpy3] cp /etc/init.d/S40network.old /etc/init.d/S40network')
     os.system('cp /etc/init.d/S40network.old /etc/init.d/S40network')
+  finally:
+    os.system('/etc/init.d/S40network restart')
 
 
 if __name__ == '__main__':

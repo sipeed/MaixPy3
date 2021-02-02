@@ -250,7 +250,7 @@ PING 192.168.0.156 (192.168.0.156) 56(84) bytes of data.
 64 bytes from 192.168.0.156: icmp_seq=2 ttl=64 time=3.94 ms
 ```
 
-确定本机网络没有问题后，可以确认硬件中的 `ps | grep python` 打印的进程中是否还存在 ` root     14880 S    python3 -c from maix import rpycs; rpycs.start()` 的进程状态为 S （运行中），如果不存在或状态为 R 则需要重启或自行手动运行 `python3 -c from maix import rpycs; rpycs.start()` 命令，系统默认自启。
+确定本机网络没有问题后，可以确认硬件中的 `ps | grep python` 打印的进程中是否还存在 ` root     14880 S    python3 -c "from maix import rpycs; rpycs.start()"` 的进程状态为 S （运行中），如果不存在或状态为 R 则需要重启或自行手动运行 `python3 -c "from maix import rpycs; rpycs.start()"` 命令，系统默认自启。
 
 ```ps
 root@sipeed:/# ps | grep python

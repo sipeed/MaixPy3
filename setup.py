@@ -29,7 +29,7 @@ setup(
   description="MaixPy Python3 library",
   long_description=open('README.md', 'r', encoding='UTF-8').read(),
   long_description_content_type='text/markdown',
-  install_requires=["Pillow", "rpyc", "gpiod", "evdev", "spidev"],
+  install_requires=["Pillow", "rpyc", "gpiod", "evdev", "spidev", "pyserial"],
   ext_modules=ext_modules,
   packages = find_packages(
     exclude=['envs'] # remove from build

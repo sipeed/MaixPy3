@@ -180,7 +180,7 @@ root@sipeed:/#
 
 > 上述每个步骤不想配置就可以用 [Ctrl + C] 跳过。
 
-最后使用命令 `reboot` 重启机器，此后系统会开机启动远程调用服务（RPyC），你可以在 `ps` 命令中得知。
+此后系统会开机启动远程调用服务（RPyC），你可以在 `ps` 命令中得知是否开启了 rpyc 远程调用服务。
 
 **注：使用 MobaXterm 连接 Serial、ssh、FTP 等服务，账号和密码与上述设置的一致。**
 
@@ -227,7 +227,7 @@ while True:
 
 如需实时图传到本机，请查阅该文档 [examples/usage_display.ipynb](https://github.com/sipeed/rpyc_ikernel/blob/master/examples/usage_display.ipynb) 获取使用方法，运行它会把屏幕显示的图像传到浏览器的 jupyter notebook 编辑框中，在谷歌内核或360极速浏览器上测试通过。
 
-> 想要提升性能需要用外部的图传客户端。
+> 想要进一步提升图传性能需要用专门的图传客户端 [rtsp_pyqt](https://github.com/sipeed/MaixPy3/tree/main/bin/rtsp_pyqt)。
 
 ## 常见问题
 

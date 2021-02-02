@@ -21,7 +21,7 @@ data_files.extend(_maix_data_files)
 
 setup(
   name='MaixPy3',
-  version='0.2.4',
+  version='0.2.5',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",
@@ -29,7 +29,7 @@ setup(
   description="MaixPy Python3 library",
   long_description=open('README.md', 'r', encoding='UTF-8').read(),
   long_description_content_type='text/markdown',
-  install_requires=["Pillow", "pexpect", "rpyc"],
+  install_requires=["Pillow", "rpyc", "gpiod", "evdev", "spidev"],
   ext_modules=ext_modules,
   packages = find_packages(
     exclude=['envs'] # remove from build

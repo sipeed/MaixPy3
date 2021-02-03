@@ -3,6 +3,7 @@ import os
 import argparse
 import time
 
+os.system('clear')
 
 class state:
   network = False  # [2021-01-23] only get ip not ping
@@ -95,8 +96,8 @@ def config_maixpy3():
     print('\n[maixpy3] have bug %s' % str(e))
     print('\n[maixpy3] cp /etc/init.d/S40network.old /etc/init.d/S40network')
     os.system('cp /etc/init.d/S40network.old /etc/init.d/S40network')
-  finally:
-    os.system('/etc/init.d/S40network restart')
+  # finally:
+  #   os.system('/etc/init.d/S40network restart')
 
 
 if __name__ == '__main__':

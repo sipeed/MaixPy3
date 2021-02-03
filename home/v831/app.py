@@ -77,7 +77,7 @@ keys = InputDevice('/dev/input/event0')
 
 async def keys_events(packet, device):
     async for event in device.async_read_loop():
-        await asyncio.sleep(0.02)
+        # await asyncio.sleep(0.02)
         if event.value == 1 and event.code == 0x02:
             # print('press key S1')
             if packet["selected"] == "main":
@@ -112,14 +112,14 @@ async def main(packet):
                 draw.text((0, 0), "{:.2f}: {}".format(
                     out.max(), labels[out.argmax()]), (255, 0, 0), font)
             display.show(img)
-        else:
-            await asyncio.sleep(0.02)
+        # else:
+            # await asyncio.sleep(0.02)
     elif packet["selected"] == "main":
         display.show(canvas)
     elif packet["selected"] == "exit":
         display.show(exits)
-    else:
-        await asyncio.sleep(0.02)
+    # else:
+    #     # await asyncio.sleep(0.02)
     asyncio.ensure_future(main(packet))
 
 asyncio.ensure_future(main(packet))

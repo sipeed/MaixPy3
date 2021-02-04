@@ -10,9 +10,9 @@ from setuptools import setup, Extension, find_packages
 ext_modules = []
 data_files = []
 
-if 'v831' in sys.argv:
-  sys.argv.remove('v831')
-  from envs.v831 import _maix_modules, _maix_data_files
+if 'maix_v831' in sys.argv:
+  sys.argv.remove('maix_v831')
+  from envs.maix_v831 import _maix_modules, _maix_data_files
 else:
   from envs.general import _maix_modules, _maix_data_files
   
@@ -37,6 +37,7 @@ setup(
   classifiers=[
       'Programming Language :: Python :: 3',
   ],
+  entry_points={"console_scripts": ["maixpy3_rpycs=maix.rpycs:start"]},
   include_package_data=True,
   package_data = {
       '': ['*.so'],

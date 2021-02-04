@@ -18,10 +18,12 @@ def hook(clear_output=True):
 
 
 try:
+    # export _MAIX_WIDTH_=800 && export _MAIX_HEIGHT_=480
+    __env_config__ = False
     __width__, __height__ = (640, 480)
-    env = os.environ
     __width__, __height__ = (
-        int(env['_MAIX_WIDTH_']), int(env['_MAIX_HEIGHT_']))
+        int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
+    __env_config__ = True
 except Exception as e:
     print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
@@ -48,14 +50,20 @@ def __thumbnail__(src, dst):
 try:
     __fastview__ = None
     from _maix_display import V831Display
-    __fastview__ = V831Display(240, 240)
+    if __env_config__:
+        __fastview__ = V831Display(__width__, __height__)
+    else:
+        __fastview__ = V831Display(240, 240)
 
     def __draw__(img):
         global __fastview__
-        img = img.resize(
-            (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
-        __fastview__.draw(img.tobytes(), __fastview__.width,
-                          __fastview__.height)
+        if isinstance(img, bytes):
+          __fastview__.draw(img, __fastview__.width, __fastview__.height)
+        elif isinstance(img, Image.Image):
+          img = img.resize(
+              (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
+          __fastview__.draw(img.tobytes(), __fastview__.width,
+                            __fastview__.height)
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
@@ -73,7 +81,7 @@ def show(img, box=(0, 0), fast=True):
     global __display__, local_show
     if __fastview__ and fast:
       __display__ = img
-      if _local_show and isinstance(img, Image.Image):
+      if _local_show:
         __draw__(img)  # underlying optimization
     else:
       if isinstance(img, bytes):

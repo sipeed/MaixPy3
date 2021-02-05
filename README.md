@@ -158,6 +158,12 @@ while True:
 
 ### [See the documentation for more information](https://maixpy.sipeed.com/)
 
+## Jupyter
+
+Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE editor that can remotely call Python code, videos, and image streaming.
+
+Click here to view the effect [usage_display_hook.ipynb](./examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
+
 ## Progress
 
 | **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
@@ -169,12 +175,6 @@ while True:
 | Windows          | build fail |                  |           |
 
 > The development progress is in no particular order.
-
-## Jupyter
-
-Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE editor that can remotely call Python code, videos, and image streaming.
-
-Click here to view the effect [usage_display_hook.ipynb](./examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
 
 ## Build
 

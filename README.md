@@ -15,7 +15,7 @@ MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpytho
 | **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
 | --------------   | ---------- | ---------------- | --------- | --------- |
 | linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
-| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M ~ 17M (Max 48M)
+| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M ~ 17M
 | maix_rv1126      | prepare    |                  |   NULL    |
 | RPi_XXXX         | maybe      |                  |   NULL    |
 | Windows          | build fail |                  |           |

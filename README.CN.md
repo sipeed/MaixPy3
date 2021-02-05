@@ -4,11 +4,11 @@
 
 # MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/MaixPy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/MaixPy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/MaixPy3.svg?style=social)
 
-English | [简体中文](./README.CN.md) 
+[English](./README.md)  | 简体中文
 
 [![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![PyPI version](https://badge.fury.io/py/MaixPy3.svg)](https://badge.fury.io/py/MaixPy3) ![Python](https://img.shields.io/badge/Python-3.5↗-ff69b4.svg) ![issue](https://img.shields.io/github/issues/sipeed/maixpy3.svg)
 
-MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpython), which simplifies the development of applications on Linux AI edge devices through Python programming.
+MaixPy3 是基于 [cpython](https://github.com/python/cpython) 的 Python3 工具包，通过 Python 编程简化在 Linux AI 边缘设备上开发应用。
 
 ## progress
 
@@ -20,18 +20,18 @@ MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpytho
 | RPi_XXXX         | maybe      |                  |   NULL    |
 | Windows          | build fail |                  |           |
 
-> The development progress is in no particular order.
+> 开发进度不分先后顺序。
 
 ## usage
 
-Display the camera image on the screen.
+在屏幕上显示摄像机的图像。
 
 ```python
 from maix import display, camera
 display.show(camera.capture())
 ```
 
-After inputting the image to the model, the result of the forward algorithm is returned.
+将图像输入模型后，将返回正向算法的结果。
 
 ```python
 from PIL import Image
@@ -61,7 +61,7 @@ print(out.max(), out.argmax())
 
 ```
 
-Some examples of accessing hardware peripherals.
+一些访问硬件外设的示例
 
 - GPIO
 
@@ -161,35 +161,35 @@ while True:
 
 ## jupyter
 
-Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE editor that can remotely call Python code, videos, and image streaming.
+在 jupyter notebook & lab 安装 [rpyc_ikernel]( https://github.com/sipeed/rpyc_ikernel) 内核即可得到一个可以远程调用 Python 代码和视频、图像推流的 IDE 编辑器。
 
-Click here to view the effect [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
+效果点此查看 [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb) ，注意 jupyter 运行在你的计算机。
 
 ## build
 
-Under `linux x86_64`, use `python3 setup.py build` to complete the general package construction.
+在 `linux x86_64` 下使用 `python3 setup.py build` 完成通用包的构建。
 
-For other platforms, take the version of `maix_v831` as an example, match the Python3 + cross-compilation chain of the corresponding platform, and run `python3.8 setup.py build maix_v831` to complete the construction of the target platform package.
+若是其他平台，以 `maix_v831` 的版型为例，搭配对应平台的 Python3 + 交叉编译链，运行 `python3.8 setup.py build maix_v831` 从而完成目标平台包的构建。
 
-Welcome to provide configurations of different platforms to [MaixPy3/envs/](./envs/) to adapt to the MaixPy3 environment.
+欢迎提供不同平台的配置到 [MaixPy3/envs/](./envs/) 来适配 MaixPy3 环境。
 
-> If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
+> 如需要 `.whl` 预编译包请将 `build` 改成 `bdist_wheel` 即可。
 
 ## develop
 
 > Tested glibc >= 27 on Ubuntu20.04 & manjaro20.03.
 
-Each catalog function of the project.
+项目的各目录功能。
 
-- [docs](./docs/) [store some general development documents]
-- [envs](./envs/) [store compilation configurations for different platforms]
-- [examples](./examples/) [store examples or applications on different platforms]
-- [ext_modules](./ext_modules/) [store project modules that need to be compiled]
-- [maix](./maix/) [Provide maix entry Python module]
-- [tests](./tests/) [Provide tox common test items]
-- [setup.py](./setup.py) [MaixPy3 project compilation entry]
+- [docs](./docs/) [ 存放一些通用的开发文档 ]
+- [envs](./envs/) [ 存放不同平台的编译配置 ]
+- [examples](./examples/) [ 存放不同平台的示例或应用 ]
+- [ext_modules](./ext_modules/) [ 存放需要编译的项目模块 ]
+- [maix](./maix/) [ 提供 maix 入口 Python 模块 ]
+- [tests](./tests/) [ 提供 tox 的通用测试项目 ]
+- [setup.py](./setup.py) [ MaixPy3 项目编译入口 ]
 
-If you want to submit the configuration of other platforms, please refer to the following:
+如果你想要提交其他平台的配置，参考如下：
 
 - [general.py](./envs/general.py)
 - [maix_v831.py](./envs/maix_v831.py)
@@ -210,13 +210,13 @@ _maix_py_modules = [
 
 ```
 
-If you want to submit some Python and C modules that need to be compiled, it is recommended to use the sub-repository to import, refer to the following:
+如果你想要提交一些需要编译的 Python 编译 C 的模块，推荐使用子仓库导入，参考如下：
 
 - [_maix](./ext_modules/_maix)
 - [_maix_nn](./ext_modules/_maix_nn)
 - [libi2c](./ext_modules/libi2c)
 
-If you want to submit some useful Python tools or sample code, refer to the following:
+如果你想要提交一些好用的 Python 工具或示例代码，参考如下：
 
 - [general](./examples/general/)
 - [maix_v831](./examples/general/)
@@ -224,7 +224,7 @@ If you want to submit some useful Python tools or sample code, refer to the foll
 
 ## Thanks
 
-All this comes from the power of open source. Thanks to them, they are listed in no particular order.
+这一切都来自于开源的力量，感谢它们，排名不分先后。
 
 - [cpython](https://github.com/python/cpython)
 - [rpyc](https://github.com/tomerfiliba-org/rpyc)
@@ -244,7 +244,7 @@ All this comes from the power of open source. Thanks to them, they are listed in
 - [MaixPy](https://github.com/sipeed/MaixPy)
 - [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel)
 
-The open source repositories that may be cited in the future are also grateful to them.
+未来可能会引用的开源仓库，也同样感谢它们。
 
 - [rpyc_ikernel](http://people.csail.mit.edu/hubert/pyaudio/)
 - [pyusb](https://github.com/pyusb/pyusb)
@@ -252,7 +252,7 @@ The open source repositories that may be cited in the future are also grateful t
 - [pyadi-iio](https://github.com/analogdevicesinc/pyadi-iio)
 - [python-iio](https://github.com/zathras777/python-iio)
 
-You are welcome to recommend the open source projects you need. If you find any missing projects, please let me know immediately.
+欢迎你推荐所需要的开源项目，如有发现遗漏的项目，请即刻告知。
 
 ## License
 

@@ -9,19 +9,21 @@ from setuptools import setup, Extension, find_packages
 
 ext_modules = []
 data_files = []
+py_modules = []
 
 if 'maix_v831' in sys.argv:
   sys.argv.remove('maix_v831')
-  from envs.maix_v831 import _maix_modules, _maix_data_files
+  from envs.maix_v831 import _maix_modules, _maix_data_files, _maix_py_modules
 else:
-  from envs.general import _maix_modules, _maix_data_files
+  from envs.general import _maix_modules, _maix_data_files, _maix_py_modules
   
 ext_modules.extend(_maix_modules)
 data_files.extend(_maix_data_files)
+py_modules.extend(_maix_py_modules)
 
 setup(
   name='MaixPy3',
-  version='0.2.5',
+  version='0.2.6',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",
@@ -29,7 +31,7 @@ setup(
   description="MaixPy Python3 library",
   long_description=open('README.md', 'r', encoding='UTF-8').read(),
   long_description_content_type='text/markdown',
-  install_requires=["Pillow", "rpyc", "gpiod", "evdev", "spidev", "pyserial"],
+  install_requires=_maix_py_modules,
   ext_modules=ext_modules,
   packages = find_packages(
     exclude=['envs'] # remove from build

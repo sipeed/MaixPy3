@@ -2,20 +2,32 @@
 __all__ = []
 
 try:
+  import gpiod as gpio
+  __all__.append('gpio')
+except ModuleNotFoundError as e:
+  pass
+
+try:
   import pylibi2c as i2c
   __all__.append('i2c')
 except ModuleNotFoundError as e:
   pass
 
 try:
-  import evdev as event
-  __all__.append('event')
+  import evdev as evdev
+  __all__.append('evdev')
 except ModuleNotFoundError as e:
   pass
 
 try:
   import spidev as spi
   __all__.append('spi')
+except ModuleNotFoundError as e:
+  pass
+
+try:
+  import serial as serial
+  __all__.append('serial')
 except ModuleNotFoundError as e:
   pass
 

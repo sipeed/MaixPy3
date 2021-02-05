@@ -61,3 +61,12 @@ _maix_modules = [
 _maix_data_files = [
     ('/maix', get_srcs(ext_so, ['so'])),
 ]
+
+_maix_py_modules = [
+    "Pillow", 
+    "rpyc", 
+    "gpiod", 
+    "evdev", 
+    "spidev", 
+    "pyserial"
+]

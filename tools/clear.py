@@ -4,11 +4,11 @@
 import os,sys
 from stat import *
 
-# Declares a collection of file suffix names to be deleted
-DelFiles=['pyc', 'tmp', 'map', 'lst', 'sdf', 'log', 'db', 'o', 'd', 'crf']
+# Declares a collection of file suffix names(.xxx) to be deleted
+DelFiles=['pyc', 'log', 'o']
 
 # Declares a collection of folder names that you want to delete
-DelFolders=['__pycache__', 'Debug', 'Release', 'dist', 'build', 'rtf', 'latex', 'MaixPy3.egg-info']
+DelFolders=['__pycache__', 'dist', 'build', 'MaixPy3.egg-info']
 
 def PurgeCatalog(path):
     count = 0
@@ -29,7 +29,7 @@ def ClearCatalog(path):
     for catalog in os.walk(path):
         print("find files : %s." % catalog[2])
         for file_name in catalog[2]:
-            if '.' in file_name: # 判断文件名是否存在后缀
+            if '.' in file_name:
                 file_type  = file_name.rsplit('.', 1)[1]
                 if file_type in DelFiles:
                     print('file %s deleted.' % (os.path.join(catalog[0], file_name)))

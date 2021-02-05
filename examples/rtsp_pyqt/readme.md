@@ -1,12 +1,15 @@
 # how to get rtsp
 
-It need ptqt5 & maixpy3.
+install maixpy3 and run `maixpy3_rpycs`
 
-cd MaixPy3
+```bash
+(venv) $ pip3 install .
+(venv) $ maixpy3_rpycs
+```
 
-- shell `python3 -c "from maix import rpycs; rpycs.start()"`
+run python3 venv.
 
-
-then open mainLogic.py and run it 
-or 
-- shell `python3  mainLogic.py `
+```bash
+(venv) $ pip install -r requirements.txt
+(venv) $ python3 mainLogic.py
+```

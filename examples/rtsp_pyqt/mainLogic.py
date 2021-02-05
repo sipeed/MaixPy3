@@ -27,7 +27,7 @@ class mainWinLogic(QWidget,Ui_Mainui):
         self.hostPort = 18811
         self.rtpPort = 18813
         self.setupUi(self)
-        self.setWindowTitle('Maix2VideoPlayer')
+        self.setWindowTitle('MaixVideoPlayer')
         self.label_3.setText(version)
         #self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
         self.stillRunning = 0

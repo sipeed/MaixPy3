@@ -255,7 +255,7 @@ _maix_py_modules = [
 
 未来可能会引用的开源仓库，也同样感谢它们。
 
-- [rpyc_ikernel](http://people.csail.mit.edu/hubert/pyaudio/)
+- [pyaudio](http://people.csail.mit.edu/hubert/pyaudio)
 - [pyusb](https://github.com/pyusb/pyusb)
 - [pybluez](https://github.com/pybluez/pybluez)
 - [pyadi-iio](https://github.com/analogdevicesinc/pyadi-iio)

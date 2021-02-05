@@ -255,7 +255,7 @@ All this comes from the power of open source. Thanks to them, they are listed in
 
 The open source repositories that may be cited in the future are also grateful to them.
 
-- [rpyc_ikernel](http://people.csail.mit.edu/hubert/pyaudio/)
+- [pyaudio](http://people.csail.mit.edu/hubert/pyaudio)
 - [pyusb](https://github.com/pyusb/pyusb)
 - [pybluez](https://github.com/pybluez/pybluez)
 - [pyadi-iio](https://github.com/analogdevicesinc/pyadi-iio)

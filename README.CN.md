@@ -10,7 +10,7 @@
 
 MaixPy3 是基于 [cpython](https://github.com/python/cpython) 的 Python3 工具包，通过 Python 编程简化在 Linux AI 边缘设备上开发应用。
 
-[TOC](#)
+[TOC](#maixpy3---)
 -  [Usage](#Usage)
 -  [Jupyter](#Jupyter)
 -  [Progress](#Progress)

@@ -10,7 +10,7 @@ English | [简体中文](./README.CN.md)
 
 MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpython), which simplifies the development of applications on Linux AI edge devices through Python programming.
 
-[TOC](#)
+[TOC](#maixpy3---)
 -  [Usage](#Usage)
 -  [Jupyter](#Jupyter)
 -  [Progress](#Progress)

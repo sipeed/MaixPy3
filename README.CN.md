@@ -1,5 +1,5 @@
 <p align="center">
-    <img height="100" src="https://maixpy.sipeed.com/static/image/logo.png" title="" alt="MaixPy3 Logo">
+    <img height="120" src="https://maixpy.sipeed.com/static/image/logo.png" title="" alt="MaixPy3 Logo">
 </p>
 
 # MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/MaixPy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/MaixPy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/MaixPy3.svg?style=social)

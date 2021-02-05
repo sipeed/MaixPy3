@@ -79,20 +79,21 @@ def local_show(value=True):
 
 def show(img, box=(0, 0), fast=True):
     global __display__, local_show
-    if __fastview__ and fast:
-      __display__ = img
-      if _local_show:
-        __draw__(img)  # underlying optimization
-    else:
-      if isinstance(img, bytes):
-        img = Image.frombytes("RGB", box, img)
-        __thumbnail__(img, __display__)
-        __display__.paste(img, (0, 0))
-      elif isinstance(img, Image.Image):
-        __thumbnail__(img, __display__)
-        __display__.paste(img, box)
-      if _local_show:
-        __display__.show()
+    if img:
+      if __fastview__ and fast:
+        __display__ = img
+        if _local_show:
+          __draw__(img)  # underlying optimization
+      else:
+        if isinstance(img, bytes):
+          img = Image.frombytes("RGB", box, img)
+          __thumbnail__(img, __display__)
+          __display__.paste(img, (0, 0))
+        elif isinstance(img, Image.Image):
+          __thumbnail__(img, __display__)
+          __display__.paste(img, box)
+        if _local_show:
+          __display__.show()
 
 
 def fill(box=(0, 0), color=(0, 0, 0)):

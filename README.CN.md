@@ -156,6 +156,8 @@ while True:
     print(event.code, event.value)
 ```
 
+### [更多信息请参见文档](https://maixpy.sipeed.com/)
+
 ## Jupyter
 
 在 jupyter notebook & lab 安装 [rpyc_ikernel]( https://github.com/sipeed/rpyc_ikernel) 内核即可得到一个可以远程调用 Python 代码和视频、图像推流的 IDE 编辑器。

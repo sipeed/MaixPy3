@@ -156,6 +156,8 @@ while True:
     print(event.code, event.value)
 ```
 
+### [See the documentation for more information](https://maixpy.sipeed.com/)
+
 ## Progress
 
 | **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |

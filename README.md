@@ -249,7 +249,7 @@ All this comes from the power of open source. Thanks to them, they are listed in
 - [numpy](https://github.com/numpy/numpy)
 - [opencv-python](https://github.com/opencv/opencv-python)
 - [ipython](https://github.com/junhuanchen/ipython)
-- [VideoStream-python](https://github.com/ninerdb/VideoStream-python)
+- [rtsp-rtp-stream](https://github.com/gabrieljablonski/rtsp-rtp-stream)
 - [ipykernel](https://github.com/ipython/ipykernel)
 - [jupyter](https://github.com/jupyter/jupyter)
 - [MaixPy](https://github.com/sipeed/MaixPy)

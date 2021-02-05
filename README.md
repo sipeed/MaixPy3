@@ -172,7 +172,7 @@ while True:
 
 Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE editor that can remotely call Python code, videos, and image streaming.
 
-Click here to view the effect [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
+Click here to view the effect [usage_display_hook.ipynb](./examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
 
 ## Build
 

@@ -160,7 +160,7 @@ while True:
 
 在 jupyter notebook & lab 安装 [rpyc_ikernel]( https://github.com/sipeed/rpyc_ikernel) 内核即可得到一个可以远程调用 Python 代码和视频、图像推流的 IDE 编辑器。
 
-效果点此查看 [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb) ，注意 jupyter 运行在你的计算机。
+效果点此查看 [usage_display_hook.ipynb](./examples/general/usage_display_hook.ipynb) ，注意 jupyter 运行在你的计算机。
 
 ## Progress
 

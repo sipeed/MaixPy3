@@ -10,19 +10,16 @@ English | [简体中文](./README.CN.md)
 
 MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpython), which simplifies the development of applications on Linux AI edge devices through Python programming.
 
-## progress
+[TOC](#)
+-  [Usage](#Usage)
+-  [Jupyter](#Jupyter)
+-  [Progress](#Progress)
+-  [Build](#Build)
+-  [Develop](#Develop)
+-  [Thanks](#Thanks)
+-  [License](#License)
 
-| **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
-| --------------   | ---------- | ---------------- | --------- | --------- |
-| linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
-| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M+
-| maix_rv1126      | prepare    |                  |   NULL    |
-| RPi_XXXX         | maybe      |                  |   NULL    |
-| Windows          | build fail |                  |           |
-
-> The development progress is in no particular order.
-
-## usage
+## Usage
 
 Display the camera image on the screen.
 
@@ -159,13 +156,25 @@ while True:
     print(event.code, event.value)
 ```
 
-## jupyter
+## Progress
+
+| **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
+| --------------   | ---------- | ---------------- | --------- | --------- |
+| linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
+| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M+
+| maix_rv1126      | prepare    |                  |   NULL    |
+| RPi_XXXX         | maybe      |                  |   NULL    |
+| Windows          | build fail |                  |           |
+
+> The development progress is in no particular order.
+
+## Jupyter
 
 Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE editor that can remotely call Python code, videos, and image streaming.
 
 Click here to view the effect [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb). Note that jupyter runs on your computer.
 
-## build
+## Build
 
 Under `linux x86_64`, use `python3 setup.py build` to complete the general package construction.
 
@@ -175,7 +184,7 @@ Welcome to provide configurations of different platforms to [MaixPy3/envs/](./en
 
 > If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
 
-## develop
+## Develop
 
 > Tested glibc >= 27 on Ubuntu20.04 & manjaro20.03.
 
@@ -256,4 +265,6 @@ You are welcome to recommend the open source projects you need. If you find any 
 
 ## License
 
-MaixPy3 is released under the MIT license.
+Copyright (c) Sipeed Corporation. All rights reserved.
+
+Licensed under the MIT license.

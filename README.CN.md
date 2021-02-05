@@ -10,19 +10,16 @@
 
 MaixPy3 是基于 [cpython](https://github.com/python/cpython) 的 Python3 工具包，通过 Python 编程简化在 Linux AI 边缘设备上开发应用。
 
-## progress
+[TOC](#)
+-  [Usage](#Usage)
+-  [Jupyter](#Jupyter)
+-  [Progress](#Progress)
+-  [Build](#Build)
+-  [Develop](#Develop)
+-  [Thanks](#Thanks)
+-  [License](#License)
 
-| **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
-| --------------   | ---------- | ---------------- | --------- | --------- |
-| linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
-| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M ~ 17M (Max 48M)
-| maix_rv1126      | prepare    |                  |   NULL    |
-| RPi_XXXX         | maybe      |                  |   NULL    |
-| Windows          | build fail |                  |           |
-
-> 开发进度不分先后顺序。
-
-## usage
+## Usage
 
 在屏幕上显示摄像机的图像。
 
@@ -159,13 +156,25 @@ while True:
     print(event.code, event.value)
 ```
 
-## jupyter
+## Jupyter
 
 在 jupyter notebook & lab 安装 [rpyc_ikernel]( https://github.com/sipeed/rpyc_ikernel) 内核即可得到一个可以远程调用 Python 代码和视频、图像推流的 IDE 编辑器。
 
 效果点此查看 [usage_display_hook.ipynb](MaixPy3/examples/general/usage_display_hook.ipynb) ，注意 jupyter 运行在你的计算机。
 
-## build
+## Progress
+
+| **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
+| --------------   | ---------- | ---------------- | --------- | --------- |
+| linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
+| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M ~ 17M (Max 48M)
+| maix_rv1126      | prepare    |                  |   NULL    |
+| RPi_XXXX         | maybe      |                  |   NULL    |
+| Windows          | build fail |                  |           |
+
+> 开发进度不分先后顺序。
+
+## Build
 
 在 `linux x86_64` 下使用 `python3 setup.py build` 完成通用包的构建。
 
@@ -175,7 +184,7 @@ while True:
 
 > 如需要 `.whl` 预编译包请将 `build` 改成 `bdist_wheel` 即可。
 
-## develop
+## Develop
 
 > Tested glibc >= 27 on Ubuntu20.04 & manjaro20.03.
 
@@ -256,4 +265,6 @@ _maix_py_modules = [
 
 ## License
 
-MaixPy3 is released under the MIT license.
+Copyright (c) Sipeed Corporation. All rights reserved.
+
+Licensed under the MIT license.

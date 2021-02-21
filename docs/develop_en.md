@@ -76,7 +76,7 @@ your arm
 ## pypi upload
 
 - python3 setup.py sdist build
-- python3.8 setup.py bdist_wheel v831
+- python3.8 setup.py bdist_wheel maix_v831
 
 > pip install twine
 

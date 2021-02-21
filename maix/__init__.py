@@ -1,5 +1,5 @@
 
-__all__ = []
+__all__ = ['display', 'camera']
 
 try:
   import gpiod as gpio
@@ -38,11 +38,11 @@ except ModuleNotFoundError as e:
 # except ModuleNotFoundError as e:
 #   pass
 
-# try:
-#   from . import nn
-#   __all__.extend(['nn'])
-# except ModuleNotFoundError as e:
-#   pass
+try:
+  from . import nn
+  __all__.extend(['nn'])
+except ModuleNotFoundError as e:
+  pass
 
 try:
   import shutil

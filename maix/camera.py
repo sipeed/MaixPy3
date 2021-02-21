@@ -16,17 +16,19 @@ try:
             if self.cam == None:
                 super(V831MaixVideo, self).__init__(size)
                 self.cam = V831Camera(self.width(), self.height())
+                import time
+                time.sleep(0.2) # wait init
                 print('[camera] config input size(%d, %d)' %
                       (self.width(), self.height()))
 
         def read(self):
+            if self.cam == None:
+                print('[camera] run config(size=(w, h)) before capture.')
+                self.config()
             if self.cam:
                 ret, frame = self.cam.read()
                 if ret:
                     return frame  # bytes
-            else:
-                print('[camera] run config(size=(w, h)) before capture.')
-                self.config()
             return None
 
         def __del__(self):

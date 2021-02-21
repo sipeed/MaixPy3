@@ -23,7 +23,7 @@ py_modules.extend(_maix_py_modules)
 
 setup(
   name='MaixPy3',
-  version='0.2.6',
+  version='0.3.0',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",

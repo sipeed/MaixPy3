@@ -33,8 +33,8 @@ _maix_data_files = [
 
 _maix_py_modules = [
     "numpy",
-    "opencv-python3",
-    "opencv-python",
+    "opencv-python==4.1.2.30",
+    "opencv-contrib-python==4.1.2.30",
     "Pillow",
     "rpyc",
     "gpiod",

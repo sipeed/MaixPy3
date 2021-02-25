@@ -31,7 +31,7 @@ setup(
   description="MaixPy Python3 library",
   long_description=open('README.md', 'r', encoding='UTF-8').read(),
   long_description_content_type='text/markdown',
-  install_requires=_maix_py_modules,
+  install_requires=py_modules,
   ext_modules=ext_modules,
   packages = find_packages(
     exclude=['envs'] # remove from build

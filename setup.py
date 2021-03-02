@@ -5,18 +5,25 @@ setup.py file for MaixPy3
 """
 
 import sys
+import platform
 from setuptools import setup, Extension, find_packages
 
 ext_modules = []
 data_files = []
 py_modules = []
 
-if 'maix_v831' in sys.argv:
-  sys.argv.remove('maix_v831')
-  from envs.maix_v831 import _maix_modules, _maix_data_files, _maix_py_modules
-else:
-  from envs.general import _maix_modules, _maix_data_files, _maix_py_modules
-  
+sysstr = platform.system()
+
+if (sysstr == "Windows"):
+  from envs.windows import _maix_modules, _maix_data_files, _maix_py_modules
+elif (sysstr == "Linux"):
+  if 'maix_v831' in sys.argv:
+    sys.argv.remove('maix_v831')
+    from envs.maix_v831 import _maix_modules, _maix_data_files, _maix_py_modules
+  else:
+    from envs.general import _maix_modules, _maix_data_files, _maix_py_modules
+    
+
 ext_modules.extend(_maix_modules)
 data_files.extend(_maix_data_files)
 py_modules.extend(_maix_py_modules)

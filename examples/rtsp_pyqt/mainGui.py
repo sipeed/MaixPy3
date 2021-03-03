@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Mainui(object):
     def setupUi(self, Mainui):
         Mainui.setObjectName("Mainui")
-        Mainui.resize(811, 581)
+        Mainui.resize(647, 463)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/ICONS/推流结果.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Mainui.setWindowIcon(icon)
@@ -42,7 +42,7 @@ class Ui_Mainui(object):
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
         self.groupBox = QtWidgets.QGroupBox(Mainui)
-        self.groupBox.setMaximumSize(QtCore.QSize(400, 400))
+        self.groupBox.setMaximumSize(QtCore.QSize(220, 220))
         self.groupBox.setObjectName("groupBox")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.groupBox)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -78,7 +78,7 @@ class Ui_Mainui(object):
         self.verticalLayout_2.addWidget(self.recordButton)
         self.verticalLayout_3.addWidget(self.groupBox)
         self.groupBox_3 = QtWidgets.QGroupBox(Mainui)
-        self.groupBox_3.setMaximumSize(QtCore.QSize(370, 200))
+        self.groupBox_3.setMaximumSize(QtCore.QSize(200, 200))
         self.groupBox_3.setObjectName("groupBox_3")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.groupBox_3)
         self.verticalLayout.setObjectName("verticalLayout")

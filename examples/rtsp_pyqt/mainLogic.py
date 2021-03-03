@@ -12,6 +12,12 @@ from mainGui import Ui_Mainui
 import random
 import cv2
 import numpy as np
+import os
+pictureDir = './pictures'
+videosDir = './videos'
+
+
+
 videoPath = "./videos/"
 picturePath  = "./pictures/"
 DEFAULT_FPS = 40
@@ -27,7 +33,11 @@ class mainWinLogic(QWidget,Ui_Mainui):
         self.hostPort = 18811
         self.rtpPort = 18813
         self.setupUi(self)
-        self.setWindowTitle('MaixVideoPlayer')
+        op = QtWidgets.QGraphicsOpacityEffect()
+        # 设置透明度的值，0.0到1.0，最小值0是透明，1是不透明
+        op.setOpacity(1)
+        self.label.setGraphicsEffect(op)
+        self.setWindowTitle('Maix2VideoPlayer')
         self.label_3.setText(version)
         #self.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
         self.stillRunning = 0
@@ -214,7 +224,14 @@ class mainWinLogic(QWidget,Ui_Mainui):
                 imgA = QtGui.QPixmap(self.imageNow)
                 img2Store = self.qtpixmap2Cvimg(imgA)
                 self.video.write(img2Store)
+def ifPathExist():
+    if not os.path.exists(pictureDir):
+        os.makedirs(pictureDir)
+    if not os.path.exists(videosDir):
+        os.makedirs(videosDir)
+
 if __name__ == '__main__':
+    ifPathExist()
     app=QApplication(sys.argv)
     win = mainWinLogic()
     win.show()

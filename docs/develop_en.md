@@ -18,6 +18,8 @@ see setup.py
 
 - python3.8 setup.py bdist
 
+- pip install MaixPy3*whl -y --upgrade
+
 add xxxx/__init__.py
 
 ## Py Call C module
@@ -71,7 +73,8 @@ your x86
 
 your arm
 
-- python3.8 setup.py build v831
+- source ../toolchain_v83x_linux_x86/envsetup.sh
+- python3.8 setup.py build maix_v831
 
 ## pypi upload
 

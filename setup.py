@@ -22,7 +22,6 @@ elif (sysstr == "Linux"):
     from envs.maix_v831 import _maix_modules, _maix_data_files, _maix_py_modules
   else:
     from envs.general import _maix_modules, _maix_data_files, _maix_py_modules
-    
 
 ext_modules.extend(_maix_modules)
 data_files.extend(_maix_data_files)
@@ -30,7 +29,7 @@ py_modules.extend(_maix_py_modules)
 
 setup(
   name='MaixPy3',
-  version='0.3.0',
+  version='0.3.1',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",

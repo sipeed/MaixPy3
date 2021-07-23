@@ -18,7 +18,7 @@ _maix_camera_module = Extension('_maix_camera', include_dirs=['ext_modules/_maix
                         libraries=[
                             "dl", "rt", "log", "ion", "pthread", "cdc_base",
                             "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",
-                            "mpp_mini", 
+                            "venc_base", "mpp_component", "adecoder", "asound", "venc_base", "hwdisplay", 
                             "maix_utils", "maix_cam", "maix_image",
                         ],
                         library_dirs=[ "/lib",  "/usr/lib", ext_so, ],
@@ -31,8 +31,6 @@ _maix_display_module = Extension('_maix_display', include_dirs=['ext_modules/_ma
                         sources=get_srcs('ext_modules/_maix_display'), 
                         libraries=[
                             "dl", "rt", "log", "ion", "pthread", "cdc_base",
-                            "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",
-                            "mpp_mini", 
                             "maix_utils", "maix_disp", "maix_image",
                         ],
                         library_dirs=[ "/lib",  "/usr/lib", ext_so, ],

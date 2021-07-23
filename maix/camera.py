@@ -12,16 +12,16 @@ try:
             self.source = source
             self.cam = None
 
-        def config(self, size=(480, 360)):
+        def config(self, size=(480, 360), dev_id=0):
             if self.cam == None:
                 super(V831MaixVideo, self).__init__(size)
-                self.cam = V831Camera(self.width(), self.height())
+                self.cam = V831Camera(self.width(), self.height(), dev_id)
                 import time
                 time.sleep(0.2) # wait init
                 print('[camera] config input size(%d, %d)' %
                       (self.width(), self.height()))
 
-        def read(self):
+        def read(self, dev_id=0):
             if self.cam == None:
                 print('[camera] run config(size=(w, h)) before capture.')
                 self.config()

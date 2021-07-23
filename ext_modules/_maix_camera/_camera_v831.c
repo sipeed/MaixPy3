@@ -10,7 +10,7 @@ PyDoc_STRVAR(V831CameraObject_type_doc, "V831Camera(width, height) -> V831Camera
 typedef struct
 {
     PyObject_HEAD;
-    unsigned int width, height;
+    unsigned int width, height, dev_id;
 
     libmaix_cam_t *cam;
     libmaix_image_t* yuv_img;
@@ -32,6 +32,7 @@ static PyObject *V831Camera_close(V831CameraObject *self)
     }
     
     libmaix_image_module_deinit();
+    libmaix_cam_exit();
 
     Py_RETURN_NONE;
 }
@@ -61,14 +62,15 @@ static int V831Camera_init(V831CameraObject *self, PyObject *args, PyObject *kwd
     // default init value
     self->width = 640, self->height = 480;
 
-    static char *kwlist[] = {"width", "height", NULL};
+    static char *kwlist[] = {"width", "height", "dev_id", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|ii:__init__", kwlist,
-                                     &self->width, &self->height))
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "|iii:__init__", kwlist,
+                                     &self->width, &self->height, &self->dev_id))
     {
         return -1;
     }
 
+    libmaix_cam_init();
     libmaix_image_module_init();
     self->yuv_img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if(NULL != self->yuv_img)
@@ -76,10 +78,10 @@ static int V831Camera_init(V831CameraObject *self, PyObject *args, PyObject *kwd
       self->rgb_img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
       if(NULL != self->rgb_img)
       {
-        self->cam = libmaix_cam_creat(self->width, self->height);
+        self->cam = libmaix_cam_create(self->dev_id, self->width, self->height, 0, 1);
         if (NULL != self->cam)
         {
-            int ret = self->cam->strat_capture(self->cam);
+            int ret = self->cam->start_capture(self->cam);
             if (0 == ret)
             {
                 return 0;

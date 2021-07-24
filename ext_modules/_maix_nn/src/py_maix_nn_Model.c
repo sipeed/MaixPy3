@@ -138,13 +138,6 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         Py_ssize_t outputs_len = PyDict_Size(o_outputs);
         self->outputs = o_outputs;
-        PyObject *o_fl_conv_no_pad = PyDict_GetItemString(o_opt, "first_layer_conv_no_pad");
-        if(!o_fl_conv_no_pad || !PyBool_Check(o_fl_conv_no_pad))
-        {
-            PyErr_SetString(PyExc_ValueError, "arg opt need first_layer_conv_no_pad key, value is True or False");
-            return -1;
-        }
-        bool fl_conv_no_pad = (o_fl_conv_no_pad == Py_True);
         PyObject *o_mean = PyDict_GetItemString(o_opt, "mean");
         if(!o_mean || !PyList_Check(o_mean) || PyList_Size(o_mean)!=3)
         {
@@ -193,7 +186,6 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         libmaix_nn_opt_param_t opt_param = {
             .awnn.input_names             = inputs_names,
             .awnn.output_names            = outputs_names,
-            // .awnn.first_layer_conv_no_pad = fl_conv_no_pad? 1: 0,     // 0/1
             .awnn.input_num               = inputs_len,               // len(input_names)
             .awnn.output_num              = outputs_len,              // len(output_names)
             .awnn.mean                    = {127.5, 127.5, 127.5},

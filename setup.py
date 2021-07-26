@@ -45,6 +45,7 @@ setup(
   classifiers=[
       'Programming Language :: Python :: 3',
   ],
+  extras_require={"test": "pytest"},
   entry_points={"console_scripts": ["maixpy3_rpycs=maix.rpycs:start"]},
   include_package_data=True,
   package_data = {

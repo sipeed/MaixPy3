@@ -136,9 +136,6 @@ objs
 depend
 *.a
 
-examples/rtsp_pyqt/.idea/.gitignore
-examples/rtsp_pyqt/.idea/misc.xml
-examples/rtsp_pyqt/.idea/modules.xml
-examples/rtsp_pyqt/.idea/rtsp_pyqt.iml
-examples/rtsp_pyqt/.idea/vcs.xml
-examples/rtsp_pyqt/.idea/inspectionProfiles/profiles_settings.xml
+examples/rtsp_pyqt
+sipeed_v83x_opencv4.1
+.vscode/

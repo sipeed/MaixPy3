@@ -4,7 +4,7 @@ from maix import camera, display
 import numpy as np
 import time
 
-test_jpg = "/root/test_input/input.jpg"
+test_jpg = "/root/test.png"
 model = {
     "param": "/root/models/sobel_int8.param",
     "bin": "/root/models/sobel_int8.bin"
@@ -22,7 +22,6 @@ options = {
     "outputs": {
         "output0": output_size
     },
-    "first_layer_conv_no_pad": True,
     "mean": [127.5, 127.5, 127.5],
     "norm": [0.0078125, 0.0078125, 0.0078125],
 }
@@ -38,8 +37,10 @@ out = m.forward(img, quantize=True)
 # print("-- read image ok")
 # out = out.reshape(222, 222, 3)
 print("-- out:", out.shape, out.dtype)
-out = ((out + 1) * 255).astype(np.uint8).reshape(output_size)
+out = out.astype(np.float32).reshape(output_size)
+out = (np.abs(out) * 255 / out.max()).astype(np.uint8)
 img2 = Image.fromarray(out, mode="RGB")
+
 display.show(img2)
 
 
@@ -50,8 +51,6 @@ while 1:
         continue
     out = m.forward(img, quantize=True)
     out = out.astype(np.float32).reshape(output_size)
-    scale = out.max() - out.min()
-    half = scale / 2.
-    out = ((out + half) / scale * 255).astype(np.uint8)
+    out = (np.abs(out) * 255 / out.max()).astype(np.uint8)
     img2 = Image.fromarray(out, mode="RGB")
     display.show(img2)

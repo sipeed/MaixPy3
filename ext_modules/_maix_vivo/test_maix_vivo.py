@@ -10,16 +10,18 @@ font = ImageFont.truetype("/home/res/baars.ttf", 18, encoding="unic")
 bak = b'\x00\x00\x00\x00' * (240 * 240)
 
 for i in range(600):
-    time.sleep(0.02)
+    # time.sleep(0.02)
     # tmp = vivo.get_vi()
     # print(len(tmp))
     tmp = vivo.get_ai()
-    print(len(tmp))
-    image = Image.frombytes("RGBA", (240, 240), bak)
-    draw = ImageDraw.Draw(image)
-    draw.text((10, 10), u'time:%s' % time.time(), (255, 255, 255), font)
-    # print(image)
-    vivo.set_ui(image.tobytes())
+    if len(tmp):
+      # print(len(tmp))
+      image = Image.frombytes("RGBA", (240, 240), bak)
+      draw = ImageDraw.Draw(image)
+      draw.text((10, 10), u'time:%s' % time.time(), (0, 0, 255), font) # bgr
+      # print(image)
+      # rgb = bgr[...,::-1]
+      vivo.set_ui(image.tobytes())
 
 # tmp = vivo.get_vi()
 # print(len(tmp))

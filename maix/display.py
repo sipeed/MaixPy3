@@ -6,7 +6,6 @@ from PIL import Image
 # remote jupyter options
 remote = None
 
-
 def hook(clear_output=True):
   global remote
   try:
@@ -27,7 +26,7 @@ try:
 except Exception as e:
     print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
+    __display__ = Image.new("RGBA", (__width__, __height__), (0, 0, 0))
 
 
 def tobytes():
@@ -38,7 +37,7 @@ def tobytes():
 def set_window(size=(640, 480)):
     global __display__, __width__, __height__
     __width__, __height__ = size
-    __display__ = Image.new("RGB", size, (0, 0, 0))
+    __display__ = Image.new("RGBA", size, (0, 0, 0))
 
 
 def __thumbnail__(src, dst):

@@ -3,40 +3,74 @@ from .video import MaixVideo
 camera = MaixVideo()
 
 try:
-    # use libmaix on v831
-    from _maix_camera import V831Camera
-
-    class V831MaixVideo(MaixVideo):
-
-        def __init__(self, source="/v831"):
-            self.source = source
-            self.cam = None
-
-        def config(self, size=(480, 360), dev_id=0):
-            if self.cam == None:
-                super(V831MaixVideo, self).__init__(size)
-                self.cam = V831Camera(self.width(), self.height(), dev_id)
-                import time
-                time.sleep(0.2) # wait init
-                print('[camera] config input size(%d, %d)' %
-                      (self.width(), self.height()))
-
-        def read(self, dev_id=0):
-            if self.cam == None:
-                print('[camera] run config(size=(w, h)) before capture.')
-                self.config()
-            if self.cam:
-                ret, frame = self.cam.read()
-                if ret:
-                    return frame  # bytes
-            return None
-
-        def __del__(self):
-            if self.cam:
-                self.cam.close()
+    try:
+        # use mpp vivo on v831
+        from _maix_vivo import _v83x_vivo
+        class V831MaixVideo(MaixVideo, _v83x_vivo):
+            def __init__(self, source="/v831"):
+                self.source = source
                 self.cam = None
 
-    camera = V831MaixVideo()
+            def config(self, size=(480, 360), dev_id=0):
+                if self.cam == None:
+                    super(V831MaixVideo, self).__init__(size)
+                    self.cam = V831Camera(self.width(), self.height(), dev_id)
+                    import time
+                    time.sleep(0.2) # wait init
+                    print('[camera] config input size(%d, %d)' %
+                        (self.width(), self.height()))
+
+            def read(self, dev_id=0):
+                if self.cam == None:
+                    print('[camera] run config(size=(w, h)) before capture.')
+                    self.config()
+                if self.cam:
+                    ret, frame = self.cam.read()
+                    if ret:
+                        return frame  # bytes
+                return None
+
+            def __del__(self):
+                if self.cam:
+                    self.cam.close()
+                    self.cam = None
+
+
+    except Exception as e:
+        # use libmaix on v831
+        from _maix_camera import V831Camera
+
+        class V831MaixVideo(MaixVideo):
+
+            def __init__(self, source="/v831"):
+                self.source = source
+                self.cam = None
+
+            def config(self, size=(480, 360), dev_id=0):
+                if self.cam == None:
+                    super(V831MaixVideo, self).__init__(size)
+                    self.cam = V831Camera(self.width(), self.height(), dev_id)
+                    import time
+                    time.sleep(0.2) # wait init
+                    print('[camera] config input size(%d, %d)' %
+                        (self.width(), self.height()))
+
+            def read(self, dev_id=0):
+                if self.cam == None:
+                    print('[camera] run config(size=(w, h)) before capture.')
+                    self.config()
+                if self.cam:
+                    ret, frame = self.cam.read()
+                    if ret:
+                        return frame  # bytes
+                return None
+
+            def __del__(self):
+                if self.cam:
+                    self.cam.close()
+                    self.cam = None
+
+        camera = V831MaixVideo()
 except Exception as e:
     pass
 

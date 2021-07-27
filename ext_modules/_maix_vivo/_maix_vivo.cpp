@@ -154,7 +154,16 @@ public:
             void *tmp = this->vo->get_frame(this->vo, VO_UI);
             if (tmp != NULL)
             {
-                memcpy(frame->buf, value.c_str(), frame_size);
+                // bgra > rgba
+                uint32_t *rgba = (uint32_t *)frame->buf, *bgra = (uint32_t *)value.c_str();
+                for (int i = 0, sum = frame->size.w * frame->size.h; i != sum; i++)
+                {
+                    rgba[i] = (bgra[i] & 0xFF000000) |         // ______AA
+                              ((bgra[i] & 0x00FF0000) >> 16) | // BB______
+                              (bgra[i] & 0x0000FF00) |         // __GG____
+                              ((bgra[i] & 0x000000FF) << 16);  // ____RR__
+                }
+                // memcpy(frame->buf, value.c_str(), frame_size); // bgra
                 uint32_t *phy = NULL, *vir = NULL;
                 this->vo->frame_addr(this->vo, tmp, &vir, &phy);
                 if (this->vo_dir)

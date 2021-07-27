@@ -297,11 +297,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
 {
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     PyObject *o_inputs = NULL;
-    int quantize = 0;
-    static char *kwlist[] = {"inputs", "quantize", NULL};
+    PyObject *o_layout = NULL;
+    int quantize = 1;
+    static char *kwlist[] = {"inputs", "quantize", "layout", NULL};
     /* Get the buffer's memory */
     if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$p:forward", kwlist,
-                                     &o_inputs, &quantize))
+                                     &o_inputs, &quantize, &o_layout))
     {
         return NULL;
     }
@@ -315,6 +316,18 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         //TODO: multipul input
         PyErr_SetString(PyExc_NotImplementedError, "not support multiple input yet");
         return NULL;
+    }
+    if(!PyUnicode_Check(o_layout))
+    {
+        PyErr_SetString(PyExc_ValueError, "layout only support hwc and chw");
+        return NULL;
+    }
+    const char* layout_str = PyUnicode_DATA(o_layout);
+    libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
+
+    if(strcmp(layout_str, "hwc") == 0)
+    {
+        outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     }
     //TODO: support numpy and bytes and list
     if(strstr(o_inputs->ob_type->tp_name, "Image") < 0)
@@ -410,6 +423,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         .h = output_h,
         .c = output_c,
         .dtype = LIBMAIX_NN_DTYPE_FLOAT,
+        .layout = outputs_layout,
         .data = NULL
     };
     Py_ssize_t _size = input.w * input.h * input.c;

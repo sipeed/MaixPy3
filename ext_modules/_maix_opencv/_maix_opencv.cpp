@@ -31,30 +31,29 @@ public:
   {
   }
 
-  py::bytes test(py::bytes &argb)
+  py::bytes test(py::bytes &rgb)
   {
-    Mat image, edges;
-    Mat src_gray;
-    Mat standard_hough, probabilistic_hough;
+    std::string tmp = static_cast<std::string>(rgb);
+    cv::Mat input(240, 240, CV_8UC3,const_cast<char*>(tmp.c_str()));
+
+    cv::Mat output = Mat::zeros(240, 240, CV_8UC4);
+    
+    Mat gray, edges;
+    // Mat standard_hough, probabilistic_hough;
     int min_threshold = 50;
     int max_trackbar = 150;
     int s_trackbar = max_trackbar;
     int p_trackbar = max_trackbar;
 
-    image = Mat::zeros(240, 240, CV_8UC4);
-    putText(image, "Hello OpenCV",
-            Point(10, 50),
-            FONT_HERSHEY_COMPLEX, 1, // font face and scale
-            Scalar(255, 0, 0, 100),  // white
-            1, LINE_AA);             // line thickness and type
+    cvtColor(input, gray, COLOR_RGB2GRAY);
 
-    cvtColor(image, src_gray, COLOR_RGB2GRAY);
+    Canny(gray, edges, 50, 200, 3);
 
-    Canny(src_gray, edges, 50, 200, 3);
+    cvtColor(edges, output, COLOR_GRAY2BGRA);
 
     vector<Vec2f> s_lines;
-    cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
-
+    // cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
+    
     /// 1. Use Standard Hough Transform
     HoughLines(edges, s_lines, 1, CV_PI / 180, min_threshold + s_trackbar, 0, 0);
 
@@ -68,24 +67,24 @@ public:
 
       Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
       Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(standard_hough, pt1, pt2, Scalar(255, 0, 0), 3, LINE_AA);
+      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, LINE_AA);
     }
 
-    vector<Vec4i> p_lines;
-    cvtColor(edges, probabilistic_hough, COLOR_GRAY2BGR);
+    // vector<Vec4i> p_lines;
+    // cvtColor(edges, probabilistic_hough, COLOR_GRAY2BGR);
 
-    /// 2. Use Probabilistic Hough Transform
-    HoughLinesP(edges, p_lines, 1, CV_PI / 180, min_threshold + p_trackbar, 30, 10);
+    // /// 2. Use Probabilistic Hough Transform
+    // HoughLinesP(edges, p_lines, 1, CV_PI / 180, min_threshold + p_trackbar, 30, 10);
 
-    /// Show the result
-    for (size_t i = 0; i < p_lines.size(); i++)
-    {
-      Vec4i l = p_lines[i];
-      line(probabilistic_hough, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0), 3, LINE_AA);
-    }
+    // /// Show the result
+    // for (size_t i = 0; i < p_lines.size(); i++)
+    // {
+    //   Vec4i l = p_lines[i];
+    //   line(output, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0, 200), 3, LINE_AA);
+    // }
 
-    int size = standard_hough.total() * standard_hough.elemSize();
-    return py::bytes((char *)standard_hough.data, size);
+    int size = output.total() * output.elemSize();
+    return py::bytes((char *)output.data, size);
     // std::vector buff;
     // cv::imencode(".bmp", image, buff);
     // std::string image_string(reinterpret_cast<char*>(&buff[0]), buff.size());

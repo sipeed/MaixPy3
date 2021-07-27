@@ -87,7 +87,7 @@ static PyObject* functional_softmax(PyObject *self, PyObject *args, PyObject *kw
     {
         return NULL;
     }
-    if(o_input->ob_type == o_ndarray)
+    if((void*)o_input->ob_type == (void*)o_ndarray)
     {
         Py_DECREF(o_ndarray);
         int dtype = -1;

@@ -9,7 +9,7 @@ typedef struct
 {
     PyObject_HEAD;
     libmaix_nn_t* nn;
-    float*        quantize_buffer;
+    int8_t*       quantize_buffer;
     float*        out_buffer;
     PyObject*     inputs;
     PyObject*     outputs;
@@ -171,26 +171,69 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             .awnn.param_path = (char*)PyUnicode_DATA(o_param_path),
             .awnn.bin_path = (char*)PyUnicode_DATA(o_bin_path),
         };
+        // encrypted model?
+        bool encrypt = false;
+        PyObject *o_encrypt = PyDict_GetItemString(o_opt, "encrypt");
+        if(o_encrypt)
+        {
+            if(PyLong_AsLong(o_encrypt))
+            {
+                encrypt = true;
+            }
+        }
+        int inputs_id[inputs_len];
+        int outputs_id[outputs_len];
         char* inputs_names[inputs_len];
         char* outputs_names[outputs_len];
         PyObject* keys_inputs = PyDict_Keys(o_inputs);
         PyObject* keys_outputs = PyDict_Keys(o_outputs);
+        PyObject* temp = NULL;
         for(Py_ssize_t i=0; i<inputs_len; ++i)
         {
-            inputs_names[i] = (char*)PyUnicode_DATA(PyList_GetItem(keys_inputs, i));
+            temp = PyList_GetItem(keys_inputs, i);
+            if(PyLong_Check(temp))
+            {
+                encrypt = true;
+                inputs_id[i] = PyLong_AsLong(temp);
+            }
+            else
+            {
+                inputs_names[i] = (char*)PyUnicode_DATA(temp);
+            }
         }
         for(Py_ssize_t i=0; i<outputs_len; ++i)
         {
-            outputs_names[i] = (char*)PyUnicode_DATA(PyList_GetItem(keys_outputs, i));
+            temp = PyList_GetItem(keys_outputs, i);
+            if(PyLong_Check(temp))
+            {
+                encrypt = true;
+                outputs_id[i] = PyLong_AsLong(temp);
+            }
+            else
+            {
+                outputs_names[i] = (char*)PyUnicode_DATA(temp);
+            }
         }
         libmaix_nn_opt_param_t opt_param = {
-            .awnn.input_names             = inputs_names,
-            .awnn.output_names            = outputs_names,
+            .awnn.input_names             = NULL,
+            .awnn.output_names            = NULL,
             .awnn.input_num               = inputs_len,               // len(input_names)
             .awnn.output_num              = outputs_len,              // len(output_names)
             .awnn.mean                    = {127.5, 127.5, 127.5},
-            .awnn.norm                    = {0.00784313725490196, 0.00784313725490196, 0.00784313725490196},
+            .awnn.norm                    = {0.0078125, 0.0078125, 0.0078125},
         };
+        if(!encrypt)
+        {
+            opt_param.awnn.input_names             = inputs_names;
+            opt_param.awnn.output_names            = outputs_names;
+            opt_param.awnn.encrypt = false;
+        }
+        else
+        {
+            opt_param.awnn.input_ids             = inputs_id;
+            opt_param.awnn.output_ids            = outputs_id;
+            opt_param.awnn.encrypt = true;
+        }
         for(Py_ssize_t i=0; i<3; ++i)
         {
             opt_param.awnn.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
@@ -236,6 +279,7 @@ end:
     }
     libmaix_nn_module_deinit();
     /* load by libmaix API error deal end*/
+    return (int)err;
 }
 
 static PyObject *Model_str(PyObject *object)
@@ -254,7 +298,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     PyObject *o_inputs = NULL;
     int quantize = 0;
-    Py_ssize_t buflen, readlen, recvlen = 0;
     static char *kwlist[] = {"inputs", "quantize", NULL};
     /* Get the buffer's memory */
     if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$p:forward", kwlist,
@@ -374,7 +417,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     {
         if(!self->quantize_buffer)
         {
-            uint8_t* quantize_buffer = (uint8_t*)malloc(_size);
+            int8_t* quantize_buffer = (int8_t*)malloc(_size);
             if(!quantize_buffer)
             {
                 PyErr_Format(PyExc_MemoryError, "no memory for quantize buffer, size:%d", _size);

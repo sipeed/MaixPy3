@@ -41,4 +41,4 @@ out = out.astype(np.float32).reshape(output_size)
 out = (np.abs(out) * 255 / out.max()).astype(np.uint8)
 img2 = Image.fromarray(out, mode="RGB")
 
-# img2.show()
+img2.show()

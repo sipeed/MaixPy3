@@ -2,4 +2,5 @@
 
 from maix import display, camera
 
-display.show(camera.capture())
+while True:
+    display.show(camera.capture())

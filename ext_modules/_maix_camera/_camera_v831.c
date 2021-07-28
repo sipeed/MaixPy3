@@ -141,7 +141,7 @@ static PyObject *V831Camera_read(V831CameraObject *self, PyObject *args)
       // not ready， sleep to release CPU
       if(ret == LIBMAIX_ERR_NOT_READY)
       {
-          usleep(10 * 1000);
+          usleep(25 * 1000);
           continue;
       }
       if(ret == LIBMAIX_ERR_NONE)

@@ -17,16 +17,16 @@ def hook(clear_output=True):
 
 
 try:
-    # export _MAIX_WIDTH_=800 && export _MAIX_HEIGHT_=480
+    # export _MAIX_WIDTH_=640 && export _MAIX_HEIGHT_=480
     __env_config__ = False
-    __width__, __height__ = (640, 480)
+    __width__, __height__ = (240, 240)
     __width__, __height__ = (
         int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
     __env_config__ = True
 except Exception as e:
     print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
-    __display__ = Image.new("RGBA", (__width__, __height__), (0, 0, 0))
+    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
 
 
 def tobytes():
@@ -34,10 +34,10 @@ def tobytes():
     return __display__.tobytes()
 
 
-def set_window(size=(640, 480)):
+def set_window(size=(240, 240)):
     global __display__, __width__, __height__
     __width__, __height__ = size
-    __display__ = Image.new("RGBA", size, (0, 0, 0))
+    __display__ = Image.new("RGB", size, (0, 0, 0))
 
 
 def __thumbnail__(src, dst):

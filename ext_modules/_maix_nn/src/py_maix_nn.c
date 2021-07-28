@@ -15,12 +15,8 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
     /* parse args */
     static char *kwlist[] = {"model_path", "opt", NULL};
 
-    int flags = 0;
     PyObject *model_path = NULL;
     PyObject *opt        = NULL;
-    PyObject *key        = NULL;
-    char *buf;
-    Py_ssize_t buflen, readlen, recvlen = 0;
 
     /* Get the buffer's memory */
     if (!PyArg_ParseTupleAndKeywords(args, kw_args, "|OO:load", kwlist,

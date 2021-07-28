@@ -14,11 +14,10 @@ try:
             def config(self, size=(224, 224)):
                 if self.cam == None:
                     super(V831VivoMaixVideo, self).__init__(size)
-                    self.cam = _v83x_vivo(240, 240, self.width(), self.height(), vo_dir = 0, ai_dir = 0)
-                    # display
                     try:
                         from PIL import Image
                         from maix import display
+                        self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = 0, ai_dir = 0)
                         display.__fastview__ = self.cam
                         def __new_draw__(img):
                             display.__fastview__

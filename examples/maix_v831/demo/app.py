@@ -10,9 +10,6 @@ import time
 import os
 import socket
 
-os.system('replug_sensor.sh')
-
-
 def get_host_ip():
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -24,10 +21,9 @@ def get_host_ip():
         s.close()
     return ip
 
-
 font = ImageFont.truetype("/home/res/baars.ttf", 27, encoding="unic")
 
-canvas = Image.new("RGB", (240, 240), "#2c3e50")
+canvas = Image.new("RGBA", (240, 240), "#2c3e50")
 with Image.open('/home/res/logo.png') as logo:
     canvas.paste(logo, (50, 40, 50 + logo.size[0], 40 + logo.size[1]), logo)
 
@@ -36,7 +32,7 @@ draw.text((10, 195), u'MaixPy.Sipeed.COM', "#bdc3c7", font)
 draw.text((0, 0), u'<exit', "#7f8c8d", font)
 draw.text((160, 0), u'demo> ', "#16a085", font)
 
-exits = Image.new("RGB", (240, 240), "#2c3e50")
+exits = Image.new("RGBA", (240, 240), "#2c3e50")
 draw = ImageDraw.Draw(exits)
 draw.text((20, 40), u"Quit?\nLater can execute", "#1abc9c", font)
 draw.text((30, 120), u"/home/app.py", "#16a085", font)
@@ -64,6 +60,20 @@ npu = nn.load({
 })
 
 camera.config(size=(224, 224))
+
+# for i in range(320):
+#   img = camera.capture()
+#   if img:
+#       out = npu.forward(img, quantize=True)
+#       out = nn.F.softmax(out)
+#       if out.max() > 0.1:
+#           image = Image.new("RGBA", (240, 240), "#00000000")
+#           draw = ImageDraw.Draw(image)
+#           draw.text((0, 0), "{:.2f}: {}".format(
+#               out.max(), labels[out.argmax()]), (255, 0, 0), font)
+#           display.show(image)
+
+# exit(0)
 
 packet = {
     'selected': "main"
@@ -108,12 +118,21 @@ async def main(packet):
             out = npu.forward(img, quantize=True)
             out = nn.F.softmax(out)
             if out.max() > 0.1:
-                draw = ImageDraw.Draw(img)
+                image = Image.new("RGBA", (240, 240), "#00000000")
+                draw = ImageDraw.Draw(image)
                 draw.text((0, 0), "{:.2f}: {}".format(
                     out.max(), labels[out.argmax()]), (255, 0, 0), font)
-            display.show(img)
+                display.show(image)
         # else:
             # await asyncio.sleep(0.02)
+    elif packet["selected"] == "save":
+        img = camera.capture()
+        if img:
+            img.save('/mnt/UDISK/%d.jpg' % int(time.time()), quality=95)
+            draw = ImageDraw.Draw(img)
+            draw.text((0, 0), "cap!", (255, 0, 0), font)
+            display.show(img)
+            packet["selected"] = "demo"
     elif packet["selected"] == "main":
         display.show(canvas)
     elif packet["selected"] == "exit":

@@ -18,13 +18,21 @@ try:
                         from PIL import Image
                         from maix import display
                         self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = 0, ai_dir = 0)
+                        display.__display__ = None
                         display.__fastview__ = self.cam
                         def __new_draw__(img):
-                            display.__fastview__
                             if isinstance(img, bytes):
-                              display.__fastview__.set_ui(img)
+                                display.__fastview__.set_ui(img)
                             elif isinstance(img, Image.Image):
-                              display.__fastview__.set_ui(img.convert("RGBA").tobytes())
+                                if (img.mode == "RGB"):
+                                    tmp = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
+                                    tmp.paste(img)
+                                    display.__fastview__.set_ui(tmp.tobytes())
+                                elif (img.mode == "RGBA"):
+                                    display.__fastview__.set_ui(img.tobytes())
+                                else:
+                                    print("unknown image mode")
+
                         display.__draw__ = __new_draw__
                     except ModuleNotFoundError as e:
                         pass

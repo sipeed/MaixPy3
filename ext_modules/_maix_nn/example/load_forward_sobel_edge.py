@@ -1,18 +1,16 @@
 from maix import nn
 from PIL import Image, ImageDraw
-from maix import camera, display
 import numpy as np
 import time
 
-test_jpg = "/root/test.png"
+test_jpg = "/test.jpg"
 model = {
-    "param": "/root/models/sobel_int8.param",
-    "bin": "/root/models/sobel_int8.bin"
+    "param": "/models/sobel_int8.param",
+    "bin": "/models/sobel_int8.bin"
 }
 
 input_size = (224, 224, 3)
 output_size = (222, 222, 3)
-camera.config(size=input_size[:2])
 
 options = {
     "model_type":  "awnn",
@@ -31,6 +29,8 @@ print("-- load ok")
 
 print("-- read image")
 img = Image.open(test_jpg).resize(input_size[:2])
+img.show()
+
 print("-- read image ok")
 print("-- forward model with image as input")
 out = m.forward(img, quantize=True)
@@ -41,16 +41,4 @@ out = out.astype(np.float32).reshape(output_size)
 out = (np.abs(out) * 255 / out.max()).astype(np.uint8)
 img2 = Image.fromarray(out, mode="RGB")
 
-display.show(img2)
-
-
-while 1:
-    img = camera.capture()
-    if not img:
-        time.sleep(0.02)
-        continue
-    out = m.forward(img, quantize=True)
-    out = out.astype(np.float32).reshape(output_size)
-    out = (np.abs(out) * 255 / out.max()).astype(np.uint8)
-    img2 = Image.fromarray(out, mode="RGB")
-    display.show(img2)
+# img2.show()

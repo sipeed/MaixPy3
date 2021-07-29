@@ -30,8 +30,7 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
                                                 "venc_base", "mpp_component", "adecoder", "asound", "venc_base", "hwdisplay",
                                                 "maix_utils", "maix_cam", "maix_image",
                                       ],
-                                      library_dirs=[
-                                          "/lib",  "/usr/lib", ext_so, ],
+                                      library_dirs=[ ext_so, ],
                                       extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
                                       define_macros=[
                                           ('V831Camera', None)],
@@ -57,7 +56,7 @@ _maix_opencv_module = Pybind11Extension("_maix_opencv",
                                             "opencv_gapi", "opencv_objdetect", "opencv_saliency", "opencv_tracking"
                                         ],
                                         library_dirs=[
-                                            "/lib",  "/usr/lib", "./ext_modules/_maix_opencv/ports/v83x/lib", ],
+                                            "./ext_modules/_maix_opencv/ports/v83x/lib", ],
                                         extra_link_args=[
                                             "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix/_maix_opencv"],
                                         )

@@ -4,10 +4,10 @@ from maix import display
 from classes_label import labels
 import time
 
-test_jpg = "/root/test_input/input.jpg"
+test_jpg = "/root/input.jpg"
 model = {
-    "param": "/root/models/resnet_awnn.param",
-    "bin": "/root/models/resnet_awnn.bin"
+    "param": "/root/models/resnet18_1000_awnn.param",
+    "bin": "/root/models/resnet18_1000_awnn.bin"
 }
 
 options = {
@@ -20,7 +20,7 @@ options = {
     },
     "first_layer_conv_no_pad": False,
     "mean": [127.5, 127.5, 127.5],
-    "norm": [0.00784313725490196, 0.00784313725490196, 0.00784313725490196],
+    "norm": [0.0176, 0.0176, 0.0176],
 }
 print("-- load model:", model)
 m = nn.load(model, opt=options)
@@ -45,7 +45,7 @@ while 1:
     out2 = nn.F.softmax(out)
     t = time.time() - t
     print("-- softmax time: {}s".format(t))
-    msg = "{:.2f}: {}".format(out.max(), labels[out.argmax()])
+    msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])
     print(msg)
     draw = ImageDraw.Draw(img)
     draw.text((0, 0), msg, fill=(255, 0, 0))

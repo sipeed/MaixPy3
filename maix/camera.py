@@ -11,7 +11,7 @@ try:
                 self.source = source
                 self.cam = None
 
-            def config(self, size=(224, 224)):
+            def config(self, size=(240, 240)):
                 if self.cam == None:
                     super(V831VivoMaixVideo, self).__init__(size)
                     try:

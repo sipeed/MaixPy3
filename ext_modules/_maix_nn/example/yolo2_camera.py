@@ -1,10 +1,14 @@
+
+
+
+
 from maix import nn
 from PIL import Image, ImageDraw, ImageFont
-from maix import  display
+from maix import  display, camera
 import time
 from maix.nn import decoder
 
-def draw_rectangle_with_title(img, box, disp_str, bg_color=(255, 0, 0), font_color=(255, 255, 255)):
+def draw_rectangle_with_title(img, box, disp_str, bg_color=(255, 0, 0, 255), font_color=(255, 255, 255, 255)):
     draw = ImageDraw.Draw(img)
     font = ImageFont.load_default()
 
@@ -14,6 +18,7 @@ def draw_rectangle_with_title(img, box, disp_str, bg_color=(255, 0, 0), font_col
     draw.text((box[0], box[1] - font_h), disp_str, fill=font_color, font=font)
 
 
+camera.config(size=(224, 224))
 
 test_jpg = "/root/face.jpg"
 model = {
@@ -37,10 +42,8 @@ m = nn.load(model, opt=options)
 print("-- load ok")
 
 print("-- read image")
-img = Image.open(test_jpg)
 w = options["inputs"]["input0"][1]
 h = options["inputs"]["input0"][0]
-img = img.resize((w, h))
 # # img.show()
 print("-- read image ok")
 
@@ -49,28 +52,30 @@ labels = ["person"]
 anchors = [1.19, 1.98, 2.79, 4.59, 4.53, 8.92, 8.06, 5.29, 10.32, 10.65]
 yolo2_decoder = decoder.Yolo2(len(labels), anchors, net_in_size=(w, h), net_out_size=(7, 7))
 
-loop_count = 50
-while loop_count > 0:
+while 1:
+    img = camera.capture()
+    if not img:
+        time.sleep(0.01)
+        continue
     t = time.time()
     out = m.forward(img, quantize=True, layout="hwc")
     print("-- forward: ", time.time() - t )
 
     t = time.time()
-    boxes, probs = yolo2_decoder.run(out, nms=0.3, threshold=0.5, img_size=(w, h))
+    boxes, probs = yolo2_decoder.run(out, nms=0.3, threshold=0.5, img_size=(240, 240))
     print("-- decode: ", time.time() - t )
 
     t = time.time()
+    img_mask = Image.new("RGBA", (240, 240), color=(0,0,0,0))
     for i, box in enumerate(boxes):
         class_id = probs[i][0]
         prob = probs[i][1][class_id]
         disp_str = "{}:{:.2f}%".format(labels[class_id], prob*100)
-        draw_rectangle_with_title(img, box, disp_str)
+        draw_rectangle_with_title(img_mask, box, disp_str)
     print("-- draw: ", time.time() - t )
 
     t = time.time()
-    display.show(img)
+    display.show(img_mask)
     print("-- show: ", time.time() - t )
-
-    loop_count -= 1
 
 

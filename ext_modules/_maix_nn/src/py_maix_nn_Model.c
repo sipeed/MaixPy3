@@ -16,6 +16,7 @@ typedef struct
     PyObject*     m_numpy;
     int           inputs_len;
     int           outputs_len;
+    bool          is_init;
 } ModelObject;
 
 PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
@@ -57,6 +58,8 @@ static void free_layers_data_mem(float** p, int len)
 
 static void Model_del(ModelObject *self)
 {
+    if(!self->is_init)
+        return;
     free_layers_data_mem(self->out_buffer, self->outputs_len);
     if(self->quantize_buffer)
     {
@@ -288,7 +291,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(PyExc_ValueError, "now model_type only support awnn");
         return -1;
     }
-
+    self->is_init = true;
     return 0;
 end:
     /* load by libmaix API error deal*/
@@ -314,6 +317,11 @@ static PyObject *Model_str(PyObject *object)
 PyDoc_STRVAR(Model_forward_doc, "forward network.\n");
 static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_args)
 {
+    if(!self->is_init)
+    {
+        PyErr_SetString(PyExc_PermissionError, "not initialize yet");
+        return NULL;
+    }
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     PyObject *o_inputs = NULL;
     const char* layout_str = "chw";

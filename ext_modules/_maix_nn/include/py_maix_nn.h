@@ -12,11 +12,15 @@ extern "C" {
 #define _MAIX_NN_NAME_ "_maix_nn"
 PyDoc_STRVAR(_maix_nn_doc, "MaixPy Python3 nn(neural network) module.\n");
 PyDoc_STRVAR(_maix_nn_functional_doc, "MaixPy Python3 nn(neural network) functional module.\n");
+PyDoc_STRVAR(_maix_nn_decoder_doc, "MaixPy Python3 nn(neural network) decoder(post process) module.\n");
 /////////////////////////////
 
 PyDoc_STRVAR(maix_nn_model_type_name, "Model");
+PyDoc_STRVAR(maix_nn_decoder_yolo2_type_name, "Yolo2");
 extern PyTypeObject PyMaix_NN_Model_Type;
+extern PyTypeObject PyMaix_NN_Decoder_Yolo2_Type;
 extern struct PyModuleDef maix_nn_functional_module;
+extern struct PyModuleDef maix_nn_decoder_module;
 
 #ifdef  __cplusplus
 }

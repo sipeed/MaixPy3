@@ -18,7 +18,7 @@ typedef struct
     int           outputs_len;
 } ModelObject;
 
-PyDoc_STRVAR(Maix_NN_Object_type_doc, "neural network model object.\n");
+PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
 
 
 
@@ -27,6 +27,7 @@ static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     ModelObject* self = (ModelObject*)type->tp_alloc(type, 0);
     if (!self)
     {
+        PyErr_NoMemory();
         return NULL;
     }
     self->nn = NULL;
@@ -81,6 +82,7 @@ static void Model_del(ModelObject *self)
         Py_DECREF(self->outputs);
         self->outputs = NULL;
     }
+    Py_DECREF(self->m_numpy);
 }
 
 static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
@@ -553,7 +555,7 @@ PyTypeObject PyMaix_NN_Model_Type = {
     0,                                        /* tp_setattro */
     0,                                        /* tp_as_buffer */
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE, /* tp_flags */
-    Maix_NN_Object_type_doc,                  /* tp_doc */
+    Maix_NN_Model_Object_type_doc,                  /* tp_doc */
     0,                                        /* tp_traverse */
     0,                                        /* tp_clear */
     0,                                        /* tp_richcompare */

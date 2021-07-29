@@ -89,11 +89,22 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
     if (PyType_Ready(&PyMaix_NN_Model_Type) < 0) {
         return NULL;
     }
+    if (PyType_Ready(&PyMaix_NN_Decoder_Yolo2_Type) < 0) {
+        return NULL;
+    }
 
-    /* Add class*/
-    PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);
+    /* Add maix.nn.F module*/
+    PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);    
     PyModule_AddObject(module, "F", functional_module);
+    Py_INCREF(functional_module);
     PyModule_AddObject(module, "functional", functional_module);
+
+    /* Add maix.nn.decoder module,
+       add maix.nn.decoder.Yolo2 class*/
+    PyObject *decoder_module = PyModule_Create(&maix_nn_decoder_module);
+    Py_INCREF(&PyMaix_NN_Decoder_Yolo2_Type);
+    PyModule_AddObject(decoder_module, "Yolo2", (PyObject*)&PyMaix_NN_Decoder_Yolo2_Type);
+    PyModule_AddObject(module, "decoder", decoder_module);
 
     return module;
 }

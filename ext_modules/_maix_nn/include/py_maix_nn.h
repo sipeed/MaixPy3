@@ -8,7 +8,7 @@ extern "C" {
 #include <Python.h>
 
 /////////////////////////////
-#define _MAIX_NN_VERSION_ "0.1.0"
+#define _MAIX_NN_VERSION_ "0.2.0"
 #define _MAIX_NN_NAME_ "_maix_nn"
 PyDoc_STRVAR(_maix_nn_doc, "MaixPy Python3 nn(neural network) module.\n");
 PyDoc_STRVAR(_maix_nn_functional_doc, "MaixPy Python3 nn(neural network) functional module.\n");

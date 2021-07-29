@@ -3,10 +3,10 @@ from PIL import Image, ImageDraw
 import numpy as np
 import time
 
-test_jpg = "/test.jpg"
+test_jpg = "/root/input.jpg"
 model = {
-    "param": "/models/sobel_int8.param",
-    "bin": "/models/sobel_int8.bin"
+    "param": "/root/models/sobel_int8.param",
+    "bin": "/root/models/sobel_int8.bin"
 }
 
 input_size = (224, 224, 3)
@@ -33,7 +33,7 @@ img.show()
 
 print("-- read image ok")
 print("-- forward model with image as input")
-out = m.forward(img, quantize=True)
+out = m.forward(img, quantize=True, layout="hwc")
 # print("-- read image ok")
 # out = out.reshape(222, 222, 3)
 print("-- out:", out.shape, out.dtype)

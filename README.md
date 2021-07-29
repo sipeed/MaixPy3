@@ -180,7 +180,7 @@ Click here to view the effect [usage_display_hook.ipynb](./examples/general/usag
 
 Under `linux x86_64`, use `python3 setup.py build` to complete the general package construction.
 
-For other platforms, take the version of `maix_v831` as an example, match the Python3 + cross-compilation chain of the corresponding platform, and run `python3.8 setup.py build maix_v831` to complete the construction of the target platform package.
+For other platforms, take the version of `maix_v831` as an example, match the Python3 + cross-compilation chain of the corresponding platform([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613)), and run `python3.8 setup.py build maix_v831` to complete the construction of the target platform package.
 
 Welcome to provide configurations of different platforms to [MaixPy3/envs/](./envs/) to adapt to the MaixPy3 environment.
 

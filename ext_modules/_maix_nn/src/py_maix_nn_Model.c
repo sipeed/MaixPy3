@@ -2,7 +2,7 @@
 #include <string.h>
 #include "libmaix_nn.h"
 #include "stdlib.h"
-
+#include <sys/time.h>
 
 
 typedef struct
@@ -317,6 +317,12 @@ static PyObject *Model_str(PyObject *object)
 PyDoc_STRVAR(Model_forward_doc, "forward network.\n");
 static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_args)
 {
+    PyObject* o_input_bytes = NULL;
+    bool o_input_bytes_need_free = false;
+    libmaix_nn_layer_t* out_fmap = NULL;
+    struct timeval start, end;
+    int64_t interval_s;
+
     if(!self->is_init)
     {
         PyErr_SetString(PyExc_PermissionError, "not initialize yet");
@@ -326,10 +332,11 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     PyObject *o_inputs = NULL;
     const char* layout_str = "chw";
     int quantize = 1;
-    static char *kwlist[] = {"inputs", "quantize", "layout", NULL};
+    int debug = 0;
+    static char *kwlist[] = {"inputs", "quantize", "layout", "debug", NULL};
     /* Get the buffer's memory */
-    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$ps:forward", kwlist,
-                                     &o_inputs, &quantize, &layout_str))
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$psp:forward", kwlist,
+                                     &o_inputs, &quantize, &layout_str, &debug))
     {
         return NULL;
     }
@@ -350,47 +357,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     {
         outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     }
-    //TODO: support numpy and bytes and list
-    if(strstr(o_inputs->ob_type->tp_name, "Image") < 0)
-    {
-        PyErr_SetString(PyExc_ValueError, "not supported input object");
-        return NULL;
-    }
-    PyObject* o_input_bytes = PyObject_CallMethod(o_inputs, "tobytes", NULL);
-    if(o_input_bytes == NULL)
-    {
-        return NULL;
-    }
-    char* input_bytes = PyBytes_AsString(o_input_bytes);
-    if(input_bytes == NULL)
-    {
-        Py_DECREF(o_input_bytes);
-        PyErr_SetString(PyExc_ValueError, "get bytes data error");
-        return NULL;
-    }
-    PyObject* o_width = PyObject_GetAttrString(o_inputs, "width");
-    if(o_width == NULL)
-    {
-        return NULL;
-    }
-    long input_width = PyLong_AsLong(o_width);
-    PyObject* o_height = PyObject_GetAttrString(o_inputs, "height");
-    if(o_height == NULL)
-    {
-        return NULL;
-    }
-    long input_height = PyLong_AsLong(o_height);
-    PyObject* o_mode = PyObject_GetAttrString(o_inputs, "mode");
-    if(o_mode == NULL)
-    {
-        return NULL;
-    }
-    if(strcmp(PyUnicode_DATA(o_mode), "RGB") != 0)
-    {
-        PyErr_SetString(PyExc_NotImplementedError, "only support RGB mode picture");
-        return NULL;
-    }
-    long input_channel = 3;
     PyObject* o_inputs_shape = PyDict_Values(self->inputs);
     PyObject* o_input_shape = PyList_GetItem(o_inputs_shape, 0);
     long input_w=0, input_h=0, input_c=0;
@@ -407,17 +373,43 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         input_c = PyLong_AsLong(PyList_GetItem(o_input_shape, 2));
     }
     Py_DECREF(o_inputs_shape);
-    if(input_w != input_width || input_h != input_height || input_c != input_channel)
+
+    if(PyBytes_Check(o_inputs))
     {
-        PyErr_Format(PyExc_ValueError, "input shape error, need:(%d, %d, %d), but(%d, %d, %d)", input_h, input_w, input_c, input_height, input_width, input_channel);
+        o_input_bytes = o_inputs;
+    }
+    else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)
+    {
+        o_input_bytes = PyObject_CallMethod(o_inputs, "tobytes", NULL);
+        if(o_input_bytes == NULL)
+        {
+            PyErr_SetString(PyExc_Exception, "tobytes error");
+            return NULL;
+        }
+        o_input_bytes_need_free = true;
+    }
+    else
+    {
+        PyErr_SetString(PyExc_ValueError, "not supported input object, only support bytes and numpy.ndarray object");
         return NULL;
     }
-    // printf("input shape, need:(%d, %d, %d), actually (%d, %d, %d)\n", input_h, input_w, input_c, input_height, input_width, input_channel);
+    if((Py_ssize_t)(input_w * input_h * input_c) != PyBytes_Size(o_input_bytes))
+    {
+        PyErr_Format(PyExc_ValueError, "input shape error, need: %d (%d, %d, %d), but: %d", input_w * input_h * input_c, input_h, input_w, input_c, PyBytes_Size(o_input_bytes));
+        goto err0;
+    }
+    char* input_bytes = PyBytes_AsString(o_input_bytes);
+    if(input_bytes == NULL)
+    {
+        PyErr_SetString(PyExc_ValueError, "get bytes data error");
+        goto err0;
+    }
+
     /* libmaix API */
     libmaix_nn_layer_t input = {
-        .w = input_width,
-        .h = input_height,
-        .c = input_channel,
+        .w = input_w,
+        .h = input_h,
+        .c = input_c,
         .dtype = (quantize == 0 ? LIBMAIX_NN_DTYPE_INT8 : LIBMAIX_NN_DTYPE_UINT8),
         .data = input_bytes,
         .need_quantization = (quantize == 0 ? false : true),
@@ -432,14 +424,19 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             if(!quantize_buffer)
             {
                 PyErr_Format(PyExc_MemoryError, "no memory for quantize buffer, size:%d", _size);
-                return NULL;
+                goto err0;
             }
             self->quantize_buffer = quantize_buffer;
         }
         input.buff_quantization = self->quantize_buffer;
     }
     // outputs
-    libmaix_nn_layer_t out_fmap[self->outputs_len];
+    out_fmap = (libmaix_nn_layer_t*)malloc(self->outputs_len * sizeof(libmaix_nn_layer_t));
+    if(!out_fmap)
+    {
+        PyErr_NoMemory();
+        goto err0;
+    }
     PyObject* o_outputs_shape = PyDict_Values(self->outputs);
     for(int i=0; i<self->outputs_len; ++i)
     {
@@ -472,7 +469,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         if(!self->out_buffer)
         {
             PyErr_Format(PyExc_MemoryError, "no memory for out buffer, need size:%d", self->outputs_len * sizeof(float*));
-            return NULL;
+            goto err1;
         }
         memset(self->out_buffer, 0, self->outputs_len * sizeof(float*));
         for(int i=0; i<self->outputs_len; ++i)
@@ -483,7 +480,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             {
                 free_layers_data_mem(self->out_buffer, self->outputs_len);
                 PyErr_Format(PyExc_MemoryError, "no memory for out buffer, need size:%d", sizeof(float*));
-                return NULL;
+                goto err1;
             }
         }
     }
@@ -491,11 +488,21 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     {
         out_fmap[i].data = self->out_buffer[i];
     }
+    if(debug)
+    {
+        gettimeofday(&start, NULL);
+    }
     err = self->nn->forward(self->nn, &input, out_fmap);
     if(err != LIBMAIX_ERR_NONE)
     {
         PyErr_Format(PyExc_Exception, "libmaix_nn forward fail: %s\n", libmaix_get_err_msg(err));
-        return NULL;
+        goto err1;
+    }
+    if(debug)
+    {
+        gettimeofday(&end, NULL );
+        interval_s  =(int64_t)(end.tv_sec - start.tv_sec)*1000000ll + end.tv_usec - start.tv_usec;
+        printf("forward use time: %lld us\n", interval_s);
     }
     PyObject* result = NULL;
     PyObject* o_result_numpy2 = NULL;
@@ -529,12 +536,18 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         }
         PyList_Append(result, o_result_numpy2);
     }
-
-    Py_DECREF(o_input_bytes);
-    Py_DECREF(o_width);
-    Py_DECREF(o_height);
-    Py_DECREF(o_mode);
+    if(out_fmap)
+        free(out_fmap);
+    if(o_input_bytes_need_free)
+        Py_DECREF(o_input_bytes);
     return result;
+err1:
+    if(out_fmap)
+        free(out_fmap);
+err0:
+    if(o_input_bytes_need_free)
+        Py_DECREF(o_input_bytes);
+    return NULL;
 }
 static PyMethodDef Model_methods[] = {
     {"forward", (PyCFunction)Model_forward, METH_VARARGS | METH_KEYWORDS, Model_forward_doc},

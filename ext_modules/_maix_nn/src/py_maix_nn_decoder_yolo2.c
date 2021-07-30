@@ -234,7 +234,6 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
     out_fmap.data = PyBytes_AsString(o_out_fmap);
 
     libmaix_nn_decoder_yolo2_result_t yolo2_result;
-    bool boxes_result_float = true;
     err = self->decoder->decode(self->decoder, &out_fmap, (void*)&yolo2_result);
     if(fmap_need_decref)
         Py_DECREF(o_out_fmap);
@@ -266,7 +265,6 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
                     PyList_SetItem(box, 2, PyLong_FromLong(w));
                     PyList_SetItem(box, 3, PyLong_FromLong(h));
                     PyList_Append(boxes, box);
-                    boxes_result_float = false;
                 }
                 else
                 {

@@ -1,3 +1,4 @@
+from typing import Tuple
 from .video import MaixVideo
 
 camera = MaixVideo()
@@ -11,25 +12,26 @@ try:
                 self.source = source
                 self.cam = None
 
-            def config(self, size=(240, 240)):
+            def config(self, size=(240, 240), _vo_dir=0, _ai_dir=0):
                 if self.cam == None:
                     super(V831VivoMaixVideo, self).__init__(size)
                     try:
                         from PIL import Image
                         from maix import display
-                        self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = 0, ai_dir = 0)
-                        display.__display__ = None
+                        self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = _vo_dir, ai_dir = _ai_dir)
+                        display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                         display.__fastview__ = self.cam
                         def __new_draw__(img):
                             if isinstance(img, bytes):
-                                display.__fastview__.set_ui(img)
+                                display.__fastview__.set(img)
                             elif isinstance(img, Image.Image):
                                 if (img.mode == "RGB"):
                                     tmp = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                                     tmp.paste(img)
-                                    display.__fastview__.set_ui(tmp.tobytes())
+                                    display.__fastview__.set(tmp.tobytes())
                                 elif (img.mode == "RGBA"):
-                                    display.__fastview__.set_ui(img.tobytes())
+                                    display.__fastview__.set(img.tobytes())
+                                    display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                                 else:
                                     print("unknown image mode")
 
@@ -42,14 +44,14 @@ try:
                     print('[camera] config input size(%d, %d)' %
                         (self.width(), self.height()))
 
-            def read(self):
+            def read(self, video_num=1, show=True):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                 if self.cam:
-                    frame = self.cam.get_ai()
-                    if len(frame):
-                        return frame  # bytes
+                    frame = self.cam.get(show)
+                    if len(frame) == 2:
+                        return frame[video_num]  # bytes 240*240*3, bytes 224*224*3
                 return None
 
             def __del__(self):

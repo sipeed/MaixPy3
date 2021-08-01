@@ -39,6 +39,12 @@ def set_window(size=(240, 240)):
     __width__, __height__ = size
     __display__ = Image.new("RGB", size, (0, 0, 0))
 
+def get_draw(): # ImageDraw
+    from PIL import ImageDraw
+    global __display__
+    if __display__:
+        return ImageDraw.Draw(__display__)
+    return None
 
 def __thumbnail__(src, dst):
     w, h = src.size
@@ -76,8 +82,10 @@ def local_show(value=True):
   _local_show = value
 
 
-def show(img, box=(0, 0), fast=True):
+def show(img=None, box=(0, 0), fast=True):
     global __display__, local_show
+    if img is None:
+        img = __display__
     if img:
       if __fastview__ and fast:
         __display__ = img
@@ -93,6 +101,7 @@ def show(img, box=(0, 0), fast=True):
           __display__.paste(img, box)
         if _local_show:
           __display__.show()
+        
 
 
 def fill(box=(0, 0), color=(0, 0, 0)):

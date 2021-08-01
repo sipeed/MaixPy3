@@ -13,6 +13,20 @@ extern "C"
     unsigned int g2d_getPhyAddrByVirAddr(void *vir_ptr);
 }
 
+// #define CALC_FPS(tips)                                                                                     \
+//   {                                                                                                        \
+//     static int fcnt = 0;                                                                                   \
+//     fcnt++;                                                                                                \
+//     static struct timespec ts1, ts2;                                                                       \
+//     clock_gettime(CLOCK_MONOTONIC, &ts2);                                                                  \
+//     if ((ts2.tv_sec * 1000 + ts2.tv_nsec / 1000000) - (ts1.tv_sec * 1000 + ts1.tv_nsec / 1000000) >= 1000) \
+//     {                                                                                                      \
+//       printf("%s => H26X FPS:%d\n", tips, fcnt);                                                  \
+//       ts1 = ts2;                                                                                           \
+//       fcnt = 0;                                                                                            \
+//     }                                                                                                      \
+//   }
+
 class _v83x_vivo
 {
     typedef enum
@@ -144,7 +158,7 @@ class _v83x_vivo
 private:
     /* data */
 public:
-    void set_ui(py::bytes &argb)
+    void set(py::bytes &argb)
     {
         frame_t *frame = this->ui;
         std::string value = static_cast<std::string>(argb);
@@ -186,75 +200,76 @@ public:
         }
     }
 
-    py::bytes get_vi()
+    py::list get(bool show=true)
     {
-        this->yuv2rgb->width = this->fm[0]->size.w;
-        this->yuv2rgb->height = this->fm[0]->size.h;
-        this->yuv2rgb->data = this->fm[0]->buf;
-        libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[0]);
-        if (err == LIBMAIX_ERR_NONE)
-        {
-            return py::bytes((char *)this->y2r[0]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3);
-        }
-        return py::bytes();
-    }
-
-    py::bytes get_ai()
-    {
+        py::list result; // l.attr("pop")();
         if (LIBMAIX_ERR_NONE == this->vi[0]->capture(this->vi[0], (uint8_t *)this->fm[0]->buf))
         {
             void *tmp = this->vo->get_frame(this->vo, VO_VI);
             if (tmp != NULL)
             {
                 frame_t *frame = this->fm[0];
-                uint32_t *phy = NULL, *vir = NULL;
-                this->vo->frame_addr(this->vo, tmp, &vir, &phy);
-                if (this->vo_dir)
-                {
-                    if (frame->ion)
+
+                if (show) {
+                    uint32_t *phy = NULL, *vir = NULL;
+                    this->vo->frame_addr(this->vo, tmp, &vir, &phy);
+                    if (this->vo_dir)
                     {
-                        const int _w_h_ = frame->size.w * frame->size.h; //ALIGN(w, 16) * ALIGN(h, 16);
-                        uint32_t *tmp_phy = (uint32_t *)frame_phy(frame->buf);
-                        _g2d_nv21_rotate(
-                            (void *)tmp_phy, (void *)tmp_phy + _w_h_,
-                            (void *)phy[0], (void *)phy[0] + _w_h_,
-                            frame->size.w, frame->size.h, this->vo_dir);
+                        if (frame->ion)
+                        {
+                            const int _w_h_ = frame->size.w * frame->size.h; //ALIGN(w, 16) * ALIGN(h, 16);
+                            uint32_t *tmp_phy = (uint32_t *)frame_phy(frame->buf);
+                            _g2d_nv21_rotate(
+                                (void *)tmp_phy, (void *)tmp_phy + _w_h_,
+                                (void *)phy[0], (void *)phy[0] + _w_h_,
+                                frame->size.w, frame->size.h, this->vo_dir);
+                        }
+                        else
+                        {
+                            g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->vo_dir);
+                            memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 3 / 2);
+                        }
                     }
                     else
                     {
-                        g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->vo_dir);
                         memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 3 / 2);
                     }
+                    this->vo->set_frame(this->vo, tmp, VO_VI);
                 }
-                else
-                {
-                    memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 3 / 2);
-                }
-                this->vo->set_frame(this->vo, tmp, VO_VI);
-            }
-            if (LIBMAIX_ERR_NONE == this->vi[1]->capture(this->vi[1], (uint8_t *)this->fm[1]->buf))
-            {
-                frame_t *frame = this->fm[1];
-                if (this->ai_dir)
-                {
-                    g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->ai_dir);
-                    this->yuv2rgb->width = this->fm[1]->size.h;
-                    this->yuv2rgb->height = this->fm[1]->size.w;
-                }
-                else
-                {
-                    this->yuv2rgb->width = this->fm[1]->size.w;
-                    this->yuv2rgb->height = this->fm[1]->size.h;
-                }
-                this->yuv2rgb->data = this->fm[1]->buf;
-                libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[1]);
+
+                this->yuv2rgb->width = this->fm[0]->size.w;
+                this->yuv2rgb->height = this->fm[0]->size.h;
+                this->yuv2rgb->data = this->fm[0]->buf;
+                libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[0]);
                 if (err == LIBMAIX_ERR_NONE)
                 {
-                    return py::bytes((char *)this->y2r[1]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3);
+                    result.append(py::bytes((char *)this->y2r[0]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3));
+                    if (LIBMAIX_ERR_NONE == this->vi[1]->capture(this->vi[1], (uint8_t *)this->fm[1]->buf))
+                    {
+                        frame_t *frame = this->fm[1];
+                        if (this->ai_dir)
+                        {
+                            g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->ai_dir);
+                            this->yuv2rgb->width = this->fm[1]->size.h;
+                            this->yuv2rgb->height = this->fm[1]->size.w;
+                        }
+                        else
+                        {
+                            this->yuv2rgb->width = this->fm[1]->size.w;
+                            this->yuv2rgb->height = this->fm[1]->size.h;
+                        }
+                        this->yuv2rgb->data = this->fm[1]->buf;
+                        libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[1]);
+                        if (err == LIBMAIX_ERR_NONE)
+                        {
+                            result.append(py::bytes((char *)this->y2r[1]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3));
+                            // CALC_FPS("get");
+                        }
+                    }
                 }
             }
         }
-        return py::bytes();
+        return result;
     }
 
     _v83x_vivo(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir) : inited(false), ui(NULL), vi({NULL}), vo(NULL), y2r({NULL}), yuv2rgb(NULL), fm({NULL})
@@ -364,7 +379,6 @@ PYBIND11_MODULE(_maix_vivo, m)
     pybind11::class_<_v83x_vivo>(m, "_v83x_vivo")
         .def(pybind11::init<int, int, int, int, int, int>(),
              py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
-        .def("get_ai", &_v83x_vivo::get_ai)
-        .def("get_vi", &_v83x_vivo::get_vi)
-        .def("set_ui", &_v83x_vivo::set_ui);
+        .def("get", &_v83x_vivo::get, py::arg("show") = 1)
+        .def("set", &_v83x_vivo::set);
 }

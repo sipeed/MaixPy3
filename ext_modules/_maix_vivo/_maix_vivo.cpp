@@ -269,7 +269,7 @@ public:
                 }
             }
         }
-        return result;
+        return std::move(result);
     }
 
     _v83x_vivo(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir) : inited(false), ui(NULL), vi({NULL}), vo(NULL), y2r({NULL}), yuv2rgb(NULL), fm({NULL})

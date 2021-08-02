@@ -26,12 +26,13 @@ try:
                                 display.__fastview__.set(img)
                             elif isinstance(img, Image.Image):
                                 if (img.mode == "RGB"):
-                                    tmp = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
-                                    tmp.paste(img)
-                                    display.__fastview__.set(tmp.tobytes())
+                                    display.__display__.paste(img)
+                                    display.__fastview__.set(display.__display__.tobytes())
+                                    display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                                 elif (img.mode == "RGBA"):
                                     display.__fastview__.set(img.tobytes())
-                                    display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
+                                    if img is display.__display__:
+                                        display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                                 else:
                                     print("unknown image mode")
 

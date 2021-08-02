@@ -36,6 +36,11 @@ try:
                                     print("unknown image mode")
 
                         display.__draw__ = __new_draw__
+                        
+                        def __new_clear__():
+                            display.show()
+                        display.clear = __new_clear__
+                        
                     except ModuleNotFoundError as e:
                         pass
                     except Exception as e:

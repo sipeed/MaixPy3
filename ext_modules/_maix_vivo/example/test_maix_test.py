@@ -12,3 +12,4 @@ while True:
   draw = display.get_draw()
   draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # bgr
   display.show()
+  # display.clear()

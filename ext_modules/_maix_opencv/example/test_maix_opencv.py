@@ -1,6 +1,8 @@
-from _maix_vivo import _v83x_vivo
+# from _maix_vivo import _v83x_vivo
+from maix import camera
 from _maix_opencv import _v83x_opencv
-
+from PIL import Image ,ImageDraw
+from maix import display
 cv = _v83x_opencv()
 
 # from PIL import Image
@@ -13,15 +15,36 @@ cv = _v83x_opencv()
 
 # print(len(tmp))
 
-vivo = _v83x_vivo(240, 240, 240, 240, vo_dir=0, ai_dir=0)
+# def find_blob():
+#   while True:
+#     tmp = camera.read()
+#     if len(tmp):
+#       ma = cv.find_blob(tmp,(95,219,0,255,255,255))
+#       print(ma)
+#       if ma:
+#         draw = display.get_draw()
+#         for i in ma:
+#           draw.rectangle((i[0],i[1],i[2],i[3]),fill ='white',outline ='black',width =1)
+#         display.show()
+#       else:
+#         display.clear()
 
-# vivo.set_ui((cv.test(bak)))
-
-for i in range(3600):
-    # time.sleep(0.02)
-    # tmp = vivo.get_vi()
-    # print(len(tmp))
-    tmp = vivo.get_ai()
+def find_ball():
+  while True:
+    tmp = camera.read()
     if len(tmp):
-      # print(len(tmp))
-      vivo.set_ui((cv.test(tmp)))
+      ma = cv.find_ball(tmp,(95,219,0,255,255,255))
+      print(ma)
+      if ma:
+        draw = display.get_draw()
+        for i in ma:
+          draw.ellipse((i[0]-i[3]/2, i[1]-i[2]/2, i[0]+i[3]/2, i[1]+i[2]/2),
+                        fill ='white',
+                        outline ='black',
+                        width =1)
+        display.show()
+      else:
+        display.clear()
+
+if __name__ == "__main__":
+  find_ball()

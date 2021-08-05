@@ -222,14 +222,12 @@ public:
     return std::move(out);
   }
 
-  void LineFitLeastSquares(int *data_x, int *data_y, int data_n, float *x_k, float *x_b)
+  void LineFitLeastSquares(int *data_x, int *data_y, int data_n, float *x_k, float *x_b,float *x_x)
   {
     float A = 0.0;
     float B = 0.0;
     float C = 0.0;
     float D = 0.0;
-    float E = 0.0;
-    float F = 0.0;
     for (int i = 0; i < data_n; i++)
     {
       A += data_x[i] * data_x[i];
@@ -237,32 +235,31 @@ public:
       C += data_x[i] * data_y[i];
       D += data_y[i];
     }
-    float a, b, temp = 0;
-    if (temp = (data_n * A - B * B))
+    float a, b,x, temp = 0;
+    temp = data_n * A - B * B;
+    if (temp > 0.5)
     {
       a = (data_n * C - B * D) / temp;
       b = (A * D - B * C) / temp;
+      if(a == 0)
+      {
+        x = B / data_n;
+      }
+      else
+      {
+        x = 0;
+      }
+      
     }
     else
     {
-      a = 1;
+      a = 0;
       b = 0;
+      x = B / data_n;
     }
-    float Xmean, Ymean;
-    Xmean = B / data_n;
-    Ymean = D / data_n;
-    float tempSumXX = 0.0, tempSumYY = 0.0;
-    for (int i = 0; i < data_n; i++)
-    {
-      tempSumXX += (data_x[i] - Xmean) * (data_x[i] - Xmean);
-      tempSumYY += (data_y[i] - Ymean) * (data_y[i] - Ymean);
-      E += (data_x[i] - Xmean) * (data_y[i] - Ymean);
-    }
-    F = sqrt(tempSumXX) * sqrt(tempSumYY);
-    float r;
-    r = E / F;
     *x_k = a;
     *x_b = b;
+    *x_x = x;
   }
 
   int Distance(int x1, int y1, int x2, int y2) //定义拷贝构造函数
@@ -313,9 +310,6 @@ public:
 
     if (contours.size() < 3 || contours.size() > 400)
     {
-      // return_line.push_back(0.0);
-      // return_line.push_back(0.0);
-      // return_line.push_back(0.0);
       return return_line;
     }
     int x_max[500], x_min[500], y_max[500], y_min[500];
@@ -386,14 +380,9 @@ public:
         {
 
           m = linesss[j].size() - 1;
-          // liness = linesss[j];
-          // lines = liness[liness.size() - 1];
 
           x3 = linesss[j][m][0];
           x4 = linesss[j][m][1];
-
-          // cout << "s1:" << j << "s2:" << liness.size() - 1 << endl;
-          // int a = linesss[j].size() - 1;
 
           w1 = x2 - x1;
           w2 = x4 - x3;
@@ -406,8 +395,6 @@ public:
           xmax = *max_element(line_p.begin(), line_p.end()); //max x_p
           line_p.clear();
 
-          // cout << "size:" << liness.size() << endl;
-
           if ((xmax - xmin) < (w1 + w2))
           {
             x3 = int((x2 - x1) / 2 + x1);                   //cx
@@ -418,8 +405,6 @@ public:
 
             if (Distance(x3, x4, w1, w2) < heigh_t * 3)
             {
-              // cout << "x_min:" << x_min[i] << "x_max:" << x_max[i] << endl;
-              // cout << "size:" << liness.size() << endl;
               x3 = y_min[i];
               x4 = y_max[i];
 
@@ -479,9 +464,6 @@ public:
     {
       if (linesss[max_num].size() < 2) //点数检查
       {
-        // return_line.push_back(0.0);
-        // return_line.push_back(0.0);
-        // return_line.push_back(0.0);
         return return_line;
       }
     }
@@ -497,10 +479,13 @@ public:
 
     float kkk = 0.0;
     float bbb = 0.0;
-    LineFitLeastSquares(x_max, x_min, linesss[max_num].size(), &kkk, &bbb);
+    float xxx = 0.0;
+    LineFitLeastSquares(x_max, x_min, linesss[max_num].size(), &kkk, &bbb,&xxx);
     return_line.push_back(kkk);
     return_line.push_back(bbb);
     return_line.push_back(float(max));
+    return_line.push_back(float(xxx));
+
     return return_line;
   }
 };

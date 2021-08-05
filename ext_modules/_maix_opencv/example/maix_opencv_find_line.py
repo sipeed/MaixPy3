@@ -15,27 +15,14 @@ def find_line():
   while True:
     tmp = camera.read()
     if tmp:
-      ma = cv.find_line(tmp)
+      ma = cv.test_find_line(tmp)
       print(ma)
-      if ma:
-        draw = display.get_draw()
-        if ma[0] == 0:
-          ma[0] = 0.0001
-        x_b = int(-ma[1]/ma[0])         # 直线与x轴的交点横坐标
-        y0  = 0 
-        if ma[0] < 0:                       
-          y_b = int(ma[1])              # 直线与y轴的交点纵坐标
-          x0  = 0
-        else:
-          x0  = 239                     # 直线与屏幕右边框交点横坐标
-          y_b = int(239*ma[0] + ma[1])  # 直线与屏幕右边框交点纵坐标
-        draw.line([(x_b, y0), (x0, y_b)],
-                  fill='white',
-                  width=1)
-        display.show()
-      else:
-        display.clear()
-
-
+      draw = display.get_draw()
+      draw.line([(ma["rect"][0], ma["rect"][1]), (ma["rect"][2], ma["rect"][3])],fill='white',width=1)
+      draw.line([(ma["rect"][2], ma["rect"][3]), (ma["rect"][4], ma["rect"][5])],fill='white',width=1)
+      draw.line([(ma["rect"][4], ma["rect"][5]), (ma["rect"][6], ma["rect"][7])],fill='white',width=1)
+      draw.line([(ma["rect"][6], ma["rect"][7]), (ma["rect"][0], ma["rect"][1])],fill='white',width=1)
+      draw.ellipse(((ma["cx"]-2, ma["cy"]-2), (ma["cx"]+2, ma["cy"]+2)), fill=None, width=1)
+      display.show()
 if __name__ == "__main__":
   find_line()

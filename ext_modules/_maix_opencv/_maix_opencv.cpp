@@ -169,6 +169,8 @@ public:
     }
     return std::move(out);
   }
+
+  // [{"x":54, "y":32, "w":158, "h":164, "pixels":14197, "cx":131, "cy":116, "rotation":0.934584, "code":1, "count":1, "perimeter":707, "roundness":0.718467}]
   py::list find_ball(py::bytes &rgb, vector<int> &hsv_da)
   {
     string tmp = static_cast<string>(rgb);
@@ -221,71 +223,26 @@ public:
     }
     return std::move(out);
   }
-
-  void LineFitLeastSquares(int *data_x, int *data_y, int data_n, float *x_k, float *x_b,float *x_x)
-  {
-    float A = 0.0;
-    float B = 0.0;
-    float C = 0.0;
-    float D = 0.0;
-    for (int i = 0; i < data_n; i++)
-    {
-      A += data_x[i] * data_x[i];
-      B += data_x[i];
-      C += data_x[i] * data_y[i];
-      D += data_y[i];
-    }
-    float a, b,x, temp = 0;
-    temp = data_n * A - B * B;
-    if (temp > 0.5)
-    {
-      a = (data_n * C - B * D) / temp;
-      b = (A * D - B * C) / temp;
-      if(a == 0)
-      {
-        x = B / data_n;
-      }
-      else
-      {
-        x = 0;
-      }
-      
-    }
-    else
-    {
-      a = 0;
-      b = 0;
-      x = B / data_n;
-    }
-    *x_k = a;
-    *x_b = b;
-    *x_x = x;
-  }
-
-  int Distance(int x1, int y1, int x2, int y2) //定义拷贝构造函数
+  int Distance(int x1, int y1, int x2, int y2)
   {
     int x = abs(x1 - x2);
     int y = abs(y1 - y2);
     return int(round(sqrt(x * x + y * y)));
   }
 
-  list<float> find_line(py::bytes &rgb)
+  py::dict find_line(py::bytes &rgb)
   {
     Mat src_gray, dst;
-    list<float> return_line;
+    // list<float> return_line;
+    py::dict return_val;
     string tmp = static_cast<string>(rgb);
     cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str())); //图片输入
     Mat src_gary, mask;
     cvtColor(input, src_gray, COLOR_RGB2GRAY); //将图片变成灰度图
-
     Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
-
     erode(src_gray, src_gray, element);
-
     dilate(src_gray, src_gray, element);
-
     threshold(src_gray, src_gray, 0, 255, THRESH_BINARY | THRESH_OTSU);
-
     dilate(src_gray, dst, element); //膨胀
 
     Rect rect;
@@ -293,200 +250,77 @@ public:
     rect.y = 0;
     rect.width = dst.cols;
     rect.height = heigh_t;
-
-    for (int i = 0; i < dst.rows; i += heigh_t)
-    {
-      rect.y = i;
-      if (dst.rows - i < 100)
-      {
-        rect.height = dst.rows - i;
-      }
-      rectangle(dst, Point(rect.x, rect.y), Point(rect.x + rect.width, rect.y + rect.height), Scalar(255), 2, 8, 0);
-    }
-
+    dst(rect).setTo(255);
+    rect.x = 0;
+    rect.y = dst.rows - heigh_t;
+    rect.width = dst.cols;
+    rect.height = heigh_t;
+    dst(rect).setTo(255);
+    rect.x = 0;
+    rect.y = 0;
+    rect.width = heigh_t;
+    rect.height = dst.rows;
+    dst(rect).setTo(255);
+    rect.x = dst.cols - heigh_t;
+    rect.y = 0;
+    rect.width = heigh_t;
+    rect.height = dst.rows;
+    dst(rect).setTo(255);
     vector<vector<Point>> contours;
     vector<Vec4i> hierarchy;
     findContours(dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE, Point());
-
-    if (contours.size() < 3 || contours.size() > 400)
+    if (contours.size() == 0)
     {
-      return return_line;
-    }
-    int x_max[500], x_min[500], y_max[500], y_min[500];
-    for (int i = 0; i < contours.size(); i++)
-    {
-      x_max[i] = 0;
-      x_min[i] = 10000;
-      y_max[i] = 0;
-      y_min[i] = 10000;
 
-      for (int j = 0; j < contours[i].size(); j++)
-      {
-        if (x_max[i] < contours[i][j].x)
-        {
-          x_max[i] = contours[i][j].x;
-        }
-        if (x_min[i] > contours[i][j].x)
-        {
-          x_min[i] = contours[i][j].x;
-        }
-        if (y_max[i] < contours[i][j].y)
-        {
-          y_max[i] = contours[i][j].y;
-        }
-        if (y_min[i] > contours[i][j].y)
-        {
-          y_min[i] = contours[i][j].y;
-        }
-      }
+      return std::move(return_val);
     }
-    vector<vector<vector<int>>> linesss;
-    vector<vector<int>> liness;
-    vector<int> lines;
-    vector<int> line_p;
-    int m;
-    bool point = 0;
-    int x1, x2, x3, x4, w1, w2, xmin, xmax;
+    int area = 0, a_n = 0;
     for (int i = 1; i < contours.size(); i++)
     {
-
-      x1 = x_min[i];
-      x2 = x_max[i];
-
-      if (abs((x_max[i] - x_min[i]) * (y_max[i] - y_min[i])) < heigh_t * heigh_t * 2)
+      int ar = contourArea(contours[i]);
+      if (ar > area)
       {
-        continue;
-      }
-
-      if (linesss.size() == 0)
-      {
-        x3 = y_min[i];
-        x4 = y_max[i];
-
-        lines.push_back(x1);
-        lines.push_back(x2);
-        lines.push_back(x3);
-        lines.push_back(x4);
-
-        liness.push_back(lines);
-        linesss.push_back(liness);
-        lines.clear();
-        liness.clear();
-      }
-      else
-      {
-        point = 0;
-        for (int j = 0; j < linesss.size(); j++)
-        {
-
-          m = linesss[j].size() - 1;
-
-          x3 = linesss[j][m][0];
-          x4 = linesss[j][m][1];
-
-          w1 = x2 - x1;
-          w2 = x4 - x3;
-
-          line_p.push_back(x1);
-          line_p.push_back(x2);
-          line_p.push_back(x3);
-          line_p.push_back(x4);
-          xmin = *min_element(line_p.begin(), line_p.end()); //min x_p
-          xmax = *max_element(line_p.begin(), line_p.end()); //max x_p
-          line_p.clear();
-
-          if ((xmax - xmin) < (w1 + w2))
-          {
-            x3 = int((x2 - x1) / 2 + x1);                   //cx
-            x4 = int((y_max[i] - y_min[i]) / 2 + y_min[i]); //cy
-
-            w1 = int((linesss[j][m][1] - linesss[j][m][0]) / 2 + linesss[j][m][0]); //cx
-            w2 = int((linesss[j][m][3] - linesss[j][m][2]) / 2 + linesss[j][m][2]); //cy
-
-            if (Distance(x3, x4, w1, w2) < heigh_t * 3)
-            {
-              x3 = y_min[i];
-              x4 = y_max[i];
-
-              lines.push_back(x1);
-              lines.push_back(x2);
-              lines.push_back(x3);
-              lines.push_back(x4);
-
-              linesss[j].push_back(lines);
-              lines.clear();
-              point = 1;
-            }
-          }
-        }
-
-        if (point == 0)
-        {
-          x3 = y_min[i];
-          x4 = y_max[i];
-          lines.push_back(x1);
-          lines.push_back(x2);
-          lines.push_back(x3);
-          lines.push_back(x4);
-
-          liness.push_back(lines);
-          lines.clear();
-
-          linesss.push_back(liness);
-          liness.clear();
-        }
+        area = ar;
+        a_n = i;
       }
     }
-    int max = 0;
-    int max_num = 0;
-    for (int i = 0; i < linesss.size(); i++) //选出最大的值
-    {
-      if (linesss[i].size() == 1) //点的数量检查
-      {
-        continue;
-      }
-      int mmax;
-      m = linesss[i].size() - 1;
 
-      x1 = int((linesss[i][0][1] - linesss[i][0][0]) / 2 + linesss[i][0][0]); //cx
-      x2 = int((linesss[i][0][3] - linesss[i][0][2]) / 2 + linesss[i][0][2]); //cy
-
-      x3 = int((linesss[i][m][1] - linesss[i][m][0]) / 2 + linesss[i][m][0]); //cx
-      x4 = int((linesss[i][m][3] - linesss[i][m][2]) / 2 + linesss[i][m][2]); //cy
-      mmax = Distance(x1, x2, x3, x4);
-      if (max < mmax)
-      {
-        max = mmax;
-        max_num = i;
-      }
-    }
-    if (linesss.size() != 0)
+    RotatedRect minRect = minAreaRect(contours[a_n]);
+    Point2f rect_points[4];
+    minRect.points(rect_points);
+    py::list tmps;
+    tmps.append(int(rect_points[0].x));
+    tmps.append(int(rect_points[0].y));
+    tmps.append(int(rect_points[1].x));
+    tmps.append(int(rect_points[1].y));
+    tmps.append(int(rect_points[2].x));
+    tmps.append(int(rect_points[2].y));
+    tmps.append(int(rect_points[3].x));
+    tmps.append(int(rect_points[3].y));
+    return_val["rect"] = tmps;
+    return_val["pixels"] = area;
+    int cx, cy;
+    cx = int((((rect_points[0].x - rect_points[1].x) + (rect_points[2].x - rect_points[1].x)) / 2) + rect_points[1].x);
+    cy = int((((rect_points[0].y - rect_points[1].y) + (rect_points[2].y - rect_points[1].y)) / 2) + rect_points[1].y);
+    return_val["cx"] = cx;
+    return_val["cy"] = cy;
+    int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
+    int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
+    float x1, y1, k;
+    if (tmp1 > tmp2)
     {
-      if (linesss[max_num].size() < 2) //点数检查
-      {
-        return return_line;
-      }
+      x1 = rect_points[1].x - rect_points[0].x;
+      y1 = rect_points[1].y - rect_points[0].y;
+      k = atan(y1 / x1);
     }
     else
     {
-      return return_line;
+      x1 = rect_points[3].x - rect_points[0].x;
+      y1 = rect_points[3].y - rect_points[0].y;
+      k = atan(y1 / x1);
     }
-    for (int i = 0; i < linesss[max_num].size(); i++)
-    {
-      x_max[i] = int((linesss[max_num][i][1] - linesss[max_num][i][0]) / 2 + linesss[max_num][i][0]); //cx
-      x_min[i] = int((linesss[max_num][i][3] - linesss[max_num][i][2]) / 2 + linesss[max_num][i][2]); //cy
-    }
-
-    float kkk = 0.0;
-    float bbb = 0.0;
-    float xxx = 0.0;
-    LineFitLeastSquares(x_max, x_min, linesss[max_num].size(), &kkk, &bbb,&xxx);
-    return_line.push_back(kkk);
-    return_line.push_back(bbb);
-    return_line.push_back(float(max));
-    return_line.push_back(float(xxx));
-
-    return return_line;
+    return_val["rotation"] = k;
+    return std::move(return_val);
   }
 };
 

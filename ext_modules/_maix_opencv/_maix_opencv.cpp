@@ -26,6 +26,13 @@ class _v83x_opencv
 
 private:
   /* data */
+  int Distance(int x1, int y1, int x2, int y2)
+  {
+    int x = abs(x1 - x2);
+    int y = abs(y1 - y2);
+    return int(round(sqrt(x * x + y * y)));
+  }
+
 public:
   void set_ui(py::bytes &argb)
   {
@@ -126,51 +133,74 @@ public:
     return py::bytes((char *)input.data, size);
   }
 
-  py::list find_blob(py::bytes &rgb, vector<int> &hsv_da)
+  //  不可变数据（3 个）：Number（数字）、String（字符串）、Tuple（元组）；
+  // 可变数据（3 个）：List（列表）、Dictionary（字典）、Set（集合）。
+  // [{"x":54, "y":32, "w":158, "h":164, "pixels":14197, "cx":131, "cy":116, "rotation":0.934584, "code":1, "count":1, "perimeter":707, "roundness":0.718467}]
+  py::list find_blob(py::bytes &rgb, vector<int> &hsv_da, int tilt)
   {
+    py::list return_val;
     string tmp = static_cast<string>(rgb);
     cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
     Mat hsv, mask;
     cvtColor(input, hsv, COLOR_RGB2HSV);
     inRange(hsv, Scalar(hsv_da[0], hsv_da[1], hsv_da[2]), Scalar(hsv_da[3], hsv_da[4], hsv_da[5]), mask);
-    // cout << hsv_da <<endl;
+
     Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
     morphologyEx(mask, mask, MORPH_OPEN, se);
     vector<vector<Point>> contours;
     vector<Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
-
-    py::list out;
+    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+    if(contours.size() == 0)
+    {
+        return return_val;
+    }
 
     for (int i = 0; i < contours.size(); i++)
     {
-      py::list tmp;
+      py::dict val;
+      Rect rects = boundingRect(contours[i]);
+      val["x"] = int(rects.x);
+      val["y"] = int(rects.y);
+      val["w"] = int(rects.width);
+      val["h"] = int(rects.height);
 
-      int x_max = 0, x_min = 1000, y_max = 0, y_min = 1000;
+      val["pixels"] = int(contourArea(contours[i]));
+      val["cx"] = int(rects.x + rects.width / 2);
+      val["cy"] = int(rects.y + rects.height / 2);
 
-      for (int j = 0; j < contours[i].size(); j++)
+      if (tilt)
       {
-        if (x_max < contours[i][j].x)
-          x_max = contours[i][j].x;
-        if (x_min > contours[i][j].x)
-          x_min = contours[i][j].x;
-        if (y_max < contours[i][j].y)
-          y_max = contours[i][j].y;
-        if (y_min > contours[i][j].y)
-          y_min = contours[i][j].y;
+
+        RotatedRect minRect = minAreaRect(contours[i]);
+        Point2f rect_points[4];
+        minRect.points(rect_points);
+        py::tuple tmp3 = py::make_tuple(rect_points[0].x,rect_points[0].y, rect_points[1].x, rect_points[1].y, rect_points[2].x, rect_points[2].y, rect_points[3].x, rect_points[3].y);
+        val["tilt_Rect"] = tmp3;
+        int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
+        int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
+        float x1, y1, k;
+        if (tmp1 > tmp2)
+        {
+          x1 = rect_points[1].x - rect_points[0].x;
+          y1 = rect_points[1].y - rect_points[0].y;
+          k = atan(y1 / x1);
+        }
+        else
+        {
+          x1 = rect_points[3].x - rect_points[0].x;
+          y1 = rect_points[3].y - rect_points[0].y;
+          k = atan(y1 / x1);
+        }
+
+        val["rotation"] = k;
+
       }
-
-      tmp.append(x_min);
-      tmp.append(y_min);
-      tmp.append(x_max);
-      tmp.append(y_max);
-
-      out.append(tmp);
+      return_val.append(val);
     }
-    return std::move(out);
+
+    return return_val;
   }
 
-  // [{"x":54, "y":32, "w":158, "h":164, "pixels":14197, "cx":131, "cy":116, "rotation":0.934584, "code":1, "count":1, "perimeter":707, "roundness":0.718467}]
   py::list find_ball(py::bytes &rgb, vector<int> &hsv_da)
   {
     string tmp = static_cast<string>(rgb);
@@ -223,13 +253,6 @@ public:
     }
     return std::move(out);
   }
-  int Distance(int x1, int y1, int x2, int y2)
-  {
-    int x = abs(x1 - x2);
-    int y = abs(y1 - y2);
-    return int(round(sqrt(x * x + y * y)));
-  }
-
   py::dict find_line(py::bytes &rgb)
   {
     Mat src_gray, dst;
@@ -284,7 +307,6 @@ public:
         a_n = i;
       }
     }
-
     RotatedRect minRect = minAreaRect(contours[a_n]);
     Point2f rect_points[4];
     minRect.points(rect_points);
@@ -334,7 +356,7 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("get_vi", &_v83x_opencv::get_vi)
       .def("set_ui", &_v83x_opencv::set_ui)
       .def("opencv_test", &_v83x_opencv::opencv_test)
-      .def("find_blob", &_v83x_opencv::find_blob)
+      .def("find_blob", &_v83x_opencv::find_blob, py::arg("rgb"), py::arg("hsv_da"), py::arg("tilt") = 0)
       .def("find_ball", &_v83x_opencv::find_ball)
       .def("find_line", &_v83x_opencv::find_line);
 }

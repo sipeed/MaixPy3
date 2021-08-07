@@ -247,6 +247,8 @@ _maix_py_modules = [
 - [pyserial](https://github.com/pyserial/pyserial)
 - [Pillow](https://github.com/python-pillow/Pillow)
 - [numpy](https://github.com/numpy/numpy)
+- [opencv](https://github.com/opencv/opencv)
+- [ncnn](https://github.com/Tencent/ncnn)
 - [opencv-python](https://github.com/opencv/opencv-python)
 - [ipython](https://github.com/junhuanchen/ipython)
 - [rtsp-rtp-stream](https://github.com/gabrieljablonski/rtsp-rtp-stream)

@@ -1,6 +1,8 @@
 import pyaudio
-from maix import display
+from maix import display, camera
 import av
+
+display.show(camera.capture())
 
 try:
     # recommend flv

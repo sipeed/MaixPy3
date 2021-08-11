@@ -162,41 +162,56 @@ public:
     {
         frame_t *frame = this->ui;
         std::string value = static_cast<std::string>(argb);
-        const int frame_size = frame->size.w * frame->size.h * 4;
-        if (frame_size == value.length())
+        void *tmp = this->vo->get_frame(this->vo, VO_UI);
+        if (tmp != NULL)
         {
-            void *tmp = this->vo->get_frame(this->vo, VO_UI);
-            if (tmp != NULL)
+            const int frame_size = frame->size.w * frame->size.h;
+            if (frame_size * 4 == value.length())
             {
                 // bgra > rgba
                 uint32_t *rgba = (uint32_t *)frame->buf, *bgra = (uint32_t *)value.c_str();
                 for (int i = 0, sum = frame->size.w * frame->size.h; i != sum; i++)
                 {
-                    rgba[i] = (bgra[i] & 0xFF000000) |         // ______AA
-                              ((bgra[i] & 0x00FF0000) >> 16) | // BB______
-                              (bgra[i] & 0x0000FF00) |         // __GG____
-                              ((bgra[i] & 0x000000FF) << 16);  // ____RR__
+                    rgba[i] =   (bgra[i] & 0xFF000000) |         // ______AA
+                                ((bgra[i] & 0x00FF0000) >> 16) | // BB______
+                                (bgra[i] & 0x0000FF00) |         // __GG____
+                                ((bgra[i] & 0x000000FF) << 16);  // ____RR__
                 }
-                // memcpy(frame->buf, value.c_str(), frame_size); // bgra
-                uint32_t *phy = NULL, *vir = NULL;
-                this->vo->frame_addr(this->vo, tmp, &vir, &phy);
-                if (this->vo_dir)
+            }
+            else if (frame_size * 3 == value.length())
+            {
+                // rgb > rgba
+                uint32_t *rgba = (uint32_t *)frame->buf;
+                uint8_t *rgb = (uint8_t *)value.c_str();
+                for (int i = 0, sum = frame->size.w * frame->size.h; i != sum; i++)
                 {
-                    if (frame->ion)
-                    {
-                        _g2d_argb_rotate((void *)frame_phy(frame->buf), (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
-                    }
-                    else
-                    {
-                        g2d_argb_rotate((uint32_t *)frame->buf, (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
-                    }
+                    rgba[i] = (rgb[i] << 8) & (rgb[i + 1] << 16) & (rgb[i] << 24) & 0xFF;
+                }
+            }
+            else
+            {
+                return;
+            }
+            // memcpy(frame->buf, value.c_str(), frame_size); // bgra
+            uint32_t *phy = NULL, *vir = NULL;
+            this->vo->frame_addr(this->vo, tmp, &vir, &phy);
+            if (this->vo_dir)
+            {
+                if (frame->ion)
+                {
+                    _g2d_argb_rotate((void *)frame_phy(frame->buf), (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
                 }
                 else
                 {
-                    memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 4);
+                    g2d_argb_rotate((uint32_t *)frame->buf, (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
                 }
-                this->vo->set_frame(this->vo, tmp, VO_UI);
             }
+            else
+            {
+                memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 4);
+            }
+            this->vo->set_frame(this->vo, tmp, VO_UI);
+
         }
     }
 

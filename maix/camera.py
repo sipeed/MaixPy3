@@ -52,10 +52,12 @@ try:
                 else:
                     self.cam.resize(size[0], size[1])
 
-            def read(self, video_num=1, show=True):
+            def read(self, video_num=1, show=True, skip_frame=10):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
+                    for i in range(skip_frame):
+                        self.read()
                 if self.cam:
                     frame = self.cam.get(show)
                     if len(frame) == 2:

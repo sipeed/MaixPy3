@@ -39,12 +39,15 @@ def set_window(size=(240, 240)):
     __width__, __height__ = size
     __display__ = Image.new("RGB", size, (0, 0, 0))
 
-def get_draw(): # ImageDraw
+def get_draw():
     from PIL import ImageDraw
     global __display__
     if __display__:
-        return ImageDraw.Draw(__display__)
+        tmp = ImageDraw.Draw(__display__)
+        tmp.paste = __display__.paste
+        return tmp
     return None
+
 
 def __thumbnail__(src, dst):
     w, h = src.size

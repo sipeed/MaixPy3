@@ -297,6 +297,31 @@ public:
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 
+    int resize(int w, int h, int i)
+    {
+        if (this->inited && this->vi[i]->width != w && this->vi[i]->height != h)
+        {
+            if (NULL != this->vi[i])
+                libmaix_cam_destroy(&this->vi[i]);
+            if (NULL != this->fm[i])
+                frame_del(&this->fm[i]);
+            if (NULL != this->y2r[i])
+                libmaix_image_destroy(&this->y2r[i]);
+            this->vi[i] = libmaix_cam_create(i, w, h, 1, 0);
+            if (NULL == this->vi[i])
+                return exit();
+            this->fm[i] = frame_new(VI_YUV420, {0, 0, w, h}, i == 0 ? this->vo_dir : 0);
+            if (NULL == this->fm[i])
+                return exit();
+            this->y2r[i] = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+            if (NULL == this->y2r[i])
+                return exit();
+            this->vi[i]->start_capture(this->vi[i]);
+            return 1;
+        }
+        return 0;
+    }
+
     int init(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir)
     {
         if (!this->inited)
@@ -400,5 +425,6 @@ PYBIND11_MODULE(_maix_vivo, m)
         .def(pybind11::init<int, int, int, int, int, int>(),
              py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
         .def("get", &_v83x_vivo::get, py::arg("show") = 1)
+        .def("resize", &_v83x_vivo::resize, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 1)
         .def("set", &_v83x_vivo::set);
 }

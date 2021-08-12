@@ -49,6 +49,8 @@ try:
 
                     print('[camera] config input size(%d, %d)' %
                         (self.width(), self.height()))
+                else:
+                    self.cam.resize(size[0], size[1])
 
             def read(self, video_num=1, show=True):
                 if self.cam == None:

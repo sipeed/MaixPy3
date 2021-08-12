@@ -7,9 +7,24 @@ font = ImageFont.truetype("/home/res/baars.ttf", 20, encoding="unic")
 
 camera.config((224, 224))
 
-while True:
-  print("input ai img", len(camera.read()) == 224 * 224 * 3) # camera.capture()
-  draw = display.get_draw()
-  draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # bgr
-  display.show()
-  # display.clear()
+print("input ai img", len(camera.read()) == 224 * 224 * 3) # camera.capture()
+draw = display.get_draw()
+draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # rgb
+display.show()
+# display.clear()
+
+camera.config((240, 240))
+
+print("input ai img", len(camera.read()) == 240 * 240 * 4) # camera.capture()
+draw = display.get_draw()
+draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # rgb
+display.show()
+# display.clear()
+
+camera.config((224, 224))
+
+print("input ai img", len(camera.read()) == 224 * 224 * 3) # camera.capture()
+draw = display.get_draw()
+draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # rgb
+display.show()
+# display.clear()

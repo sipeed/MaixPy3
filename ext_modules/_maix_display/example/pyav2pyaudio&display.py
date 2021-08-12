@@ -1,7 +1,16 @@
 import pyaudio
-from maix import display
+from maix import display , camera
 import av
+# camera.config()
 
+import signal
+def handle_signal(signum,frame):
+    exit(0)
+signal.signal(signal.SIGINT,handle_signal)
+
+tmp = camera.capture()
+tmp = camera.capture()
+tmp = camera.capture()
 try:
     # recommend flv
     # ffmpeg -r 30 -i bad_apple.mp4 -s 240x240 output.mp4

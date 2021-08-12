@@ -158,34 +158,39 @@ class _v83x_vivo
 private:
     /* data */
 public:
-    void set(py::bytes &argb)
+    void set(py::bytes &bytes)
     {
         frame_t *frame = this->ui;
-        std::string value = static_cast<std::string>(argb);
+        std::string value = static_cast<std::string>(bytes);
         void *tmp = this->vo->get_frame(this->vo, VO_UI);
         if (tmp != NULL)
         {
             const int frame_size = frame->size.w * frame->size.h;
             if (frame_size * 4 == value.length())
             {
-                // bgra > rgba
-                uint32_t *rgba = (uint32_t *)frame->buf, *bgra = (uint32_t *)value.c_str();
-                for (int i = 0, sum = frame->size.w * frame->size.h; i != sum; i++)
+                // puts("rgba");
+                // rgba > abgr > argb
+                uint32_t *argb = (uint32_t *)frame->buf, *abgr = (uint32_t *)value.c_str();
+                for (int i = 0, sum = frame_size; i != sum; i++)
                 {
-                    rgba[i] =   (bgra[i] & 0xFF000000) |         // ______AA
-                                ((bgra[i] & 0x00FF0000) >> 16) | // BB______
-                                (bgra[i] & 0x0000FF00) |         // __GG____
-                                ((bgra[i] & 0x000000FF) << 16);  // ____RR__
+                    argb[i] =   (abgr[i] & 0xFF000000) |         // ______AA
+                                ((abgr[i] & 0x00FF0000) >> 16) | // BB______
+                                (abgr[i] & 0x0000FF00) |         // __GG____
+                                ((abgr[i] & 0x000000FF) << 16);  // ____RR__
                 }
             }
             else if (frame_size * 3 == value.length())
             {
-                // rgb > rgba
-                uint32_t *rgba = (uint32_t *)frame->buf;
+                // puts("rgb");
+                // rgb > argb
+                uint32_t *argb = (uint32_t *)frame->buf;
                 uint8_t *rgb = (uint8_t *)value.c_str();
-                for (int i = 0, sum = frame->size.w * frame->size.h; i != sum; i++)
+                for (int i = 0, sum = frame_size; i != sum; i++)
                 {
-                    rgba[i] = (rgb[i] << 8) & (rgb[i + 1] << 16) & (rgb[i] << 24) & 0xFF;
+                    uint32_t tmp = *rgb << 16;  // ____BB
+                    rgb++, tmp |= *rgb << 8;    // __GG__
+                    rgb++, tmp |= *rgb;         // RR____
+                    rgb++, argb[i] = 0xFF000000 | tmp; // ARGB
                 }
             }
             else

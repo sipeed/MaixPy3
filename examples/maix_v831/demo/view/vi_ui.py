@@ -14,7 +14,7 @@ class vi_ui(events.Events):
 
     def __set_ui(self, draw):
         import time
-        draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0))
+        draw.text((0, 230), u'time:%s' % time.time(), (255, 0, 0))
 
     def __get_vi(self, rgb24):
         print('get_vi', len(rgb24))

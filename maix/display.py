@@ -6,6 +6,7 @@ from PIL import Image
 # remote jupyter options
 remote = None
 
+
 def hook(clear_output=True):
   global remote
   try:
@@ -34,10 +35,10 @@ def tobytes():
     return __display__.tobytes()
 
 
-def set_window(size=(240, 240)):
-    global __display__, __width__, __height__
-    __width__, __height__ = size
-    __display__ = Image.new("RGB", size, (0, 0, 0))
+# def set_window(size=(240, 240)):
+#     global __display__, __width__, __height__
+#     __width__, __height__ = size
+#     __display__ = Image.new("RGB", size, (0, 0, 0))
 
 def get_draw():
     from PIL import ImageDraw
@@ -77,37 +78,25 @@ except ModuleNotFoundError as e:
 except Exception as e:
     pass
 
-_local_show = True
 
-
-def local_show(value=True):
-  global _local_show
-  _local_show = value
-
-
-def show(img=None, box=(0, 0), fast=True):
+def show(img=None, box=(0, 0)):
     global __display__, local_show
     if img is None:
         img = __display__
-    if img:
-      if __fastview__ and fast:
-        __display__ = img
-        if _local_show:
-          __draw__(img)  # underlying optimization
-      else:
+    if __fastview__:
+        __draw__(img)  # underlying optimization
+    else:
         if isinstance(img, bytes):
-          img = Image.frombytes("RGB", box, img)
-          __thumbnail__(img, __display__)
-          __display__.paste(img, (0, 0))
+            img = Image.frombytes("RGB", box, img)
+            __thumbnail__(img, __display__)
+            __display__.paste(img, (0, 0))
         elif isinstance(img, Image.Image):
-          __thumbnail__(img, __display__)
-          __display__.paste(img, box)
-        if _local_show:
-          __display__.show()
-        
+            __thumbnail__(img, __display__)
+            __display__.paste(img, box)
+        __display__.show()
 
 
-def fill(box=(0, 0), color=(0, 0, 0)):
+def fill(box=(0, 0), color=(0, 0, 0, 0)):
     global __display__
     if len(box) == 2:
         box = box + __display__.size
@@ -115,7 +104,7 @@ def fill(box=(0, 0), color=(0, 0, 0)):
     show(__display__)
 
 
-def clear(c=(0, 0, 0)):
+def clear(c=(0, 0, 0, 0)):
     global __display__
     fill(color=c)
 

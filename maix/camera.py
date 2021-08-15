@@ -29,6 +29,7 @@ try:
                             elif isinstance(img, Image.Image):
                                 display.get_draw().paste(img)
                                 display.__fastview__.set(display.__display__.tobytes())
+                                display.get_draw().paste((0, 0, 0, 0), (0, 0) + img.size) # clear
                         display.__draw__ = __new_draw__
 
                     except ModuleNotFoundError as e:

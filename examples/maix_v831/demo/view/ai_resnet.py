@@ -55,12 +55,12 @@ class bind:
                 self.result[0], self.result[1], labels[self.result[1]]), (255, 0, 0), common_font)
 
     def on_data(self, rgb24):
-        # self.tmp += 1
-        # if self.tmp % 4 == 0:
-        from maix import nn
-        # if len(rgb24) == 224*224*3:  # remove it!
-        out = self.npu.forward(rgb24, quantize=True)
-        out = nn.F.softmax(out)
-        if out.max() > 0.1:
-            self.result = (out.max(), out.argmax())
-            # print(self.result)
+        self.tmp += 1
+        if self.tmp % 3 == 0:
+            from maix import nn
+            if len(rgb24) == 224*224*3:  # remove it!
+                out = self.npu.forward(rgb24, quantize=True)
+                out = nn.F.softmax(out)
+                if out.max() > 0.1:
+                    self.result = (out.max(), out.argmax())
+                    # print(self.result)

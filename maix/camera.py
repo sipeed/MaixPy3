@@ -42,16 +42,20 @@ try:
                 else:
                     self.cam.resize(size[0], size[1])
 
-            def read(self, video_num=1, show=True, skip_frame=10):
+            def read(self, video_num=1, show=True, skip_frame=5):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                     for i in range(skip_frame):
-                        self.read()
+                        frame = self.cam.get(False)
                 if self.cam:
                     frame = self.cam.get(show)
                     if len(frame) == 2:
                         return frame[video_num]  # bytes 240*240*3, bytes 224*224*3
+                    # try again if fail
+                    frame = self.cam.get(show)
+                    if len(frame) == 2:
+                        return frame[video_num]
                 return None
 
             def __del__(self):

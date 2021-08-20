@@ -271,7 +271,6 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
       }
       return_val.append(val);
     }
-
     return return_val;
 }
   //  不可变数据（3 个）：Number（数字）、String（字符串）、Tuple（元组）；

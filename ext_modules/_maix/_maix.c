@@ -89,7 +89,7 @@ static PyObject *PyJpegCompress(char *inData, int width, int height, int channel
   jpeg_set_defaults(&cinfo);
   jpeg_set_quality(&cinfo, quality, TRUE); // default 75
   jpeg_start_compress(&cinfo, TRUE);
-  int row_stride = width * 3;
+  int row_stride = width * channels;
   while (cinfo.next_scanline < cinfo.image_height)
   {
     row_pointer[0] = (uint8_t *)&inData[cinfo.next_scanline * row_stride];

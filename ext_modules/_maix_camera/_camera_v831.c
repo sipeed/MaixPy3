@@ -32,7 +32,7 @@ static PyObject *V831Camera_close(V831CameraObject *self)
     }
     
     libmaix_image_module_deinit();
-    libmaix_cam_exit();
+    libmaix_camera_module_deinit();
 
     Py_RETURN_NONE;
 }
@@ -70,7 +70,7 @@ static int V831Camera_init(V831CameraObject *self, PyObject *args, PyObject *kwd
         return -1;
     }
 
-    libmaix_cam_init();
+    libmaix_camera_module_init();
     libmaix_image_module_init();
     self->yuv_img = libmaix_image_create(self->width, self->height, LIBMAIX_IMAGE_MODE_YUV420SP_NV21, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if(NULL != self->yuv_img)

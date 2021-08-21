@@ -80,7 +80,7 @@ except Exception as e:
 
 
 def show(img=None, box=(0, 0)):
-    global __display__, local_show
+    global __display__
     if img is None:
         img = __display__
     if __fastview__:

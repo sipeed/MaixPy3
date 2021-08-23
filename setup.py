@@ -46,7 +46,9 @@ setup(
       'Programming Language :: Python :: 3',
   ],
   extras_require={"test": "pytest"},
-  entry_points={"console_scripts": ["maixpy3_rpycs=maix.rpycs:start"]},
+  entry_points={
+    "console_scripts": ["maixpy3_mjpeg=maix.mjpeg:start"]
+  },
   include_package_data=True,
   package_data = {
       '': ['*.so'],

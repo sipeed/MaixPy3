@@ -137,7 +137,8 @@ if __name__ == '__main__':
     # print(image.tobytes())
 
     from PIL import Image, ImageDraw
-    image = Image.new("RGB", (320, 240), "#FFFFFF")
+    image = Image.new("RGBA", (40, 40), "#FFFFFFFF")
+    
     draw = ImageDraw.Draw(image)
     draw.text((0, 0), u'hello world', (0, 0, 0))
     # image.show()

@@ -58,9 +58,10 @@ class bind:
         self.tmp += 1
         if self.tmp % 3 == 0:
             from maix import nn
-            if len(rgb24) == 224*224*3:  # remove it!
-                out = self.npu.forward(rgb24, quantize=True)
-                out = nn.F.softmax(out)
-                if out.max() > 0.1:
-                    self.result = (out.max(), out.argmax())
-                    # print(self.result)
+            from maix import camera
+            camera.config(size=(224, 224))
+            out = self.npu.forward(rgb24, quantize=True)
+            out = nn.F.softmax(out)
+            if out.max() > 0.1:
+                self.result = (out.max(), out.argmax())
+                # print(self.result)

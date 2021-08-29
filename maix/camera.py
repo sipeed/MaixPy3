@@ -42,7 +42,7 @@ try:
                 else:
                     self.cam.resize(size[0], size[1])
 
-            def read(self, video_num=1, show=True, skip_frame=5):
+            def read(self, video_num=1, show=True, skip_frame=8):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
@@ -108,11 +108,22 @@ try:
     class CvMaixVideo(MaixVideo):
 
         def __init__(self, source=0):
-            super(CvMaixVideo, self).__init__((640, 480))
             self.source = source
-            self.cam = VideoCapture(0)
+            self.cam = None
+
+        def config(self, size=(640, 480), source=None):
+            if self.cam == None:
+                super(CvMaixVideo, self).__init__(size)
+                if source:
+                    self.source = source
+                self.cam = VideoCapture(self.source)
+                print('[camera] config input size(%s, %d, %d)' %
+                    (self.source, self.width(), self.height()))
 
         def read(self):
+            if self.cam == None:
+                print('[camera] run config(size=(w, h)) before capture.')
+                self.config()
             ret, frame = self.cam.read()
             if ret:
                 bgr = frame[..., ::-1]  # bgr2rgb
@@ -120,7 +131,9 @@ try:
             return None
 
         def __del__(self):
-            self.cam.release()
+            if self.cam:
+                self.cam.release()
+                self.cam = None
 
     camera = CvMaixVideo()
 except Exception as e:

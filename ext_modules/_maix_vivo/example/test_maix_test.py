@@ -15,7 +15,7 @@ display.show()
 
 camera.config((240, 240))
 
-print("input ai img", len(camera.read()) == 240 * 240 * 4) # camera.capture()
+print("input ui img", len(camera.read()) == 240 * 240 * 3) # camera.capture()
 draw = display.get_draw()
 draw.text((10, 10), u'time:%s' % time.time(), (255, 0, 0), font) # rgb
 display.show()

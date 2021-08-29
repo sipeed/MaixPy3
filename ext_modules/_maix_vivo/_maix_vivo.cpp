@@ -406,7 +406,7 @@ public:
                 libmaix_image_destroy(&this->yuv2rgb);
             if (NULL != this->vo)
                 libmaix_vo_destroy(&this->vo);
-            usleep(100000); // wait 1s to deinit
+            usleep(200000); // wait 1s to deinit
             libmaix_image_module_deinit();
             libmaix_camera_module_deinit();
             this->inited = false;

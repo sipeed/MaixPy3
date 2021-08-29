@@ -25,7 +25,8 @@ try:
         int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
     __env_config__ = True
 except Exception as e:
-    print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
+    pass
+    # print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
     __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
 

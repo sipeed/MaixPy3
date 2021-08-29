@@ -8,9 +8,9 @@ from threading import Thread
 from rpyc.utils.server import ThreadedServer
 from rpyc.core.service import SlaveService
 
-from .utils.video_stream import VideoStream
-from .utils.rtsp_packet import RTSPPacket
-from .utils.rtp_packet import RTPPacket
+from .video_stream import VideoStream
+from .rtsp_packet import RTSPPacket
+from .rtp_packet import RTPPacket
 
 import logging
 logging.basicConfig(level=logging.WARNING)

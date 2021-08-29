@@ -20,7 +20,8 @@ class vi_ui(events.Events):
         print('get_vi', len(rgb24))
 
     def __enter__(self):
-        # camera.config(size=(240, 240))
+        from maix import camera
+        camera.config(size=(240, 240))
         self.on_get_vi += self.__get_vi
         self.on_set_ui += self.__set_ui
         return self

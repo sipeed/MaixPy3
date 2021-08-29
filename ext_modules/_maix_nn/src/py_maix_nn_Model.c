@@ -264,7 +264,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         self->inputs_len = inputs_len;
         self->outputs_len = outputs_len;
-        self->nn = libmaix_nn_creat();
+        self->nn = libmaix_nn_create();
         if(!self->nn)
         {
             PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");

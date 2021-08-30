@@ -80,17 +80,17 @@ class BytesImage(Image):
 
 class FileImageHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        logging.info('GET response code: 200')
+        logging.debug('GET response code: 200')
         self.send_response(200)
         # Response headers (multipart)
         for k, v in request_headers().items():
             self.send_header(k, v)
-            logging.info('GET response header: ' + k + '=' + v)
+            logging.debug('GET response header: ' + k + '=' + v)
         # Multipart content
         try:
           self.serve_images()
-        except Exception as e:
-          logging.info('run: ' + str(e)) # BrokenPipeError: [Errno 32] Broken pipe
+        except KeyboardInterrupt as e:
+          logging.debug('run: ' + str(e)) # BrokenPipeError: [Errno 32] Broken pipe
 
     def serve_image(self, image: Image):
         # Part boundary string
@@ -100,10 +100,10 @@ class FileImageHandler(BaseHTTPRequestHandler):
         # Part headers
         for k, v in image.image_headers().items():
             self.send_header(k, v)
-            logging.info('GET response header: %s = %s' % (k, v))
+            logging.debug('GET response header: %s = %s' % (k, v))
         self.end_headers()
         # Part binary
-        # logging.info('GET response image: ' + filename)
+        # logging.debug('GET response image: ' + filename)
         try:
             for chunk in image.get_byte_generator():
                 self.wfile.write(chunk)
@@ -114,10 +114,10 @@ class FileImageHandler(BaseHTTPRequestHandler):
         t_start = time.time()
         for i, filename in enumerate(glob('img/*.jpg')):
             image = FileImage(filename)
-            logging.info('GET response image: ' + filename)
+            logging.debug('GET response image: ' + filename)
             self.serve_image(image)
             fps = (i + 1) / (time.time() - t_start)
-            logging.info("served image %d, overall fps: %0.3f" % (i + 1, fps))
+            logging.debug("served image %d, overall fps: %0.3f" % (i + 1, fps))
 
     def log_message(self, format, *args):
         return
@@ -136,7 +136,7 @@ def BytesImageHandlerFactory(q: queue.Queue):
                 image = self.queue.get()
                 self.serve_image(image)
                 fps = (i + 1) / (time.time() - t_start)
-                logging.info("served image %d, overall fps: %0.3f" %
+                logging.debug("served image %d, overall fps: %0.3f" %
                              (i + 1, fps))
                 i += 1
 
@@ -153,16 +153,13 @@ def MaixImageHandlerFactory(q: queue.Queue):
             super().__init__(request, client_address, server)
 
         def serve_images(self):
-            i = 0
-            t_start = time.time()
-            while True:
-                image = self.queue.get()
-                self.serve_image(image)
-                fps = (i + 1) / (time.time() - t_start)
-                logging.info("served image %d, overall fps: %0.3f" %
-                             (i + 1, fps))
-                i += 1
-
+            try:
+                while True:
+                    image = self.queue.get()
+                    self.serve_image(image)
+            except KeyboardInterrupt as e:
+              pass
+              
         def add_image(self, image: Image):
             self.queue.put(image)
 
@@ -181,7 +178,7 @@ class MjpgServerThread(Thread):
       self.server = ThreadingHTTPServer((self.name, self.port), self.handler)
       self.server.serve_forever()
     except Exception as e:
-      # logging.info('run: ' + str(e)) # [Errno 98] Address already in use
+      # logging.debug('run: ' + str(e)) # [Errno 98] Address already in use
       pass
 
   def __del__(self):
@@ -226,7 +223,7 @@ def start_mjpg(size=8):
 
 def start(host='0.0.0.0', mjpg=18811, rpyc=18812, debug=False):
   if debug:
-    logging.getLogger().setLevel(level=logging.info)
+    logging.getLogger().setLevel(level=logging.DEBUG)
 
   global HostName, MjpgPort, RpycPort
   logging.info('start %s %s %s %s' % (__file__, host, mjpg, rpyc))
@@ -238,7 +235,7 @@ def start(host='0.0.0.0', mjpg=18811, rpyc=18812, debug=False):
           SlaveService, hostname=HostName, port=RpycPort, reuse_addr=True)
       rpyc_server.start()
   except OSError as e:
-    # logging.info('[%s] OSError: %s' % (__file__, str(e))) # [Errno 98] Address already in use
+    # logging.debug('[%s] OSError: %s' % (__file__, str(e))) # [Errno 98] Address already in use
     exit(0)
 
   global MjpgSrv
@@ -326,7 +323,7 @@ if __name__ == '__main__':
 
           for filename in glob('img/*.jpg'):
               image = FileImage(filename)
-              logging.info('GET response image: ' + filename)
+              logging.debug('GET response image: ' + filename)
               image_queue.put(image)
           #   wait until the current queue has been served before quiting
           while not image_queue.empty():

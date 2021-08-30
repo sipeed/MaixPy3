@@ -70,24 +70,25 @@ except Exception as e:
     pass
 
 
-def show(img=None, box=(0, 0)):
+def show(img=None, box=(0, 0), local_show=True):
     global __display__, remote
     if img is None:
         img = __display__
-    if __fastview__:
-        __draw__(img)  # underlying optimization
-    if remote:
+    if local_show:
+        if __fastview__:
+            __draw__(img)  # underlying optimization
+        else:
+            if isinstance(img, bytes):
+                img = Image.frombytes("RGB", box, img)
+                __thumbnail__(img, __display__)
+                __display__.paste(img, (0, 0))
+            elif isinstance(img, Image.Image):
+                __thumbnail__(img, __display__)
+                __display__.paste(img, box)
+            __display__.show()
+    if remote._media_display:
         from maix import mjpg
         mjpg.store_mjpg(img)
-    else:
-        if isinstance(img, bytes):
-            img = Image.frombytes("RGB", box, img)
-            __thumbnail__(img, __display__)
-            __display__.paste(img, (0, 0))
-        elif isinstance(img, Image.Image):
-            __thumbnail__(img, __display__)
-            __display__.paste(img, box)
-        __display__.show()
 
 
 def fill(box=(0, 0), color=(0, 0, 0, 0)):

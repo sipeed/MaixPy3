@@ -31,16 +31,6 @@ finally:
     __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
 
 
-def tobytes():
-    global __display__
-    return __display__.tobytes()
-
-
-# def set_window(size=(240, 240)):
-#     global __display__, __width__, __height__
-#     __width__, __height__ = size
-#     __display__ = Image.new("RGB", size, (0, 0, 0))
-
 def get_draw():
     from PIL import ImageDraw
     global __display__
@@ -81,11 +71,14 @@ except Exception as e:
 
 
 def show(img=None, box=(0, 0)):
-    global __display__
+    global __display__, remote
     if img is None:
         img = __display__
     if __fastview__:
         __draw__(img)  # underlying optimization
+    if remote:
+        from maix import mjpg
+        mjpg.store_mjpg(img)
     else:
         if isinstance(img, bytes):
             img = Image.frombytes("RGB", box, img)

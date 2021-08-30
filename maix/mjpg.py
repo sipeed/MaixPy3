@@ -77,47 +77,6 @@ class BytesImage(Image):
     def get_byte_generator(self):
         yield self.data
 
-class MaixImageHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        logging.info('GET response code: 200')
-        self.send_response(200)
-        # Response headers (multipart)
-        for k, v in request_headers().items():
-            self.send_header(k, v)
-            logging.info('GET response header: ' + k + '=' + v)
-        # Multipart content
-        import _maix
-        from maix import display
-        tmp = display.__display__
-        if tmp:
-            if (tmp.mode == 'RGB'):
-                frame = _maix.rgb2jpg(tmp.tobytes(), tmp.width, tmp.height)
-            elif (tmp.mode == 'RGBA'):
-                frame = _maix.rgb2jpg(tmp.convert("RGB").tobytes(), tmp.width, tmp.height)
-            image = BytesImage(frame)
-            self.serve_image(image)
-
-    def serve_image(self, image: Image):
-        # Part boundary string
-        self.end_headers()
-        self.wfile.write(bytes(boundary, 'utf-8'))
-        self.end_headers()
-        # Part headers
-        for k, v in image.image_headers().items():
-            self.send_header(k, v)
-            logging.info('GET response header: %s = %s' % (k, v))
-        self.end_headers()
-        # Part binary
-        # logging.info('GET response image: ' + filename)
-        try:
-            for chunk in image.get_byte_generator():
-                self.wfile.write(chunk)
-        except (ConnectionResetError, ConnectionAbortedError):
-            return
-
-    def log_message(self, format, *args):
-        return
-
 
 class FileImageHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -128,7 +87,10 @@ class FileImageHandler(BaseHTTPRequestHandler):
             self.send_header(k, v)
             logging.info('GET response header: ' + k + '=' + v)
         # Multipart content
-        self.serve_images()
+        try:
+          self.serve_images()
+        except Exception as e:
+          logging.info('run: ' + str(e)) # BrokenPipeError: [Errno 32] Broken pipe
 
     def serve_image(self, image: Image):
         # Part boundary string
@@ -175,13 +137,37 @@ def BytesImageHandlerFactory(q: queue.Queue):
                 self.serve_image(image)
                 fps = (i + 1) / (time.time() - t_start)
                 logging.info("served image %d, overall fps: %0.3f" %
-                              (i + 1, fps))
+                             (i + 1, fps))
                 i += 1
 
         def add_image(self, image: Image):
             self.queue.put(image)
 
     return BytesImageHandler
+
+
+def MaixImageHandlerFactory(q: queue.Queue):
+    class MaixImageHandler(FileImageHandler):
+        def __init__(self, request, client_address, server):
+            self.queue = q
+            super().__init__(request, client_address, server)
+
+        def serve_images(self):
+            i = 0
+            t_start = time.time()
+            while True:
+                image = self.queue.get()
+                self.serve_image(image)
+                fps = (i + 1) / (time.time() - t_start)
+                logging.info("served image %d, overall fps: %0.3f" %
+                             (i + 1, fps))
+                i += 1
+
+        def add_image(self, image: Image):
+            self.queue.put(image)
+
+    return MaixImageHandler
+
 
 class MjpgServerThread(Thread):
 
@@ -192,7 +178,7 @@ class MjpgServerThread(Thread):
 
   def run(self):
     try:
-      self.server = HTTPServer((self.name, self.port), self.handler)
+      self.server = ThreadingHTTPServer((self.name, self.port), self.handler)
       self.server.serve_forever()
     except Exception as e:
       # logging.info('run: ' + str(e)) # [Errno 98] Address already in use
@@ -204,15 +190,38 @@ class MjpgServerThread(Thread):
       self.server = None
 
 
-MjpgVar, HostName, MjpgPort, RpycPort = None, '0.0.0.0', 18811, 18812
+MjpgSrv, HostName, MjpgPort, RpycPort, MjpgQueue = None, '0.0.0.0', 18811, 18812, None
 
 
-def start_mjpg():
-  global MjpgVar
-  if MjpgVar == None or MjpgVar.is_alive() == False:
-    MjpgVar = MjpgServerThread(HostName, MjpgPort, MaixImageHandler)
-    MjpgVar.start()
-  return MjpgVar.is_alive()
+def store_mjpg(img):
+  global MjpgQueue
+  if MjpgQueue:
+      try:
+          from PIL import Image
+          if isinstance(img, bytes):
+              MjpgQueue.put(BytesImage(img))
+          elif isinstance(img, Image.Image):
+              import _maix
+              if (img.mode == 'RGB'):
+                  frame = _maix.rgb2jpg(img.tobytes(), img.width, img.height)
+              elif (img.mode == 'RGBA'):
+                  frame = _maix.rgb2jpg(img.convert(
+                      "RGB").tobytes(), img.width, img.height)
+              MjpgQueue.put(BytesImage(frame))
+      except KeyboardInterrupt as e:
+          print(e)
+
+
+def start_mjpg(size=8):
+  global MjpgSrv, MjpgQueue
+  if MjpgSrv == None or MjpgSrv.is_alive() == False:
+    MjpgQueue = queue.Queue(maxsize=size)
+    MjpgSrv = MjpgServerThread(HostName, MjpgPort, BytesImageHandlerFactory(q=MjpgQueue))
+    MjpgSrv.start()
+    from maix import display
+    if display.__display__:
+        store_mjpg(display.__display__)
+  return MjpgSrv.is_alive()
 
 
 def start(host='0.0.0.0', mjpg=18811, rpyc=18812, debug=False):
@@ -232,30 +241,113 @@ def start(host='0.0.0.0', mjpg=18811, rpyc=18812, debug=False):
     # logging.info('[%s] OSError: %s' % (__file__, str(e))) # [Errno 98] Address already in use
     exit(0)
 
-  global MjpgVar
-  MjpgVar.__del__()
+  global MjpgSrv
+  MjpgSrv.__del__()
 
 
+class MjpgReader():
+    """
+    MJPEG format
+
+    Content-Type: multipart/x-mixed-replace; boundary=--BoundaryString
+    --BoundaryString
+    Content-type: image/jpg
+    Content-Length: 12390
+
+    ... image-data here ...
+
+
+    --BoundaryString
+    Content-type: image/jpg
+    Content-Length: 12390
+
+    ... image-data here ...
+    """
+
+    def __init__(self, url: str):
+        self._url = url
+
+    def iter_content(self):
+        """
+        Raises:
+            RuntimeError
+        """
+        import io
+        import requests
+        r = requests.get(self._url, stream=True)
+
+        # parse boundary
+        content_type = r.headers['content-type']
+        index = content_type.rfind("boundary=")
+        assert index != 1
+        boundary = content_type[index+len("boundary="):] + "\r\n"
+        boundary = boundary.encode('utf-8')
+
+        rd = io.BufferedReader(r.raw)
+        while True:
+            self._skip_to_boundary(rd, boundary)
+            length = self._parse_length(rd)
+            yield rd.read(length)
+
+    def _parse_length(self, rd) -> int:
+        length = 0
+        while True:
+            line = rd.readline()
+            if line == b'\r\n':
+                return length
+            if line.startswith(b"Content-Length"):
+                length = int(line.decode('utf-8').split(": ")[1])
+                assert length > 0
+
+
+    def _skip_to_boundary(self, rd, boundary: bytes):
+        for _ in range(10):
+            if boundary in rd.readline():
+                break
+        else:
+            raise RuntimeError("Boundary not detected:", boundary)
+    
 if __name__ == '__main__':
-    def unit_test():
+  
+    start() # test rpyc & mjpg
+
+    def unit_test_s():
       from_files = False
       if from_files:
-            # from files
-            server = MjpgServerThread(HostName, MjpgPort)
-            server.start()
+          # from files
+          server = MjpgServerThread(HostName, MjpgPort)
+          server.start()
       else:
-            # from bytes; which could be coming from a bytestream or generated using e.g., opencv
-            image_queue = queue.Queue(maxsize=100)
-            handler_class = BytesImageHandlerFactory(q=image_queue)
-            server = MjpgServerThread(HostName, MjpgPort, handler_class)
-            server.start()
-                
-            for filename in glob('img/*.jpg'):
-                image = FileImage(filename)
-                logging.info('GET response image: ' + filename)
-                image_queue.put(image)
-            #   wait until the current queue has been served before quiting
-            while not image_queue.empty():
-                time.sleep(1)
-    # unit_test()
-    start()
+          # from bytes; which could be coming from a bytestream or generated using e.g., opencv
+          image_queue = queue.Queue(maxsize=100)
+          handler_class = BytesImageHandlerFactory(q=image_queue)
+          server = MjpgServerThread(HostName, MjpgPort, handler_class)
+          server.start()
+
+          for filename in glob('img/*.jpg'):
+              image = FileImage(filename)
+              logging.info('GET response image: ' + filename)
+              image_queue.put(image)
+          #   wait until the current queue has been served before quiting
+          while not image_queue.empty():
+              time.sleep(1)
+    # unit_test_s()
+    def unit_test_c():
+        mr = MjpgReader("http://127.0.0.1:18811")
+        try:
+          for content in mr.iter_content():
+            print(len(content))
+            
+            from PIL import Image
+            from io import BytesIO
+            tmp = Image.open(BytesIO(content))
+            tmp.show()
+            # import cv2
+            # import numpy as np
+            # i = cv2.imdecode(np.frombuffer(content, dtype=np.uint8), cv2.IMREAD_COLOR)
+            # cv2.imshow('i', i)
+            # if cv2.waitKey(1) == 27:
+            #     break
+        except ValueError as e:
+          print(e)
+    # unit_test_c()

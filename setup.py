@@ -47,7 +47,7 @@ setup(
   ],
   extras_require={"test": "pytest"},
   entry_points={
-    "console_scripts": ["maixpy3_mjpg=maix.mjpg:start"]
+    "console_scripts": ["maixpy3_rpycs=maix.mjpg:start"]
   },
   include_package_data=True,
   package_data = {

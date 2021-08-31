@@ -145,7 +145,6 @@ def BytesImageHandlerFactory(q: queue.Queue):
 
     return BytesImageHandler
 
-
 def MaixImageHandlerFactory(q: queue.Queue):
     class MaixImageHandler(FileImageHandler):
         def __init__(self, request, client_address, server):
@@ -158,7 +157,7 @@ def MaixImageHandlerFactory(q: queue.Queue):
                     image = self.queue.get()
                     self.serve_image(image)
             except KeyboardInterrupt as e:
-              pass
+                pass
               
         def add_image(self, image: Image):
             self.queue.put(image)
@@ -187,7 +186,7 @@ class MjpgServerThread(Thread):
       self.server = None
 
 
-MjpgSrv, HostName, MjpgPort, RpycPort, MjpgQueue = None, '0.0.0.0', 18811, 18812, None
+HostName, RpycPort, MjpgSrv, MjpgPort, MjpgQueue = '0.0.0.0', 18812, None, 18811, None
 
 
 def store_mjpg(img):

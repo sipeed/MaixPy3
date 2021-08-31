@@ -4,14 +4,14 @@ import os
 from PIL import Image
 
 # remote jupyter options
-remote, _remote_output = None, False
+remote, _remote_show = None, False
 
-def hook(stop_output=False, clear_output=True):
-  global remote, _remote_output
-  _remote_output = not stop_output
+def jupyter(show=False, clear=True):
   try:
+    global remote, _remote_show
+    _remote_show = show
     if remote != None:
-      remote.clear_output = clear_output
+      remote.clear_output = clear
       remote._start_display()
   except Exception as e:
     remote = None
@@ -70,8 +70,8 @@ except Exception as e:
     pass
 
 
-def show(img=None, box=(0, 0), local_show=True):
-    global __display__, _remote_output
+def show(img=None, box=(0, 0), local_show=True, remote_show=True):
+    global __display__, _remote_show
     if img is None:
         img = __display__
     if local_show:
@@ -86,7 +86,7 @@ def show(img=None, box=(0, 0), local_show=True):
                 __thumbnail__(img, __display__)
                 __display__.paste(img, box)
             __display__.show()
-    if _remote_output:
+    if remote_show and _remote_show:
         from maix import mjpg
         mjpg.store_mjpg(img)
 

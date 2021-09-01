@@ -22,7 +22,6 @@ PyDoc_STRVAR(maix_nn_decoder_yolo2_type_name, "Yolo2");
 PyDoc_STRVAR(maix_nn_app_classifier_type_name, "Classifier");
 extern PyTypeObject PyMaix_NN_Model_Type;
 extern PyTypeObject PyMaix_NN_Decoder_Yolo2_Type;
-extern PyTypeObject PyMaix_NN_app_Classifier_Type;
 extern struct PyModuleDef maix_nn_functional_module;
 extern struct PyModuleDef maix_nn_decoder_module;
 extern struct PyModuleDef maix_nn_app_module;

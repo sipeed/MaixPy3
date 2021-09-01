@@ -2,7 +2,7 @@ from maix import nn
 from PIL import Image, ImageDraw
 from maix import camera, display
 import time
-from maix.nn.app.classifier import Classifier
+from maix.nn.app.classifier import Classifier, load
 
 class_num = 3
 sample_num = 15
@@ -58,6 +58,11 @@ while 1:
                 print("train ...")
                 classifier.train()
                 print("train end ...")
+                print("test save")
+                classifier.save("m.classifier")
+                print("test load")
+                classifier = load(m, "m.classifier")
+                print("test load ok")
     idx, distance = classifier.predict(img)
     print("predict class: {}, distance: {}".format(idx, distance))
 

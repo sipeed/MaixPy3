@@ -3,21 +3,7 @@
 #include "libmaix_nn.h"
 #include "stdlib.h"
 #include "libmaix_nn_classifier.h"
-
-
-typedef struct
-{
-    PyObject_HEAD;
-    PyObject* m_numpy;
-    ModelObject* nn_model;
-    int class_num;
-    int sample_num;
-    int feature_len;
-    int input_w;
-    int input_h;
-    void* classifier_obj;
-    bool init;
-} App_Classifier_Object;
+#include "py_maix_nn_classifier.h"
 
 PyDoc_STRVAR(app_classifier_type_doc, "neural network model app classifier object.\n");
 
@@ -31,7 +17,6 @@ static PyObject* app_classifier_new(PyTypeObject *type, PyObject *args, PyObject
         PyErr_NoMemory();
         return NULL;
     }
-    self->m_numpy = NULL;
     self->init = false;
     self->class_num = 0;
     self->sample_num = 0;
@@ -45,11 +30,6 @@ static PyObject* app_classifier_new(PyTypeObject *type, PyObject *args, PyObject
 
 static void app_classifier_del(App_Classifier_Object *self)
 {
-    if(self->m_numpy)
-    {
-        Py_DECREF(self->m_numpy);
-        self->m_numpy = NULL;
-    }
     if(self->nn_model)
     {
         Py_DECREF(self->nn_model);
@@ -71,13 +51,6 @@ static int app_classifier_init(App_Classifier_Object *self, PyObject *args, PyOb
     }
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     static char *kwlist[] = {"model", "class_num", "sample_num", "feature_len", "input_w", "input_h", NULL};
-    
-    self->m_numpy = PyImport_ImportModule("numpy");
-    if(!self->m_numpy)
-    {
-        PyErr_SetString(PyExc_Exception, "need numpy module");
-        return -1;
-    }
 
     if (!PyArg_ParseTupleAndKeywords(args, kwds, "OIIIII:__init__", kwlist,
                                      &self->nn_model, &self->class_num, &self->sample_num, &self->feature_len, &self->input_w, &self->input_h))
@@ -370,7 +343,7 @@ static PyObject* app_classifier_method_save(App_Classifier_Object *self, PyObjec
     static char *kwlist[] = {"path", NULL};
     const char* path = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "s:__init__", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "s:save", kwlist,
                                      &path))
     {
         return NULL;

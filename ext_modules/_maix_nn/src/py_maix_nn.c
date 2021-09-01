@@ -1,5 +1,6 @@
 
 #include "py_maix_nn.h"
+#include "py_maix_nn_classifier.h"
 
 #include "string.h"
 #include "libmaix_nn.h"
@@ -30,7 +31,10 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
         return NULL;
     }
     /* new object */
-    PyObject* model_obj = PyMaix_NN_Model_Type.tp_new(&PyMaix_NN_Model_Type, PyList_New(0), PyDict_New());
+    PyObject* call_args = PyList_New(0);
+    PyObject* call_keywords = PyDict_New();
+    PyObject* model_obj = PyMaix_NN_Model_Type.tp_new(&PyMaix_NN_Model_Type, call_args, call_keywords);
+    Py_DECREF(call_args);Py_DECREF(call_keywords);
     if(!model_obj)
     {
         PyErr_NoMemory();
@@ -38,8 +42,8 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
     }
     /* init model object */
 
-    PyObject *call_args = Py_BuildValue("(O)", model_path);
-    PyObject *call_keywords = PyDict_New();
+    call_args = Py_BuildValue("(O)", model_path);
+    call_keywords = PyDict_New();
     PyDict_SetItemString(call_keywords, "opt", opt);
     PyObject *o_init_func = PyObject_GetAttrString(model_obj, "__init__");
     PyObject* ret = PyObject_Call(o_init_func, call_args, call_keywords);

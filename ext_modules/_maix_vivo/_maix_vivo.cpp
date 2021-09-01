@@ -266,7 +266,7 @@ public:
     {
         if (!this->inited)
         {
-            libmaix_cam_init();
+            libmaix_camera_module_init();
             libmaix_image_module_init();
 
             this->ai_dir = ai_dir;
@@ -346,7 +346,7 @@ public:
                 libmaix_image_destroy(&this->yuv2rgb);
             if (NULL != this->vo)
                 libmaix_vo_destroy(&this->vo);
-            libmaix_cam_exit();
+            libmaix_camera_module_deinit();
             libmaix_image_module_deinit();
             this->inited = false;
         }

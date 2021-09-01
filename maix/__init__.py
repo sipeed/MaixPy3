@@ -1,5 +1,5 @@
 
-__all__ = ['display', 'camera']
+__all__ = ['display', 'camera', 'nn']
 
 try:
   import gpiod as gpio

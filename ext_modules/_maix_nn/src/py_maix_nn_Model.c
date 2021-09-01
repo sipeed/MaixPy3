@@ -5,20 +5,6 @@
 #include <sys/time.h>
 
 
-typedef struct
-{
-    PyObject_HEAD;
-    libmaix_nn_t* nn;
-    int8_t*       quantize_buffer;
-    float**       out_buffer;
-    PyObject*     inputs;
-    PyObject*     outputs;
-    PyObject*     m_numpy;
-    int           inputs_len;
-    int           outputs_len;
-    bool          is_init;
-} ModelObject;
-
 PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
 
 
@@ -264,7 +250,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         self->inputs_len = inputs_len;
         self->outputs_len = outputs_len;
-        self->nn = libmaix_nn_creat();
+        self->nn = libmaix_nn_create();
         if(!self->nn)
         {
             PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");
@@ -390,7 +376,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     }
     else
     {
-        PyErr_SetString(PyExc_ValueError, "not supported input object, only support bytes and numpy.ndarray object");
+        PyErr_SetString(PyExc_ValueError, "not supported input object, only support bytes and PIL.Image object");
         return NULL;
     }
     if((Py_ssize_t)(input_w * input_h * input_c) != PyBytes_Size(o_input_bytes))

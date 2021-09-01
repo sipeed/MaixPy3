@@ -145,15 +145,15 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         Py_ssize_t outputs_len = PyDict_Size(o_outputs);
         self->outputs = o_outputs;
         PyObject *o_mean = PyDict_GetItemString(o_opt, "mean");
-        if(!o_mean || !PyList_Check(o_mean) || PyList_Size(o_mean)!=3)
+        if(!o_mean || !(PyFloat_Check(o_mean) || (PyList_Check(o_mean) && (PyList_Size(o_mean)==3 || PyList_Size(o_mean)==1))))
         {
-            PyErr_SetString(PyExc_ValueError, "arg opt need mean key, value is list");
+            PyErr_SetString(PyExc_ValueError, "arg opt need mean key, value is float or list");
             return -1;
         }
         PyObject *o_norm = PyDict_GetItemString(o_opt, "norm");
-        if(!o_norm || !PyList_Check(o_norm) || PyList_Size(o_norm)!=3)
+        if(!o_norm || !(PyFloat_Check(o_norm) || (PyList_Check(o_norm) && (PyList_Size(o_norm)==3 || PyList_Size(o_norm)==1))))
         {
-            PyErr_SetString(PyExc_ValueError, "arg opt need norm key, value is list");
+            PyErr_SetString(PyExc_ValueError, "arg opt need norm key, value is float or list");
             return -1;
         }
         PyObject *o_param_path = PyDict_GetItemString(o_model_path, "param");
@@ -240,13 +240,41 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             opt_param.awnn.output_ids            = outputs_id;
             opt_param.awnn.encrypt = true;
         }
-        for(Py_ssize_t i=0; i<3; ++i)
+        if(PyFloat_Check(o_mean))
         {
-            opt_param.awnn.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
+            opt_param.awnn.mean[0] = (float)PyFloat_AsDouble(o_mean);
+            opt_param.awnn.mean[1] = opt_param.awnn.mean[0];
+            opt_param.awnn.mean[2] = opt_param.awnn.mean[0];
         }
-        for(Py_ssize_t i=0; i<3; ++i)
+        else
         {
-            opt_param.awnn.norm[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_norm, i));
+            Py_ssize_t i=0;
+            for(; i<PyList_Size(o_mean); ++i)
+            {
+                opt_param.awnn.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
+            }
+            for(Py_ssize_t j=i; j<3; ++j)
+            {
+                opt_param.awnn.mean[j] = opt_param.awnn.mean[i-1];
+            }
+        }
+        if(PyFloat_Check(o_norm))
+        {
+            opt_param.awnn.norm[0] = (float)PyFloat_AsDouble(o_norm);
+            opt_param.awnn.norm[1] = opt_param.awnn.norm[0];
+            opt_param.awnn.norm[2] = opt_param.awnn.norm[0];
+        }
+        else
+        {
+            Py_ssize_t i=0;
+            for(; i<PyList_Size(o_norm); ++i)
+            {
+                opt_param.awnn.norm[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_norm, i));
+            }
+            for(Py_ssize_t j=i; j<3; ++j)
+            {
+                opt_param.awnn.norm[j] = opt_param.awnn.norm[i-1];
+            }
         }
         self->inputs_len = inputs_len;
         self->outputs_len = outputs_len;

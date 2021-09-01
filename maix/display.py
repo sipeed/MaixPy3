@@ -4,13 +4,14 @@ import os
 from PIL import Image
 
 # remote jupyter options
-remote = None
+remote, _remote_show = None, False
 
-def hook(clear_output=True):
-  global remote
+def jupyter(show=False, clear=True):
   try:
+    global remote, _remote_show
+    _remote_show = show
     if remote != None:
-      remote.clear_output = clear_output
+      remote.clear_output = clear
       remote._start_display()
   except Exception as e:
     remote = None
@@ -24,20 +25,20 @@ try:
         int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
     __env_config__ = True
 except Exception as e:
-    print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
+    pass
+    # print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
 finally:
     __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
 
 
-def tobytes():
+def get_draw():
+    from PIL import ImageDraw
     global __display__
-    return __display__.tobytes()
-
-
-def set_window(size=(240, 240)):
-    global __display__, __width__, __height__
-    __width__, __height__ = size
-    __display__ = Image.new("RGB", size, (0, 0, 0))
+    if __display__:
+        tmp = ImageDraw.Draw(__display__)
+        tmp.paste = __display__.paste
+        return tmp
+    return None
 
 
 def __thumbnail__(src, dst):
@@ -68,34 +69,29 @@ except ModuleNotFoundError as e:
 except Exception as e:
     pass
 
-_local_show = True
+
+def show(img=None, box=(0, 0), local_show=True, remote_show=True):
+    global __display__, _remote_show
+    if img is None:
+        img = __display__
+    if local_show:
+        if __fastview__:
+            __draw__(img)  # underlying optimization
+        else:
+            if isinstance(img, bytes):
+                img = Image.frombytes("RGB", box, img)
+                __thumbnail__(img, __display__)
+                __display__.paste(img, (0, 0))
+            elif isinstance(img, Image.Image):
+                __thumbnail__(img, __display__)
+                __display__.paste(img, box)
+            __display__.show()
+    if remote_show and _remote_show:
+        from maix import mjpg
+        mjpg.store_mjpg(img)
 
 
-def local_show(value=True):
-  global _local_show
-  _local_show = value
-
-
-def show(img, box=(0, 0), fast=True):
-    global __display__, local_show
-    if img:
-      if __fastview__ and fast:
-        __display__ = img
-        if _local_show:
-          __draw__(img)  # underlying optimization
-      else:
-        if isinstance(img, bytes):
-          img = Image.frombytes("RGB", box, img)
-          __thumbnail__(img, __display__)
-          __display__.paste(img, (0, 0))
-        elif isinstance(img, Image.Image):
-          __thumbnail__(img, __display__)
-          __display__.paste(img, box)
-        if _local_show:
-          __display__.show()
-
-
-def fill(box=(0, 0), color=(0, 0, 0)):
+def fill(box=(0, 0), color=(0, 0, 0, 0)):
     global __display__
     if len(box) == 2:
         box = box + __display__.size
@@ -103,7 +99,7 @@ def fill(box=(0, 0), color=(0, 0, 0)):
     show(__display__)
 
 
-def clear(c=(0, 0, 0)):
+def clear(c=(0, 0, 0, 0)):
     global __display__
     fill(color=c)
 
@@ -135,7 +131,8 @@ if __name__ == '__main__':
     # print(image.tobytes())
 
     from PIL import Image, ImageDraw
-    image = Image.new("RGB", (320, 240), "#FFFFFF")
+    image = Image.new("RGBA", (40, 40), "#FFFFFFFF")
+    
     draw = ImageDraw.Draw(image)
     draw.text((0, 0), u'hello world', (0, 0, 0))
     # image.show()

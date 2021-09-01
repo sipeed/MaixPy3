@@ -8,8 +8,8 @@ from maix import  display, camera
 import time
 from maix.nn import decoder
 
-def draw_rectangle_with_title(img, box, disp_str, bg_color=(255, 0, 0, 255), font_color=(255, 255, 255, 255)):
-    draw = ImageDraw.Draw(img)
+def draw_rectangle_with_title(draw, box, disp_str, bg_color=(255, 0, 0, 255), font_color=(255, 255, 255, 255)):
+    # draw = ImageDraw.Draw(img)
     font = ImageFont.load_default()
 
     font_w, font_h = font.getsize(disp_str)
@@ -20,7 +20,6 @@ def draw_rectangle_with_title(img, box, disp_str, bg_color=(255, 0, 0, 255), fon
 
 camera.config(size=(224, 224))
 
-test_jpg = "/root/face.jpg"
 model = {
     "param": "/root/models/yolo2_face_awnn.param",
     "bin": "/root/models/yolo2_face_awnn.bin"
@@ -66,16 +65,15 @@ while 1:
     print("-- decode: ", time.time() - t )
 
     t = time.time()
-    img_mask = Image.new("RGBA", (240, 240), color=(0,0,0,0))
     for i, box in enumerate(boxes):
         class_id = probs[i][0]
         prob = probs[i][1][class_id]
         disp_str = "{}:{:.2f}%".format(labels[class_id], prob*100)
-        draw_rectangle_with_title(img_mask, box, disp_str)
+        draw_rectangle_with_title(display.get_draw(), box, disp_str)
     print("-- draw: ", time.time() - t )
 
     t = time.time()
-    display.show(img_mask)
+    display.show()
     print("-- show: ", time.time() - t )
 
 

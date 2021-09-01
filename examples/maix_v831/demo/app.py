@@ -3,7 +3,7 @@
 from PIL import Image, ImageFont, ImageDraw
 from maix import display, camera
 from maix import nn
-from res.classes_label import labels
+from resc.classes_label import labels
 from evdev import InputDevice
 import asyncio
 import time
@@ -21,10 +21,10 @@ def get_host_ip():
         s.close()
     return ip
 
-font = ImageFont.truetype("/home/res/baars.ttf", 27, encoding="unic")
+font = ImageFont.truetype("./resc/baars.ttf", 27, encoding="unic")
 
 canvas = Image.new("RGBA", (240, 240), "#2c3e50")
-with Image.open('/home/res/logo.png') as logo:
+with Image.open('./resc/logo.png') as logo:
     canvas.paste(logo, (50, 40, 50 + logo.size[0], 40 + logo.size[1]), logo)
 
 draw = ImageDraw.Draw(canvas)
@@ -44,8 +44,8 @@ draw.text((180, 0), u'Yes> ', "#e74c3c", font)
 
 
 npu = nn.load({
-    "param": "/home/res/resnet.param",
-    "bin": "/home/res/resnet.bin"
+    "param": "./resc/resnet.param",
+    "bin": "./resc/resnet.bin"
 }, opt={
     "model_type":  "awnn",
     "inputs": {
@@ -113,7 +113,7 @@ for device in [keys]:
 
 async def main(packet):
     if packet["selected"] == "demo":
-        img = camera.capture()
+        img = camera.read()
         if img:
             out = npu.forward(img, quantize=True)
             out = nn.F.softmax(out)
@@ -123,6 +123,7 @@ async def main(packet):
                 draw.text((0, 0), "{:.2f}: {}".format(
                     out.max(), labels[out.argmax()]), (255, 0, 0), font)
                 display.show(image)
+                # print(out.max(), out.argmax())
         # else:
             # await asyncio.sleep(0.02)
     elif packet["selected"] == "save":

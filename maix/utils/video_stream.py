@@ -45,7 +45,7 @@ class VideoStream:
             # import random
             # display.clear((random.randint(10, 100), 0, 0))
             tmp = display.__display__
-            frame = _maix.rgb2jpg(tmp.tobytes(), tmp.width, tmp.height)
+            frame = _maix.rgb2jpg(tmp.convert("RGB").tobytes(), tmp.width, tmp.height)
             frame_length = len(frame)
         elif self.TYPE == 1:
             import _maix

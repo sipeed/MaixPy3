@@ -103,7 +103,7 @@ _maix_modules = [
     _maix_vivo_module,
     _maix_opencv_module,
     # _maix_camera_module,
-    # _maix_display_module,
+    _maix_display_module,
     _maix_nn_module
 ]
 

@@ -29,7 +29,7 @@ py_modules.extend(_maix_py_modules)
 
 setup(
   name='MaixPy3',
-  version='0.3.1',
+  version='0.3.2',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",
@@ -46,7 +46,9 @@ setup(
       'Programming Language :: Python :: 3',
   ],
   extras_require={"test": "pytest"},
-  entry_points={"console_scripts": ["maixpy3_rpycs=maix.rpycs:start"]},
+  entry_points={
+    "console_scripts": ["maixpy3_rpycs=maix.mjpg:start"]
+  },
   include_package_data=True,
   package_data = {
       '': ['*.so'],

@@ -15,7 +15,7 @@
 #rotation 斜框斜度
 
 from maix import camera
-from _maix_opencv import _v83x_opencv
+from maix import maix_cv
 from PIL import Image, ImageDraw
 from maix import display
 cv = _v83x_opencv()
@@ -33,7 +33,7 @@ tmp = camera.read()
 def find_blob():
     while True:
         tmp = camera.read()
-        ma = cv.find_blob(tmp, (95, 219, 0, 255, 255, 255))
+        ma = maix_cv.find_blob(tmp, (95, 219, 0, 255, 255, 255))
         # ma = cv.find_blob(tmp, (95, 219, 0, 255, 255, 255),tilt=1)
         print(ma)
         draw = display.get_draw()

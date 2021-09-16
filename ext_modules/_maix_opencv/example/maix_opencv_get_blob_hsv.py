@@ -10,7 +10,7 @@
 
 
 from maix import camera
-from _maix_opencv import _v83x_opencv
+from maix import maix_cv
 from PIL import Image, ImageDraw
 from maix import display
 cv = _v83x_opencv()
@@ -28,7 +28,7 @@ tmp = camera.read()
 def get_blob_hsv():
     while True:
         tmp = camera.read()
-        ma = cv.get_blob_hsv(tmp,[110,110,20,20],5)
+        ma = maix_cv.get_blob_hsv(tmp,[110,110,20,20],5)
         print(ma)
         draw = display.get_draw()
         draw.rectangle((110,110, 130, 130), outline='red', width=1)

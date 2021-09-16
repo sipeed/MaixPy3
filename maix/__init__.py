@@ -37,7 +37,6 @@ except ModuleNotFoundError as e:
 #   __all__.extend(['display', 'video', 'rpycs', 'camera'])
 # except ModuleNotFoundError as e:
 #   pass
-
 try:
   from . import nn
   __all__.extend(['nn'])
@@ -55,5 +54,12 @@ try:
         command = executable = "fbviewer"
         return command, executable
     ImageShow.register(fbViewer, 0)
+except ModuleNotFoundError as e:
+  pass
+
+try:
+  from . import maix_cv
+  maix_cv = maix_cv.maix_cv
+  __all__.extend(['maix_cv'])
 except ModuleNotFoundError as e:
   pass

@@ -86,9 +86,11 @@ _maix_display_module = Extension('_maix_display', include_dirs=['ext_modules/_ma
     extra_compile_args=['-DV831Display'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
-
+max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
+max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
+max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
 _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
-                            sources=get_srcs('ext_modules/_maix_nn/src'),
+                            sources=max_nn_srcs,
                             libraries=[
     "maix_utils", "maix_nn",
 ],

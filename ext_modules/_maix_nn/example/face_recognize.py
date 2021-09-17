@@ -80,7 +80,7 @@ class Face_Recognizer:
         print("-- init end")
 
     def get_faces(self, img, std_img = False):
-        faces = self.recognizer.get_feature(img, std_img)
+        faces = self.recognizer.get_faces(img, std_img)
         return faces
 
     def __len__(self):

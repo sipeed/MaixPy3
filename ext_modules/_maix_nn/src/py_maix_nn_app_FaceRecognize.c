@@ -148,7 +148,7 @@ static PyObject *app_FaceRecognize_str(PyObject *object)
   return dev_desc;
 }
 
-PyDoc_STRVAR(app_FaceRecognize_method_get_feature_doc, "get face feature from image.\n");
+PyDoc_STRVAR(app_FaceRecognize_method_get_feature_doc, "get faces info from image.\n");
 static PyObject* app_FaceRecognize_method_get_feature(App_FaceRecognize_Object *self, PyObject *args, PyObject *kw_args)
 {
     if(!self->init)
@@ -165,7 +165,7 @@ static PyObject* app_FaceRecognize_method_get_feature(App_FaceRecognize_Object *
     int std_img = 0;
 
 
-    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|i:get_feature", kwlist,
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|i:get_faces", kwlist,
                                      &img, &std_img))
     {
         return NULL;
@@ -314,7 +314,7 @@ static PyObject* app_FaceRecognize_method_compare(App_FaceRecognize_Object *self
 }
 
 static PyMethodDef app_FaceRecognize_methods[] = {
-    {"get_feature", (PyCFunction)app_FaceRecognize_method_get_feature, METH_VARARGS | METH_KEYWORDS, app_FaceRecognize_method_get_feature_doc},
+    {"get_faces", (PyCFunction)app_FaceRecognize_method_get_feature, METH_VARARGS | METH_KEYWORDS, app_FaceRecognize_method_get_feature_doc},
     {"compare", (PyCFunction)app_FaceRecognize_method_compare, METH_VARARGS | METH_KEYWORDS, app_FaceRecognize_method_compare_doc},
     {NULL, NULL, 0, NULL},
 };

@@ -1,3 +1,8 @@
+'''
+    Face recognize demo, download modle from maixhub first:
+            https://maixhub.com/modelInfo?modelId=29
+'''
+
 from maix import nn, display, camera
 from maix.nn.app.face import FaceRecognize
 from PIL import Image, ImageDraw, ImageFont

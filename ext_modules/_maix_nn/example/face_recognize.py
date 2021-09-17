@@ -38,21 +38,15 @@ class Face_Recognizer:
         self.feature_len = 256
         self.features = []
 
-        steps = [8, 16, 32]
-        channel_num = 0
-        for i in range(len(steps)):
-            channel_num += self.input_size[1] / steps[i] * (self.input_size[0] / steps[i]) * 2
-        channel_num = int(channel_num)
-
         options = {
             "model_type":  "awnn",
             "inputs": {
                 "input0": self.input_size
             },
             "outputs": {
-                "output0": (1, 4, channel_num) ,
-                "431": (1, 2, channel_num) ,
-                "output2": (1, 10, channel_num) 
+                "output0": (1, 4, 2508) ,
+                "431": (1, 2, 2508) ,
+                "output2": (1, 10, 2508) 
             },
             "mean": [127.5, 127.5, 127.5],
             "norm": [0.0078125, 0.0078125, 0.0078125],

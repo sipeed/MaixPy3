@@ -140,3 +140,4 @@ examples/rtsp_pyqt
 sipeed_v83x_opencv4.1
 .vscode/
 ext_modules/_maix_opencv/example/test.py
+.vscode-ctags

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# cv.find_blob(pic,hsv,tilt=0)函数说明
+# maix_cv.find_blob(pic,hsv,tilt=0)函数说明
 # 功能:在图片pic中寻找符合hsv颜色区域的色块
 # 输入：pic，240*240尺寸的图片bytes数据
 #     hsv,hsv阈值数组，前三个是最小值，后三个是最大值
@@ -14,45 +14,38 @@
 #tilt_Rect 斜框四个顶点
 #rotation 斜框斜度
 
+from maix import maix_cv
 from maix import camera
-from _maix_opencv import _v83x_opencv
 from PIL import Image, ImageDraw
 from maix import display
-cv = _v83x_opencv()
-
-class funation:
-
-    test = [(0,-70,0,80,-10,30),(26,-18,-33,42,-2,-5)]  #绿色
-    def __init__(self):
-        #跳过一些帧
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        tmp = camera.read()
-        del tmp
-    def run(self):
-        tmp = camera.read()
-        if tmp:
-            ma = cv.find_blob_lab(tmp, self.test)
-            print(ma)
-            draw = display.get_draw()
-            if ma:
-                for i in ma:
-                    draw.rectangle((i["x"], i["y"], i["x"] + i["w"], i["y"] + i["h"]), outline='red', width=1)
-                display.show()
-            else:
-                display.clear()
+import time
+test = [(13,11,-91,54,48,-28)]  #蓝色
+def find_blob():
+    tmp = camera.read()
+    if tmp:
+        t = time.time()
+        ma = maix_cv.find_blob_lab(tmp,test)
+        t = time.time() - t
+        print("-- forward time: {}s".format(t))
+        # print(ma)
+        draw = display.get_draw()
+        if ma:
+            for i in ma:
+                draw.rectangle((i["x"], i["y"], i["x"] + i["w"], i["y"] + i["h"]), outline='red', width=1)
+            display.show()
         else:
-            print('tmp err')
+            display.clear()
+    else:
+        print('tmp err')
 
 
 
 if __name__ == "__main__":
-    start = funation()
+    import signal
+    def handle_signalm(signum,frame):
+        print("father over")
+        exit(0)
+    signal.signal(signal.SIGINT,handle_signalm)
+    camera.config(size=(224,224))
     while True:
-        start.run()
+        find_blob()

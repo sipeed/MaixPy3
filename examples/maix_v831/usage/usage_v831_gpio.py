@@ -2,8 +2,8 @@
 from gpiod import chip, line, line_request
 gpiochip1 = chip("gpiochip1")
 
-def pin(gpio="H", pos=14):
-  return 32 * (ord(gpio.lower()) - ord('a')) + pos
+def pin(gpio="PH", pos=14):
+  return 32 * (ord(gpio.lower()[1]) - ord('a')) + pos
 
 def gpio(line_offset=(224 + 14), line_mode = line_request.DIRECTION_OUTPUT): # "default PH14 OUTPUT"
   try:
@@ -18,7 +18,7 @@ def gpio(line_offset=(224 + 14), line_mode = line_request.DIRECTION_OUTPUT): # "
     return tmp
 
 import time
-led = gpio(pin("D", 11))
+led = gpio(pin("PD", 11))
 while led:
     led.set_value(0)
     time.sleep(0.5)

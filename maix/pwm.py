@@ -39,7 +39,14 @@ class PWM(object):
         self._chip = chip
         self.base = '/sys/class/pwm/pwmchip{:d}'.format(self._chip)
         self.path = self.base + '/pwm{:d}'.format(self._channel)
-
+        with open("/sys/class/sunxi_dump/dump","wb") as f:
+            f.write(b'0x0300B0FC')
+        with open("/sys/class/sunxi_dump/dump","rb") as f:
+            self.gpio = f.read()
+            self.gpio = b'0x0300B0FC ' + self.gpio[:-1]
+            print("nihao---------------")
+        with open("/sys/class/sunxi_dump/write","wb") as f:
+            f.write(b'0x0300B0FC 0x77114442')
         if not os.path.isdir(self.base):
             raise FileNotFoundError('Directory not found: ' + self.base)
 
@@ -55,6 +62,8 @@ class PWM(object):
         self.enable = False
         self.inversed = False
         self.unexport()
+        with open("/sys/class/sunxi_dump/write","wb") as f:
+            f.write(self.gpio)
         return
 
     def export(self) -> None:

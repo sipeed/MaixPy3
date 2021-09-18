@@ -125,6 +125,19 @@ public:
     exit();
   }
 
+    // py::scoped_interpreter python;
+ 
+    // py::module sys = py::module::import("sys");
+    // py::print(sys.attr("path"));
+ 
+    // py::module t = py::module::import("tttt");
+    // t.attr("add")(1,2);
+
+
+
+
+
+
   py::bytes opencv_test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -132,6 +145,33 @@ public:
     int size = input.total() * input.elemSize();
     return py::bytes((char *)input.data, size);
   }
+  int my_test(py::object objx)
+  {
+    // auto mk = py::type(objx);
+    // auto mk = py::int(3);
+    // py::type(std::move(objx))
+    // py::print(py::str(objx));
+    // py::print(py::str(py::type(objx)));
+    // py::scoped_interpreter python;
+    py::print("nihao");
+    py::print(objx.get_type());
+    return 0;
+    // return py::type::of(std::move(objx));
+    // return objx.get_type(objx);
+  } 
+
+
+
+
+// ssh_shell_ubuntu "source /opt/v831/envsetup.sh && python3.8 setup.py clean --all bdist_wheel maix_v831"
+// adb push ./dist/MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl / && adb shell 'pip install --upgrade MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl'
+// adb shell "python -c \"from maix import maix_cv;maix_cv.my_test('mk') \" "
+// adb shell "python -c \"from maix import maix_cv;maix_cv.get_type_of('mk') \" "
+
+// ssh_shell_ubuntu "source /opt/v831/envsetup.sh && python3.8 setup.py clean --all bdist_wheel maix_v831" && adb push ./dist/MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl / && adb shell 'pip install --upgrade MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl' && adb shell "python -c \"from maix import maix_cv;maix_cv.my_test('woshi') \" "
+
+
+
   py::list get_blob_hsv(py::bytes &rgb, vector<int> &roi, int critical)
   {
     py::list return_val;
@@ -495,6 +535,8 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("get_vi", &_v83x_opencv::get_vi)
       .def("set_ui", &_v83x_opencv::set_ui)
       .def("opencv_test", &_v83x_opencv::opencv_test)
+      .def("my_test", &_v83x_opencv::my_test)
+      .def("get_type_of", [](py::object ob) { return py::type::of(std::move(ob)); })
       .def("find_blob", &_v83x_opencv::find_blob, py::arg("rgb"), py::arg("hsv_da"), py::arg("tilt") = 0)
       .def("find_blob_lab", &_v83x_opencv::find_blob_lab, py::arg("rgb"), py::arg("hsv_da"), py::arg("tilt") = 0)
       .def("find_ball", &_v83x_opencv::find_ball)

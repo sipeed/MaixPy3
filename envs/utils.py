@@ -1,6 +1,6 @@
 
 import os
-
+import time
 def get_incs(path, exclude=[]):
     setup_path = os.path.dirname(os.path.abspath(__file__)) + '/../' # envs/
     return setup_path + path
@@ -29,4 +29,6 @@ def get_srcs(path, file_type=['c', 'cpp', 'cc', 'cxx', 's'], exclude=[]):
             # else:
             #     print(_sources[s])
         # print('res', _sources)
+    with open("/home/nihao/work/work_space/MaixPy3/nihao.log","w") as f:
+        f.write(str(_sources))
     return _sources

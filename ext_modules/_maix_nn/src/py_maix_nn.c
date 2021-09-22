@@ -1,6 +1,7 @@
 
 #include "py_maix_nn.h"
 #include "py_maix_nn_classifier.h"
+#include "py_maix_nn_FaceRecognize.h"
 
 #include "string.h"
 #include "libmaix_nn.h"
@@ -99,6 +100,9 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
     if (PyType_Ready(&PyMaix_NN_app_Classifier_Type) < 0) {
         return NULL;
     }
+    if (PyType_Ready(&PyMaix_NN_app_FaceRecognize_Type) < 0) {
+        return NULL;
+    }
 
     /* Add maix.nn.F module*/
     PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);    
@@ -118,6 +122,8 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
     PyObject *app_module = PyModule_Create(&maix_nn_app_module);
     Py_INCREF(&PyMaix_NN_app_Classifier_Type);
     PyModule_AddObject(app_module, "Classifier", (PyObject*)&PyMaix_NN_app_Classifier_Type);
+    Py_INCREF(&PyMaix_NN_app_FaceRecognize_Type);
+    PyModule_AddObject(app_module, "FaceRecognize", (PyObject*)&PyMaix_NN_app_FaceRecognize_Type);
     PyModule_AddObject(module, "_app", app_module);
 
     return module;

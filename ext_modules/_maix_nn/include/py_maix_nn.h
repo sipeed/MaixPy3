@@ -20,6 +20,7 @@ PyDoc_STRVAR(_maix_nn__app_doc, "MaixPy Python3 nn(neural network) _app module, 
 PyDoc_STRVAR(maix_nn_model_type_name, "Model");
 PyDoc_STRVAR(maix_nn_decoder_yolo2_type_name, "Yolo2");
 PyDoc_STRVAR(maix_nn_app_classifier_type_name, "Classifier");
+PyDoc_STRVAR(maix_nn_app_FaceRecognize_type_name, "FaceRecognize");
 extern PyTypeObject PyMaix_NN_Model_Type;
 extern PyTypeObject PyMaix_NN_Decoder_Yolo2_Type;
 extern struct PyModuleDef maix_nn_functional_module;

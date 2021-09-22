@@ -1,7 +1,6 @@
 """Linux PWM driver sysfs interface"""
 
 import os
-
 __author__ = 'Scott Ellis'
 __version__ = '1.0'
 __license__ = 'New BSD'
@@ -39,14 +38,6 @@ class PWM(object):
         self._chip = chip
         self.base = '/sys/class/pwm/pwmchip{:d}'.format(self._chip)
         self.path = self.base + '/pwm{:d}'.format(self._channel)
-        
-
-        with open("/sys/class/sunxi_dump/dump","rb") as f:
-            self.gpio = f.read()
-            self.gpio = b'0x0300B0FC ' + self.gpio[:-1]
-
-        with open("/sys/class/sunxi_dump/write","wb") as f:
-            f.write(b'0x0300B0FC 0x77114442')
         if not os.path.isdir(self.base):
             raise FileNotFoundError('Directory not found: ' + self.base)
 

@@ -134,7 +134,7 @@ static int decoder_yolo2_init(DecoderYolo2Object *self, PyObject *args, PyObject
     self->config.nms_value = 0.3;
     self->config.threshold = 0.5;
 
-    self->decoder = libmaix_nn_decoder_yolo2_creat();
+    self->decoder = libmaix_nn_decoder_yolo2_create();
     if(!self->decoder)
     {
         PyErr_SetString(PyExc_Exception, "create yolo2 decoder fail");

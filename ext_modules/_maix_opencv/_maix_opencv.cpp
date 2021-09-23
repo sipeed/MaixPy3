@@ -8,7 +8,7 @@
 #include <array>
 #include <map>
 #include <set>
-#include <typeinfo> 
+#include <typeinfo>
 
 #include "opencv2/core.hpp"
 #include "opencv2/imgproc.hpp"
@@ -16,21 +16,12 @@
 #include "opencv2/videoio.hpp"
 #include "opencv2/imgcodecs.hpp"
 
-
 using namespace cv;
 using namespace std;
 
 namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
-
-typedef struct color_thresholds_list_lnk_data
-{
-    uint8_t LMin, LMax; // or grayscale
-    uint8_t AMin, AMax;
-    uint8_t BMin, BMax;
-}color_thresholds;
-
 
 class _v83x_opencv
 {
@@ -45,15 +36,6 @@ private:
   }
 
 public:
-  _v83x_opencv()
-  {
-    roi.push_back(0);
-    roi.push_back(0);
-    roi.push_back(0);
-    roi.push_back(0);
-  }
-
-
   void set_ui(py::bytes &argb)
   {
   }
@@ -145,19 +127,6 @@ public:
     exit();
   }
 
-    // py::scoped_interpreter python;
- 
-    // py::module sys = py::module::import("sys");
-    // py::print(sys.attr("path"));
- 
-    // py::module t = py::module::import("tttt");
-    // t.attr("add")(1,2);
-
-
-
-
-
-
   py::bytes opencv_test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -165,101 +134,146 @@ public:
     int size = input.total() * input.elemSize();
     return py::bytes((char *)input.data, size);
   }
-  int my_test(py::object objx)
-  {
-    // auto mk = py::type(objx);
-    // auto mk = py::int(3);
-    // py::type(std::move(objx))
-    // py::print(py::str(objx));
-    // py::print(py::str(py::type(objx)));
-    // py::scoped_interpreter python;
 
-    py::print("nihao");
-    auto ty = objx.get_type();
-    cout << ty<< endl;
-    // cout << mk<< endl;
-    // if(py::isinstance<py::bytes>(objx))
-    // {
-    //   cout << "---bytes!"<<endl;
-    // }
-    // // py::int a(3);
-    // for(int i =0;i<objx.cast<int>();i++)
-    // {
-    //   cout <<"zhuanhuan!"<<endl;
-    // }
-
-
-
-
-  // py::scoped_interpreter python;
-    auto mk=py::module::import("PIL.Image").attr("Image");
-    
-
-
-    py::print(mk);
-    // auto ma = py::type(mk);
-  
-    if(py::isinstance(objx,mk))
-    {
-      cout << "PIL.Image.Image"<<endl;
-      auto mdd = objx.attr("size").cast<vector<int>>();
-      cout << mdd[0]  << mdd[1]<< endl;
-      // auto md = mk.attr("tobytes");
-      // auto img_bytes = md(objx);
-    // cout << objx.size<<endl;
-    
-
-
-      // py::print(img_bytes);
-
-
-    }
-
-
-// PIL.Image.Image
-
-    // if(ty == "<class \'bytes\'>")
-    // {
-    //   cout << "---bytes!"<<endl;
-    // }
-    // py::print(objx.get_type());
-    // cout<<typeid(ty.str()).name()<<endl; 
-    return 0;
-    // return py::type::of(std::move(objx));
-    // return objx.get_type(objx);
-  } 
-/*
-from PIL import Image
-from maix import maix_cv
-img = Image.new("RGB", (224, 224), "#2c3e50")
-maix_cv.my_test(img.tobytes())
-
-ssh_shell_ubuntu "source /opt/v831/envsetup.sh && python3.8 setup.py clean --all bdist_wheel maix_v831"
-adb push ./dist/MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl / && adb shell 'pip install --upgrade MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl'
-adb shell "python -c \"from maix import maix_cv;maix_cv.my_test('mk') \" "
-adb shell "python -c \"from maix import maix_cv;maix_cv.get_type_of('mk') \" "
-
-ssh_shell_ubuntu "source /opt/v831/envsetup.sh && python3.8 setup.py clean --all bdist_wheel maix_v831" && adb push ./dist/MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl / && adb shell 'pip install --upgrade MaixPy3-0.3.2-cp38-cp38-linux_armv7l.whl'
-adb shell "python "
-
-
-from PIL import Image
-from maix import maix_cv
-img = Image.new("RGB", (224, 224), "#2c3e50")
-maix_cv.my_test(img.tobytes()) 
-maix_cv.my_test(img) 
-
-
-
-
-*/
-
-
-  py::list get_blob_hsv(py::bytes &rgb, vector<int> &roi, int critical)
+  py::list get_blob_lab(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
   {
     py::list return_val;
-    string tmp = static_cast<string>(rgb);
-    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
+    {
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+
+        in_img = input;
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
+    else
+    {
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
+
+      if (py::isinstance(py_img, PIL_))
+      {
+        auto tobytes = PIL_.attr("tobytes");
+        auto img_bytes = tobytes(py_img);
+        string tmp = py_img.cast<string>();
+
+        auto mdd = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
+    int critical_t;
+    critical_t = critical > 100 ? 100 : critical;
+    critical_t = critical_t < 0 ? 0 : critical_t;
+
+    Rect rect;
+    rect.x = roi[0];
+    rect.y = roi[1];
+    rect.width = roi[2];
+    rect.height = roi[3];
+    Mat lab_img;
+    cvtColor(in_img(rect), lab_img, COLOR_RGB2Lab);
+
+    vector<Mat> lab_planes;
+    split(lab_img, lab_planes);
+
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float *histRanges = range;
+    Mat l_hist, a_hist, b_hist;
+    calcHist(&lab_planes[0], 1, 0, Mat(), l_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[1], 1, 0, Mat(), a_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[2], 1, 0, Mat(), b_hist, 1, &histSize, &histRanges, true, false);
+
+    float lmax = 0, lnum = 0;
+    float amax = 0, anum = 0;
+    float bmax = 0, bnum = 0;
+    for (int i = 0; i < histSize; i++)
+    {
+      if (l_hist.at<float>(i) > lmax)
+      {
+        lmax = l_hist.at<float>(i);
+        lnum = i;
+      }
+      if (a_hist.at<float>(i) > amax)
+      {
+        amax = a_hist.at<float>(i);
+        anum = i;
+      }
+      if (b_hist.at<float>(i) > bmax)
+      {
+        bmax = b_hist.at<float>(i);
+        bnum = i;
+      }
+    }
+    int min_lnum = int(lnum - critical);
+
+    min_lnum = min_lnum < 0 ? 0 : min_lnum;
+
+    int max_lnum = int(lnum + critical);
+
+    max_lnum = max_lnum > 180 ? 180 : max_lnum;
+
+    int min_anum = int(anum - critical);
+    min_anum = min_anum < 0 ? 0 : min_anum;
+    int max_anum = int(anum + critical);
+    max_anum = max_anum > 255 ? 255 : max_anum;
+
+    int min_bnum = int(bnum - critical);
+    min_bnum = min_bnum < 0 ? 0 : min_bnum;
+    int max_bnum = int(bnum + critical);
+    max_bnum = max_bnum > 255 ? 255 : max_bnum;
+
+    return_val.append(int(min_lnum * 100 / 255));
+    return_val.append(min_anum - 128);
+    return_val.append(min_bnum - 128);
+    return_val.append(int(max_lnum * 100 / 255));
+    return_val.append(max_anum - 128);
+    return_val.append(max_bnum - 128);
+    return return_val;
+  }
+/*
+  py::list get_blob_hsv(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
+  {
+    py::list return_val;
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
+    {
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+
+        in_img = input;
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
+    else
+    {
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
+
+      if (py::isinstance(py_img, PIL_))
+      {
+        auto tobytes = PIL_.attr("tobytes");
+        auto img_bytes = tobytes(py_img);
+        string tmp = py_img.cast<string>();
+
+        auto mdd = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
     critical = critical > 100 ? 100 : critical;
     critical = critical < 0 ? 0 : critical;
     Rect rect;
@@ -269,7 +283,7 @@ maix_cv.my_test(img)
     rect.width = roi[2];
     rect.height = roi[3];
     Mat hsv;
-    cvtColor(input(rect), hsv, COLOR_RGB2HSV);
+    cvtColor(in_img(rect), hsv, COLOR_RGB2HSV);
 
     vector<Mat> hsv_planes;
     split(hsv, hsv_planes);
@@ -328,33 +342,31 @@ maix_cv.my_test(img)
     return_val.append(max_vnum);
     return return_val;
   }
-
-
-
-py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds,vector<int> size,int mode, vector<int> roi,int x_stride,int y_stride,bool invert,int area_threshold,int pixels_threshold,bool merge,int margin,int tilt)
-{
-  py::list return_val;
-  Mat in_img;
-  if(py::isinstance<py::bytes>(py_img))
+*/
+  py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds, vector<int> size, int mode, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt)
   {
-    string tmp = py_img.cast<string>();
-    if (size[0] == 0 || size[1] == 0)
+    py::list return_val;
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
     {
-      cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
-      in_img = input;
+        in_img = input;
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
     }
     else
     {
-      cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-      in_img = input;
-    }
-  }
-  else
-  {
-    auto PIL_=py::module::import("PIL.Image").attr("Image");
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
 
-    if(py::isinstance(py_img,PIL_))
+      if (py::isinstance(py_img, PIL_))
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
@@ -364,118 +376,36 @@ py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds,vector
         cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
         in_img = input;
       }
-  }
-  Mat lab, mask1;
-  if(roi[2] != 0 &&  roi[3] != 0)
-  {
-    Rect rect(roi[0],roi[1],roi[2],roi[3]);
-    cvtColor(in_img(rect), lab, COLOR_RGB2Lab);
-  }
-  else
-  {
-    cvtColor(in_img, lab, COLOR_RGB2Lab);
-  }
-  Mat mask = Mat::zeros(lab.size(), CV_8UC1);
-  for (int i=0;i<thresholds.size();i++)
-  {
-    inRange(lab, Scalar(int((thresholds[i][0] * 255)/100), thresholds[i][1]+128, thresholds[i][2]+128), Scalar(int((thresholds[i][3] * 255)/100), thresholds[i][4] +128, thresholds[i][5]+128), mask1);
-    mask = mask + mask1;
-  }
-  if(invert)
-  {
-    bitwise_not(mask,mask);
-  }
-
-    Mat se = getStructuringElement(MORPH_RECT, Size(x_stride, y_stride), Point(-1, -1));      //开运算,去除噪点
-    morphologyEx(mask, mask, MORPH_OPEN, se);
-    if(margin != 0){
-    Mat se_t = getStructuringElement(MORPH_RECT, Size(margin, margin), Point(-1, -1));          //闭运算,链接相邻比较近的色块
-    morphologyEx(mask, mask, MORPH_CLOSE, se_t);
     }
-
-    vector<vector<Point>> contours;
-    vector<Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-    if (contours.size() == 0)
-    {
-      return return_val;
-    }
-    for (int i = 0; i < contours.size(); i++)
-    {
-      py::dict val;
-      Rect rects = boundingRect(contours[i]);
-      val["x"] = int(rects.x);
-      val["y"] = int(rects.y);
-      val["w"] = int(rects.width);
-      val["h"] = int(rects.height);
-      if(int(rects.width) * int(rects.width) < area_threshold)
-      {
-        continue;
-      }
-      if(int(contourArea(contours[i])) < pixels_threshold)
-      {
-        continue;
-      }
-      val["pixels"] = int(contourArea(contours[i]));
-
-      val["cx"] = int(rects.x + rects.width / 2);
-      val["cy"] = int(rects.y + rects.height / 2);
-
-      if (tilt)
-      {
-        RotatedRect minRect = minAreaRect(contours[i]);
-        Point2f rect_points[4];
-        minRect.points(rect_points);
-        py::tuple tmp3 = py::make_tuple(rect_points[0].x, rect_points[0].y, rect_points[1].x, rect_points[1].y, rect_points[2].x, rect_points[2].y, rect_points[3].x, rect_points[3].y);
-        val["tilt_Rect"] = tmp3;
-        int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
-        int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
-        float x1, y1, k;
-        if (tmp1 > tmp2)
-        {
-          x1 = rect_points[1].x - rect_points[0].x;
-          y1 = rect_points[1].y - rect_points[0].y;
-          k = atan(y1 / x1);
-        }
-        else
-        {
-          x1 = rect_points[3].x - rect_points[0].x;
-          y1 = rect_points[3].y - rect_points[0].y;
-          k = atan(y1 / x1);
-        }
-
-        val["rotation"] = k;
-      }
-      return_val.append(val);
-    }
-    return return_val;
-}
-
-
-
-
-
-
-
-
-/*
-py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
-{
-    py::list return_val;
-    string tmp = static_cast<string>(rgb);
-    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
     Mat lab, mask1;
-    cvtColor(input, lab, COLOR_RGB2Lab);
-
-    Mat mask = Mat::zeros(lab.size(), CV_8UC1);
-
-    for (int i=0;i<hsv_da.size();i++)
+    if (roi[2] != 0 && roi[3] != 0)
     {
-      inRange(lab, Scalar(int((hsv_da[i][0] * 255)/100), hsv_da[i][1]+128, hsv_da[i][2]+128), Scalar(int((hsv_da[i][3] * 255)/100), hsv_da[i][4] +128, hsv_da[i][5]+128), mask1);
+      Rect rect(roi[0], roi[1], roi[2], roi[3]);
+      cvtColor(in_img(rect), lab, COLOR_RGB2Lab);
+    }
+    else
+    {
+      cvtColor(in_img, lab, COLOR_RGB2Lab);
+    }
+    Mat mask = Mat::zeros(lab.size(), CV_8UC1);
+    for (int i = 0; i < thresholds.size(); i++)
+    {
+      inRange(lab, Scalar(int((thresholds[i][0] * 255) / 100), thresholds[i][1] + 128, thresholds[i][2] + 128), Scalar(int((thresholds[i][3] * 255) / 100), thresholds[i][4] + 128, thresholds[i][5] + 128), mask1);
       mask = mask + mask1;
     }
-    Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
+    if (invert)
+    {
+      bitwise_not(mask, mask);
+    }
+
+    Mat se = getStructuringElement(MORPH_RECT, Size(x_stride, y_stride), Point(-1, -1)); //开运算,去除噪点
     morphologyEx(mask, mask, MORPH_OPEN, se);
+    if (margin != 0)
+    {
+      Mat se_t = getStructuringElement(MORPH_RECT, Size(margin, margin), Point(-1, -1)); //闭运算,链接相邻比较近的色块
+      morphologyEx(mask, mask, MORPH_CLOSE, se_t);
+    }
+
     vector<vector<Point>> contours;
     vector<Vec4i> hiearchy;
     findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
@@ -483,7 +413,6 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
     {
       return return_val;
     }
-
     for (int i = 0; i < contours.size(); i++)
     {
       py::dict val;
@@ -492,14 +421,21 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
       val["y"] = int(rects.y);
       val["w"] = int(rects.width);
       val["h"] = int(rects.height);
-
+      if (int(rects.width) * int(rects.width) < area_threshold)
+      {
+        continue;
+      }
+      if (int(contourArea(contours[i])) < pixels_threshold)
+      {
+        continue;
+      }
       val["pixels"] = int(contourArea(contours[i]));
+
       val["cx"] = int(rects.x + rects.width / 2);
       val["cy"] = int(rects.y + rects.height / 2);
 
       if (tilt)
       {
-
         RotatedRect minRect = minAreaRect(contours[i]);
         Point2f rect_points[4];
         minRect.points(rect_points);
@@ -520,99 +456,55 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
           y1 = rect_points[3].y - rect_points[0].y;
           k = atan(y1 / x1);
         }
-
         val["rotation"] = k;
       }
       return_val.append(val);
     }
-    return return_val;
-}
-
-
-*/
-  //  不可变数据（3 个）：Number（数字）、String（字符串）、Tuple（元组）；
-  // 可变数据（3 个）：List（列表）、Dictionary（字典）、Set（集合）。
-  // [{"x":54, "y":32, "w":158, "h":164, "pixels":14197, "cx":131, "cy":116, "rotation":0.934584, "code":1, "count":1, "perimeter":707, "roundness":0.718467}]
-  py::list find_blob(py::bytes &rgb, vector<int> &hsv_da, int tilt)
-  {
-    py::list return_val;
-    string tmp = static_cast<string>(rgb);
-    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-    Mat hsv, mask;
-    cvtColor(input, hsv, COLOR_RGB2HSV);
-    inRange(hsv, Scalar(hsv_da[0], hsv_da[1], hsv_da[2]), Scalar(hsv_da[3], hsv_da[4], hsv_da[5]), mask);
-
-    Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
-    morphologyEx(mask, mask, MORPH_OPEN, se);
-    vector<vector<Point>> contours;
-    vector<Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-    if (contours.size() == 0)
-    {
-      return return_val;
-    }
-
-    for (int i = 0; i < contours.size(); i++)
-    {
-      py::dict val;
-      Rect rects = boundingRect(contours[i]);
-      val["x"] = int(rects.x);
-      val["y"] = int(rects.y);
-      val["w"] = int(rects.width);
-      val["h"] = int(rects.height);
-
-      val["pixels"] = int(contourArea(contours[i]));
-      val["cx"] = int(rects.x + rects.width / 2);
-      val["cy"] = int(rects.y + rects.height / 2);
-
-      if (tilt)
-      {
-
-        RotatedRect minRect = minAreaRect(contours[i]);
-        Point2f rect_points[4];
-        minRect.points(rect_points);
-        py::tuple tmp3 = py::make_tuple(rect_points[0].x, rect_points[0].y, rect_points[1].x, rect_points[1].y, rect_points[2].x, rect_points[2].y, rect_points[3].x, rect_points[3].y);
-        val["tilt_Rect"] = tmp3;
-        int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
-        int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
-        float x1, y1, k;
-        if (tmp1 > tmp2)
-        {
-          x1 = rect_points[1].x - rect_points[0].x;
-          y1 = rect_points[1].y - rect_points[0].y;
-          k = atan(y1 / x1);
-        }
-        else
-        {
-          x1 = rect_points[3].x - rect_points[0].x;
-          y1 = rect_points[3].y - rect_points[0].y;
-          k = atan(y1 / x1);
-        }
-
-        val["rotation"] = k;
-      }
-      return_val.append(val);
-    }
-
     return return_val;
   }
-
-  py::list find_ball(py::bytes &rgb, vector<int> &hsv_da)
+  
+  py::list find_ball_lab(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
   {
-    string tmp = static_cast<string>(rgb);
-    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
+    {
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+
+        in_img = input;
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
+    else
+    {
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
+      if (py::isinstance(py_img, PIL_))
+      {
+        auto tobytes = PIL_.attr("tobytes");
+        auto img_bytes = tobytes(py_img);
+        string tmp = py_img.cast<string>();
+
+        auto mdd = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+    }
     Mat hsv, mask;
-    cvtColor(input, hsv, COLOR_RGB2HSV);
-    inRange(hsv, Scalar(hsv_da[0], hsv_da[1], hsv_da[2]), Scalar(hsv_da[3], hsv_da[4], hsv_da[5]), mask);
+    cvtColor(in_img, hsv, COLOR_RGB2Lab);
+    inRange(hsv, Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
     // cout << hsv_da <<endl;
     Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
     morphologyEx(mask, mask, MORPH_OPEN, se);
     vector<vector<Point>> contours;
     vector<Vec4i> hiearchy;
     findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-
     py::list out;
-
     for (int i = 0; i < contours.size(); i++)
     {
       /* 当拟合点数少于6个时，不进行拟合 */
@@ -620,65 +512,139 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
       {
         break;
       }
-
       // 圆拟合
       RotatedRect rrt = fitEllipse(contours[i]);
-
       int cr_x, cr_y, cr_w, cr_h;
-
       cr_x = rrt.center.x;
       cr_y = rrt.center.y;
       cr_w = rrt.size.width;
       cr_h = rrt.size.height;
-
       /* 当图形长宽相差太大 或者 图形面积太小时，不进行处理 */
       if ((abs(cr_w - cr_h) > 10) ||
           (cr_w * cr_h) < 400)
       {
         break;
       }
-
       py::list tmp;
-
       tmp.append(cr_x);
       tmp.append(cr_y);
       tmp.append(cr_w);
       tmp.append(cr_h);
-
       out.append(tmp);
     }
     return std::move(out);
   }
 
-  py::dict find_blob_lab(py::object py_img,vector<int> size,int mode)
-  // py::dict find_line(py::bytes &rgb)
+  // py::list find_ball_hsv(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
+  // {
+  //   // py::list find_ball(py::bytes &rgb, vector<int> &hsv_da)
+  //   // {
+
+  //   Mat in_img;
+  //   if (py::isinstance<py::bytes>(py_img))
+  //   {
+  //     string tmp = py_img.cast<string>();
+  //     if (size[0] == 0 || size[1] == 0)
+  //     {
+  //       cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+
+  //       in_img = input;
+  //     }
+  //     else
+  //     {
+  //       cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+  //       in_img = input;
+  //     }
+  //   }
+  //   else
+  //   {
+  //     auto PIL_ = py::module::import("PIL.Image").attr("Image");
+
+  //     if (py::isinstance(py_img, PIL_))
+  //     {
+  //       auto tobytes = PIL_.attr("tobytes");
+  //       auto img_bytes = tobytes(py_img);
+  //       string tmp = py_img.cast<string>();
+
+  //       auto mdd = py_img.attr("size").cast<vector<int>>();
+  //       cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+  //       in_img = input;
+  //     }
+  //   }
+  //   Mat hsv, mask;
+  //   cvtColor(in_img, hsv, COLOR_RGB2HSV);
+  //   inRange(hsv, Scalar(thresholds[0], thresholds[1], thresholds[2]), Scalar(thresholds[3], thresholds[4], thresholds[5]), mask);
+  //   // cout << hsv_da <<endl;
+  //   Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
+  //   morphologyEx(mask, mask, MORPH_OPEN, se);
+  //   vector<vector<Point>> contours;
+  //   vector<Vec4i> hiearchy;
+  //   findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+
+  //   py::list out;
+
+  //   for (int i = 0; i < contours.size(); i++)
+  //   {
+  //     /* 当拟合点数少于6个时，不进行拟合 */
+  //     if (contours[i].size() < 6)
+  //     {
+  //       break;
+  //     }
+
+  //     // 圆拟合
+  //     RotatedRect rrt = fitEllipse(contours[i]);
+
+  //     int cr_x, cr_y, cr_w, cr_h;
+
+  //     cr_x = rrt.center.x;
+  //     cr_y = rrt.center.y;
+  //     cr_w = rrt.size.width;
+  //     cr_h = rrt.size.height;
+
+  //     /* 当图形长宽相差太大 或者 图形面积太小时，不进行处理 */
+  //     if ((abs(cr_w - cr_h) > 10) ||
+  //         (cr_w * cr_h) < 400)
+  //     {
+  //       break;
+  //     }
+
+  //     py::list tmp;
+
+  //     tmp.append(cr_x);
+  //     tmp.append(cr_y);
+  //     tmp.append(cr_w);
+  //     tmp.append(cr_h);
+
+  //     out.append(tmp);
+  //   }
+  //   return std::move(out);
+  // }
+
+  py::dict find_line(py::object py_img, vector<int> size, int mode)
   {
     Mat src_gray, dst;
-    // list<float> return_line;
     py::dict return_val;
-    // string tmp = static_cast<string>(rgb);
-    // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str())); //图片输入
 
-  Mat in_img;
-  if(py::isinstance<py::bytes>(py_img))
-  {
-    string tmp = py_img.cast<string>();
-    if (size[0] == 0 || size[1] == 0)
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
     {
-      cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-      in_img = input;
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        in_img = input;
+      }
     }
     else
     {
-      cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-      in_img = input;
-    }
-  }
-  else
-  {
-    auto PIL_=py::module::import("PIL.Image").attr("Image");
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
 
-    if(py::isinstance(py_img,PIL_))
+      if (py::isinstance(py_img, PIL_))
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
@@ -688,7 +654,7 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
         cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
         in_img = input;
       }
-  }
+    }
     Mat src_gary, mask;
     cvtColor(in_img, src_gray, COLOR_RGB2GRAY); //将图片变成灰度图
     Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
@@ -696,7 +662,6 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
     dilate(src_gray, src_gray, element);
     threshold(src_gray, src_gray, 0, 255, THRESH_BINARY | THRESH_OTSU);
     dilate(src_gray, dst, element); //膨胀
-
     Rect rect;
     rect.x = 0;
     rect.y = 0;
@@ -723,7 +688,6 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
     findContours(dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE, Point());
     if (contours.size() == 0)
     {
-
       return std::move(return_val);
     }
     int area = 0, a_n = 0;
@@ -775,10 +739,8 @@ py::list find_blob_lab(py::bytes &rgb, vector<vector<int>> &hsv_da, int tilt)
   }
 };
 
-
-vector<int> size_tmp {0,0};
-vector<int> roi_tmp {0,0,0,0};
-
+vector<int> size_tmp{0, 0};
+vector<int> roi_tmp{0, 0, 0, 0};
 
 PYBIND11_MODULE(_maix_opencv, m)
 {
@@ -790,11 +752,8 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("get_vi", &_v83x_opencv::get_vi)
       .def("set_ui", &_v83x_opencv::set_ui)
       .def("opencv_test", &_v83x_opencv::opencv_test)
-      .def("my_test", &_v83x_opencv::my_test)
-      .def("find_blob", &_v83x_opencv::find_blob, py::arg("rgb"), py::arg("hsv_da"), py::arg("tilt") = 0)
-      .def("find_blob_lab", &_v83x_opencv::find_blob_lab, py::arg("py_img"),py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0 ,py::arg("roi") = roi_tmp,py::arg("x_stride") = 2 ,py::arg("y_stride") = 2,py::arg("invert") = 0,py::arg("area_threshold") = 10,py::arg("pixels_threshold") = 10,py::arg("merge") = 0,py::arg("margin") = 0,py::arg("tilt") = 0)
-      .def("find_ball", &_v83x_opencv::find_ball)
-      .def("find_line", &_v83x_opencv::find_line)
-      .def("get_blob_hsv", &_v83x_opencv::get_blob_hsv),
-      py::arg("rgb"), py::arg("roi"), py::arg("critical");
+      .def("get_blob_lab", &_v83x_opencv::get_blob_lab, py::arg("py_img"), py::arg("roi") = roi_tmp, py::arg("critical") = 0, py::arg("size") = size_tmp, py::arg("mode") = 0)
+      .def("find_blob_lab", &_v83x_opencv::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0, py::arg("roi") = roi_tmp, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
+      .def("find_ball_lab", &_v83x_opencv::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0)
+      .def("find_line", &_v83x_opencv::find_line, py::arg("py_img"), py::arg("size") = size_tmp, py::arg("mode") = 0),
 }

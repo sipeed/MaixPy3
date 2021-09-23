@@ -144,34 +144,30 @@ public:
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
-        in_img = input;
+        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
       else
       {
         cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        input.copyTo(in_img);
       }
     }
     else
     {
       auto PIL_ = py::module::import("PIL.Image").attr("Image");
-
       if (py::isinstance(py_img, PIL_))
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
-        string tmp = py_img.cast<string>();
-
-        auto mdd = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        string tmp = img_bytes.cast<string>();
+        auto img_size = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
     }
-    int critical_t;
-    critical_t = critical > 100 ? 100 : critical;
-    critical_t = critical_t < 0 ? 0 : critical_t;
+    critical = critical > 100 ? 100 : critical;
+    critical = critical < 0 ? 0 : critical;
 
     Rect rect;
     rect.x = roi[0];
@@ -352,31 +348,29 @@ public:
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
-        in_img = input;
+        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
       else
       {
         cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        input.copyTo(in_img);
       }
     }
     else
     {
       auto PIL_ = py::module::import("PIL.Image").attr("Image");
-
       if (py::isinstance(py_img, PIL_))
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
-        string tmp = py_img.cast<string>();
-
-        auto mdd = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        string tmp = img_bytes.cast<string>();
+        auto img_size = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
     }
+    
     Mat lab, mask1;
     if (roi[2] != 0 && roi[3] != 0)
     {
@@ -471,14 +465,13 @@ public:
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
-        in_img = input;
+        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
       else
       {
         cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        input.copyTo(in_img);
       }
     }
     else
@@ -488,13 +481,13 @@ public:
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
-        string tmp = py_img.cast<string>();
-
-        auto mdd = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        string tmp = img_bytes.cast<string>();
+        auto img_size = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
     }
+    
     Mat hsv, mask;
     cvtColor(in_img, hsv, COLOR_RGB2Lab);
     inRange(hsv, Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
@@ -619,40 +612,40 @@ public:
   //   }
   //   return std::move(out);
   // }
+    // std::string tmp = static_cast<std::string>(rgb);
+    // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
+// A* c = new A(1);
   py::dict find_line(py::object py_img, vector<int> size, int mode)
   {
     Mat src_gray, dst;
     py::dict return_val;
-
     Mat in_img;
     if (py::isinstance<py::bytes>(py_img))
     {
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
       else
       {
         cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        input.copyTo(in_img);
       }
     }
     else
     {
       auto PIL_ = py::module::import("PIL.Image").attr("Image");
-
       if (py::isinstance(py_img, PIL_))
       {
         auto tobytes = PIL_.attr("tobytes");
         auto img_bytes = tobytes(py_img);
-        string tmp = py_img.cast<string>();
-
-        auto mdd = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
+        string tmp = img_bytes.cast<string>();
+        auto img_size = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
       }
     }
     Mat src_gary, mask;
@@ -688,6 +681,7 @@ public:
     findContours(dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE, Point());
     if (contours.size() == 0)
     {
+      
       return std::move(return_val);
     }
     int area = 0, a_n = 0;
@@ -738,7 +732,6 @@ public:
     return std::move(return_val);
   }
 };
-
 vector<int> size_tmp{0, 0};
 vector<int> roi_tmp{0, 0, 0, 0};
 
@@ -755,5 +748,5 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("get_blob_lab", &_v83x_opencv::get_blob_lab, py::arg("py_img"), py::arg("roi") = roi_tmp, py::arg("critical") = 0, py::arg("size") = size_tmp, py::arg("mode") = 0)
       .def("find_blob_lab", &_v83x_opencv::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0, py::arg("roi") = roi_tmp, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
       .def("find_ball_lab", &_v83x_opencv::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0)
-      .def("find_line", &_v83x_opencv::find_line, py::arg("py_img"), py::arg("size") = size_tmp, py::arg("mode") = 0),
+      .def("find_line", &_v83x_opencv::find_line, py::arg("py_img"), py::arg("size") = size_tmp, py::arg("mode") = 0);
 }

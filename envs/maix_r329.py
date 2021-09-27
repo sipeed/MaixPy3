@@ -92,8 +92,8 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ex
 #     extra_link_args=[-Wl,-rpath=/usr/lib/python3.8/site-packages/maix -DR329]
 # )
 
-_maix_display_module = Extension(
-    name = '_maix_display', 
+_maix_display_module = Pybind11Extension(
+    name = "_maix_display",
     include_dirs=['ext_modules/_maix_display/include', 'ext_modules/libmaix/components/libmaix/include'],
     sources=get_srcs('ext_modules/_maix_display'),
     libraries=[
@@ -110,7 +110,7 @@ _maix_display_module = Extension(
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
     extra_compile_args=['-DR329Display'],
     extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix"]
-)
+    )
 # max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
 # max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
 # max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")

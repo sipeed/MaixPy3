@@ -76,16 +76,39 @@ _maix_camera_module = Extension('_maix_camera', include_dirs=['ext_modules/_maix
     "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
-_maix_display_module = Extension('_maix_display', include_dirs=['ext_modules/_maix_display/include', 'ext_modules/libmaix/components/libmaix/include'],
-                                 sources=get_srcs('ext_modules/_maix_display'),
-                                 libraries=[
-    "dl", "rt", "log", "ion", "pthread", "cdc_base",
-    "maix_utils", "maix_disp", "maix_image",
-],
+# _maix_display_module = Extension('_maix_display', include_dirs=['ext_modules/_maix_display/include', 'ext_modules/libmaix/components/libmaix/include'],
+#                                  sources=get_srcs('ext_modules/_maix_display'),
+#                                  libraries=[
+#     "dl", "rt", "log", "ion", "pthread", "cdc_base",
+#     "maix_utils", "maix_disp", "maix_image",
+# ],
+#     library_dirs=["/lib",  "/usr/lib", ext_so, ],
+#     extra_compile_args=['-DV831Display'],
+#     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+# )
+
+_maix_display_module = Pybind11Extension(
+    name = "_maix_display",
+    include_dirs=['ext_modules/_maix_display/include', 'ext_modules/libmaix/components/libmaix/include'],
+    sources=get_srcs('ext_modules/_maix_display'),
+    libraries=[
+    # "dl", 
+    # "rt", 
+    # "log", 
+    # "ion", 
+    "pthread", 
+    # "cdc_base",
+    # "maix_utils", 
+    "maix_disp", 
+    # "maix_image",
+    ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
     extra_compile_args=['-DV831Display'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
-)
+    )
+
+
+
 max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
 max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
 max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")

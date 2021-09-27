@@ -49,11 +49,11 @@ def __thumbnail__(src, dst):
 
 try:
     __fastview__ = None
-    from _maix_display import V831Display
+    from _maix_display import Display
     if __env_config__:
-        __fastview__ = V831Display(__width__, __height__)
+        __fastview__ = Display(__width__, __height__)
     else:
-        __fastview__ = V831Display(240, 240)
+        __fastview__ = Display(240, 240)
 
     def __draw__(img):
         global __fastview__
@@ -69,27 +69,6 @@ except ModuleNotFoundError as e:
 except Exception as e:
     pass
 
-try:
-    __fastview__ = None
-    from _maix_display import R329Display
-    if __env_config__:
-        __fastview__ = R329Display(__width__, __height__)
-    else:
-        __fastview__ = R329Display(240, 240)
-
-    def __draw__(img):
-        global __fastview__
-        if isinstance(img, bytes):
-          __fastview__.draw(img, __fastview__.width, __fastview__.height)
-        elif isinstance(img, Image.Image):
-          img = img.resize(
-              (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
-          __fastview__.draw(img.tobytes(), __fastview__.width,
-                            __fastview__.height)
-except ModuleNotFoundError as e:
-    pass
-except Exception as e:
-    pass
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
     global __display__, _remote_show

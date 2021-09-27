@@ -24,6 +24,12 @@ PyDoc_STRVAR(V831Display_name, "V831Display");
 extern PyTypeObject V831DisplayObjectType;
 #endif
 
+// #define R329Display
+#ifdef R329Display
+PyDoc_STRVAR(R329Display_name, "R329Display");
+extern PyTypeObject R329DisplayObjectType;
+#endif
+
 #ifdef  __cplusplus
 }
 #endif

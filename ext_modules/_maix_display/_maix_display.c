@@ -60,5 +60,16 @@ PyMODINIT_FUNC PyInit__maix_display(void)
     PyModule_AddObject(module, V831Display_name, (PyObject *)&V831DisplayObjectType);
 #endif
 
+#ifdef R329Display
+    if (PyType_Ready(&R329DisplayObjectType) < 0) {
+        return NULL;
+    }
+
+    /* Register R329DisplayObjectType */
+    Py_INCREF(&R329DisplayObjectType);
+    PyModule_AddObject(module, R329Display_name, (PyObject *)&R329DisplayObjectType);
+
+#endif
+
     return module;
 }

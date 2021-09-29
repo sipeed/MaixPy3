@@ -63,5 +63,15 @@ PyMODINIT_FUNC PyInit__maix_camera(void)
     PyModule_AddObject(module, V831Camera_name, (PyObject *)&V831CameraObjectType);
 #endif
 
+#ifdef R329Camera
+    if (PyType_Ready(&R329CameraObjectType) < 0) {
+        return NULL;
+    }
+
+    /* Register R329CameraObjectType */
+    Py_INCREF(&R329CameraObjectType);
+    PyModule_AddObject(module, R329Camera_name, (PyObject *)&R329CameraObjectType);
+#endif
+
     return module;
 }

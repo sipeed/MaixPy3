@@ -24,6 +24,15 @@ PyDoc_STRVAR(V831Camera_name, "V831Camera");
 extern PyTypeObject V831CameraObjectType;
 #endif
 
+#ifdef R329Camera
+PyDoc_STRVAR(R329Camera_name, "R329Camera");
+extern PyTypeObject R329CameraObjectType;
+#endif
+
+
+
+
+
 #ifdef  __cplusplus
 }
 #endif

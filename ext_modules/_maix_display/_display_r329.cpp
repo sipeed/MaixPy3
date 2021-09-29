@@ -16,7 +16,7 @@ static void conversion_rgb888_to_rgb565(r329_Display *tp, void *tmp)
 }
 void v_init(r329_Display *tp)
 {
-    tp->disp = libmaix_disp_create();
+    tp->disp = libmaix_disp_create(0);
     if (tp->disp == NULL)
     {
         PyErr_SetString(PyExc_RuntimeError, "libmaix_disp_create err!");

@@ -16,21 +16,6 @@ def jupyter(show=False, clear=True):
   except Exception as e:
     remote = None
 
-
-try:
-    # export _MAIX_WIDTH_=640 && export _MAIX_HEIGHT_=480
-    __env_config__ = False
-    __width__, __height__ = (240, 240)
-    __width__, __height__ = (
-        int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
-    __env_config__ = True
-except Exception as e:
-    pass
-    # print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
-finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
-
-
 def get_draw():
     from PIL import ImageDraw
     global __display__
@@ -50,10 +35,7 @@ def __thumbnail__(src, dst):
 try:
     __fastview__ = None
     from _maix_display import Display
-    if __env_config__:
-        __fastview__ = Display(__width__, __height__)
-    else:
-        __fastview__ = Display(240, 240)
+    __fastview__ = Display()
 
     def __draw__(img):
         global __fastview__

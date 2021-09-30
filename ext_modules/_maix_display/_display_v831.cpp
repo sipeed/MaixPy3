@@ -7,7 +7,7 @@ namespace py = pybind11;
 
 void v_init(v831_Display *tp)
 {
-    tp->disp = libmaix_disp_creat();
+    tp->disp = libmaix_disp_create(0);
     if(tp->disp == NULL) {
         // tp->disp->swap_rb = 1;
         PyErr_SetString(PyExc_RuntimeError, "libmaix_disp_create err!"); 
@@ -63,7 +63,7 @@ pybind11::object v831_Display::draw(pybind11::object py_img,int img_w,int img_h)
     if (NULL != this->disp) {
       if (this->disp->width >= img_width && this->disp->height >= img_height) {
           if (in_img != NULL) {
-            this->disp->draw(this->disp, in_img, (this->disp->width - img_width) / 2,(this->disp->height - img_height) / 2, img_width, img_height, 1);
+            this->disp->draw(this->disp, in_img);
           }
       }
     }

@@ -16,20 +16,7 @@ def jupyter(show=False, clear=True):
   except Exception as e:
     remote = None
 
-
-try:
-    # export _MAIX_WIDTH_=640 && export _MAIX_HEIGHT_=480
-    __env_config__ = False
-    __width__, __height__ = (240, 240)
-    __width__, __height__ = (
-        int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
-    __env_config__ = True
-except Exception as e:
-    pass
-    # print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
-finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
-
+__display__ = Image.new("RGB")
 
 def get_draw():
     from PIL import ImageDraw
@@ -50,11 +37,7 @@ def __thumbnail__(src, dst):
 try:
     __fastview__ = None
     from _maix_display import Display
-    if __env_config__:
-        __fastview__ = Display(__width__, __height__)
-    else:
-        __fastview__ = Display(240, 240)
-
+    __fastview__ = Display()
     def __draw__(img):
         global __fastview__
         if isinstance(img, bytes):
@@ -91,7 +74,7 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
         mjpg.store_mjpg(img)
 
 
-def fill(box=(0, 0), color=(0, 0, 0, 0)):
+def fill(box=(0, 0), color=(0, 255, 0)):
     global __display__
     if len(box) == 2:
         box = box + __display__.size
@@ -99,7 +82,7 @@ def fill(box=(0, 0), color=(0, 0, 0, 0)):
     show(__display__)
 
 
-def clear(c=(0, 0, 0, 0)):
+def clear(c=(0, 255, 0)):
     global __display__
     fill(color=c)
 

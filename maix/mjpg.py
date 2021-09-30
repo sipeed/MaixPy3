@@ -347,3 +347,15 @@ if __name__ == '__main__':
         except ValueError as e:
           print(e)
     # unit_test_c()
+    # test_mjpg html <img>
+    from maix import camera, mjpg
+    import queue, _maix
+
+    Queue = queue.Queue(maxsize=8)
+    mjpg.MjpgServerThread("0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=Queue)).start()
+
+    while True:
+        img = camera.capture()
+        jpg = _maix.rgb2jpg(img.convert("RGB").tobytes(), img.width, img.height)
+        Queue.put(mjpg.BytesImage(jpg))
+        print(len(jpg))

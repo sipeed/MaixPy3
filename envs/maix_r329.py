@@ -108,7 +108,9 @@ _maix_opencv_module = Pybind11Extension(
         "opencv_tracking"
         ],
         library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4", ],
-        extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/_maix_opencv"],)
+        extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/_maix_opencv"],
+        extra_compile_args=['-std=c++11', '-std=gnu++11' ],
+    )
 
 _maix_camera_module = Extension(
     name = '_maix_camera', 
@@ -138,7 +140,7 @@ _maix_camera_module = Extension(
 ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
-    extra_compile_args=['-DR329Camera'],
+    extra_compile_args=['-DR329Camera', '-std=c++11', '-std=gnu++11' ],
     extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix"]
 )
 

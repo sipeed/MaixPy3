@@ -82,7 +82,6 @@ _maix_opencv_module = Pybind11Extension(
         "opencv_img_hash",
         "opencv_plot", 
         "opencv_structured_light", 
-        # "opencv_xfeatures2d", 
         "opencv_ccalib", 
         "opencv_flann",
         "opencv_imgproc", 
@@ -102,7 +101,6 @@ _maix_opencv_module = Pybind11Extension(
         "opencv_text", 
         "opencv_xphoto", 
         "opencv_dnn_objdetect",
-        # "opencv_gapi", 
         "opencv_objdetect", 
         "opencv_saliency", 
         "opencv_tracking"
@@ -112,7 +110,7 @@ _maix_opencv_module = Pybind11Extension(
         extra_compile_args=['-std=c++11', '-std=gnu++11' ],
     )
 
-_maix_camera_module = Extension(
+_maix_camera_module = Pybind11Extension(
     name = '_maix_camera', 
     include_dirs=['ext_modules/_maix_camera/include', 'ext_modules/libmaix/components/libmaix/include'],
     sources=get_srcs('ext_modules/_maix_camera'),

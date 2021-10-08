@@ -1,41 +1,80 @@
 #ifndef _MAIX_CAMERA_H
 #define _MAIX_CAMERA_H
 
-#ifdef  __cplusplus
-extern "C" {
+#include <iostream>
+#include <pybind11/pybind11.h>
+#include <pybind11/embed.h>
+#include <pybind11/stl.h>
+#include <vector>
+#include <list>
+#include <array>
+#include <map>
+#include <set>
+#ifdef __cplusplus
+extern "C"
+{
 #endif
+// #include <stdio.h>
+#include "libmaix_cam.h"
 
-#include <Python.h>
-
-/* Macros needed for Python 3 */
-#ifndef PyInt_Check
-#define PyInt_Check PyLong_Check
-#define PyInt_FromLong PyLong_FromLong
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_Type PyLong_Type
-#endif
-
-PyDoc_STRVAR(VirtualCamera_name, "VirtualCamera");
-extern PyTypeObject VirtualCameraObjectType;
-
-// #define V831Camera
-#ifdef V831Camera
-PyDoc_STRVAR(V831Camera_name, "V831Camera");
-extern PyTypeObject V831CameraObjectType;
-#endif
-
-#ifdef R329Camera
-PyDoc_STRVAR(R329Camera_name, "R329Camera");
-extern PyTypeObject R329CameraObjectType;
-#endif
-
-
-
-
-
-#ifdef  __cplusplus
+#define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
+#ifdef __cplusplus
 }
 #endif
 
+// #define R329Camera
+// #define V831Camera
+
+#ifdef R329Camera
+class r329_camera
+{
+private:
+public:
+    int width, height, dev_id;
+    libmaix_cam_t *cam;
+    uint8_t *img_buff;
+    r329_camera(int w, int h, int dev_id);
+    ~r329_camera();
+    pybind11::object read();
+    void close();
+    void __enter__();
+    void __exit__();
+};
 #endif
 
+#ifdef V831Camera
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+#include "libmaix_image.h"
+
+#ifdef __cplusplus
+}
+#endif
+
+class v831_camera
+{
+private:
+public:
+    int width, height, dev_id;
+    // width operator=(const int num)       //如果使用的话,可能需要重载赋值运算符
+    // {
+    // 	if(num < 640 || num > 480)
+    // }
+    libmaix_cam_t *cam;
+    libmaix_image_t *yuv_img;
+    libmaix_image_t *rgb_img;
+
+    v831_camera(int w, int h, int dev_id);
+    ~v831_camera();
+    pybind11::list read();
+    void close();
+    void __enter__();
+    void __exit__();
+    // String str();
+};
+#endif
+
+#endif

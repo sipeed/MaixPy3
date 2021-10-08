@@ -9,7 +9,7 @@ def test_import():
 '''
 
 import _maix_camera
-cam = _maix_camera.R329Camera(240,240,0)
+cam = _maix_camera.Camera(240,240,0)
 img_bytes = cam.read()
 img_bytes =img_bytes[1]
 

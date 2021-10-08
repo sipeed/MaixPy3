@@ -1,4 +1,5 @@
 
+#ifdef WINDOWSS
 #include "_maix_camera.h"
 
 PyDoc_STRVAR(VirtualCameraObject_type_doc, "VirtualCamera(width, height) -> VirtualCamera object.\n");
@@ -232,3 +233,5 @@ PyTypeObject VirtualCameraObjectType = {
     0,                                        /* tp_alloc */
     VirtualCamera_new,                                /* tp_new */
 };
+
+#endif

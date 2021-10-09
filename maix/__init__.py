@@ -44,6 +44,13 @@ except ModuleNotFoundError as e:
   pass
 
 try:
+  from _maix_opencv import Vision, Image
+  vision, image = Vision(), Image()
+  __all__.extend(['vision', 'image'])
+except ModuleNotFoundError as e:
+  pass
+
+try:
   import shutil
   from PIL import ImageShow
   # use fbviewer on linux
@@ -54,12 +61,5 @@ try:
         command = executable = "fbviewer"
         return command, executable
     ImageShow.register(fbViewer, 0)
-except ModuleNotFoundError as e:
-  pass
-
-try:
-  from . import maix_cv
-  maix_cv = maix_cv.maix_cv
-  __all__.extend(['maix_cv'])
 except ModuleNotFoundError as e:
   pass

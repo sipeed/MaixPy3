@@ -23,31 +23,9 @@ namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
-class _v83x_opencv
+class _maix_image
 {
-
-private:
-  /* data */
-  int Distance(int x1, int y1, int x2, int y2)
-  {
-    int x = abs(x1 - x2);
-    int y = abs(y1 - y2);
-    return int(round(sqrt(x * x + y * y)));
-  }
-
 public:
-  void set_ui(py::bytes &argb)
-  {
-  }
-
-  py::bytes get_vi()
-  {
-    return py::bytes();
-  }
-
-  py::bytes get_ai()
-  {
-  }
 
   py::bytes test(py::bytes &rgb)
   {
@@ -109,11 +87,96 @@ public:
     // return py::bytes();
   }
 
-  _v83x_opencv()
+  _maix_image()
   {
   }
 
-  ~_v83x_opencv()
+  ~_maix_image()
+  {
+  }
+
+};
+
+
+class _maix_vision
+{
+
+private:
+  /* data */
+  int Distance(int x1, int y1, int x2, int y2)
+  {
+    int x = abs(x1 - x2);
+    int y = abs(y1 - y2);
+    return int(round(sqrt(x * x + y * y)));
+  }
+
+public:
+
+  py::bytes test(py::bytes &rgb)
+  {
+    std::string tmp = static_cast<std::string>(rgb);
+    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+
+    cv::Mat output = Mat::zeros(240, 240, CV_8UC4);
+
+    Mat gray, edges;
+    // Mat standard_hough, probabilistic_hough;
+    int min_threshold = 50;
+    int max_trackbar = 150;
+    int s_trackbar = max_trackbar;
+    int p_trackbar = max_trackbar;
+
+    cvtColor(input, gray, COLOR_RGB2GRAY);
+
+    Canny(gray, edges, 50, 200, 3);
+
+    cvtColor(edges, output, COLOR_GRAY2BGRA);
+
+    vector<Vec2f> s_lines;
+    // cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
+
+    /// 1. Use Standard Hough Transform
+    HoughLines(edges, s_lines, 1, CV_PI / 180, min_threshold + s_trackbar, 0, 0);
+
+    /// Show the result
+    for (size_t i = 0; i < s_lines.size(); i++)
+    {
+      float r = s_lines[i][0], t = s_lines[i][1];
+      double cos_t = cos(t), sin_t = sin(t);
+      double x0 = r * cos_t, y0 = r * sin_t;
+      double alpha = 1000;
+
+      Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
+      Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
+      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, LINE_AA);
+    }
+
+    // vector<Vec4i> p_lines;
+    // cvtColor(edges, probabilistic_hough, COLOR_GRAY2BGR);
+
+    // /// 2. Use Probabilistic Hough Transform
+    // HoughLinesP(edges, p_lines, 1, CV_PI / 180, min_threshold + p_trackbar, 30, 10);
+
+    // /// Show the result
+    // for (size_t i = 0; i < p_lines.size(); i++)
+    // {
+    //   Vec4i l = p_lines[i];
+    //   line(output, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0, 200), 3, LINE_AA);
+    // }
+
+    int size = output.total() * output.elemSize();
+    return py::bytes((char *)output.data, size);
+    // std::vector buff;
+    // cv::imencode(".bmp", image, buff);
+    // std::string image_string(reinterpret_cast<char*>(&buff[0]), buff.size());
+    // return py::bytes();
+  }
+
+  _maix_vision()
+  {
+  }
+
+  ~_maix_vision()
   {
   }
 
@@ -722,20 +785,28 @@ public:
     return std::move(return_val);
   }
 };
-vector<int> size_tmp{0, 0};
-vector<int> roi_tmp{0, 0, 0, 0};
 
 PYBIND11_MODULE(_maix_opencv, m)
 {
-  pybind11::class_<_v83x_opencv>(m, "_v83x_opencv")
+  pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
-      .def("test", &_v83x_opencv::test)
-      .def("get_ai", &_v83x_opencv::get_ai)
-      .def("get_vi", &_v83x_opencv::get_vi)
-      .def("set_ui", &_v83x_opencv::set_ui)
-      .def("opencv_test", &_v83x_opencv::opencv_test)
-      .def("get_blob_lab", &_v83x_opencv::get_blob_lab, py::arg("py_img"), py::arg("roi") = roi_tmp, py::arg("critical") = 0, py::arg("size") = size_tmp, py::arg("mode") = 0)
-      .def("find_blob_lab", &_v83x_opencv::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0, py::arg("roi") = roi_tmp, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
-      .def("find_ball_lab", &_v83x_opencv::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = size_tmp, py::arg("mode") = 0)
-      .def("find_line", &_v83x_opencv::find_line, py::arg("py_img"), py::arg("size") = size_tmp, py::arg("mode") = 0);
+      .def("get_blob_lab", &_maix_vision::get_blob_lab, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_blob_lab", &_maix_vision::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
+      .def("find_ball_lab", &_maix_vision::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0);
+
+  pybind11::class_<_maix_image>(m, "Image")
+      .def(pybind11::init<>())
+      .def("convert", &_maix_image::test)
+      .def("resize", &_maix_image::test)
+      .def("crop", &_maix_image::test)
+      .def("paste", &_maix_image::test)
+      .def("rotate", &_maix_image::test)
+      .def("getpixel", &_maix_image::test)
+      .def("putpixel", &_maix_image::test)
+      .def("format", &_maix_image::test)
+      .def("size", &_maix_image::test)
+      .def("mode", &_maix_image::test)
+      .def("save", &_maix_image::test)
+      .def("tobytes", &_maix_image::test);
 }

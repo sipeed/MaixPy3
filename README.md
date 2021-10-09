@@ -169,8 +169,8 @@ Click here to view the effect [usage_display_hook.ipynb](./examples/general/usag
 | **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
 | --------------   | ---------- | ---------------- | --------- | --------- |
 | linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
-| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M+
-| maix_rv1126      | prepare    |                  |   NULL    |
+| maix_v83x        | working    | [maix_v83x](./examples/maix_v83x/) | [maix_v83x](./envs/maix_v83x.py)     | 11M+
+| maix_r329      | working    | [maix_r329](./examples/maix_r329/) |   [maix_r329](./envs/maix_r329.py)    |  unknown
 | RPi_XXXX         | maybe      |                  |   NULL    |
 | Windows          | build fail |                  |           |
 
@@ -180,7 +180,7 @@ Click here to view the effect [usage_display_hook.ipynb](./examples/general/usag
 
 Under `linux x86_64`, use `python3 setup.py build` to complete the general package construction.
 
-For other platforms, take the version of `maix_v831` as an example, match the Python3 + cross-compilation chain of the corresponding platform([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613)), and run `python3.8 setup.py build maix_v831` to complete the construction of the target platform package.
+For other platforms, take the version of `maix_v83x` as an example, match the Python3 + cross-compilation chain of the corresponding platform([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613)), and run `python3.8 setup.py build maix_v83x` to complete the construction of the target platform package.
 
 Welcome to provide configurations of different platforms to [MaixPy3/envs/](./envs/) to adapt to the MaixPy3 environment.
 
@@ -203,7 +203,7 @@ Each catalog function of the project.
 If you want to submit the configuration of other platforms, please refer to the following:
 
 - [general.py](./envs/general.py)
-- [maix_v831.py](./envs/maix_v831.py)
+- [maix_v83x.py](./envs/maix_v83x.py)
 
 ```python
 
@@ -230,7 +230,7 @@ If you want to submit some Python and C modules that need to be compiled, it is 
 If you want to submit some useful Python tools or sample code, refer to the following:
 
 - [general](./examples/general/)
-- [maix_v831](./examples/general/)
+- [maix_v83x](./examples/general/)
 - [rtsp_pyqt](./examples/rtsp_pyqt/)
 
 ## Thanks

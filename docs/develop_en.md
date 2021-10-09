@@ -74,12 +74,12 @@ your x86
 your arm
 
 - source ../toolchain_v83x_linux_x86/envsetup.sh
-- python3.8 setup.py build maix_v831
+- python3.8 setup.py build maix_v83x
 
 ## pypi upload
 
 - python3 setup.py sdist build
-- python3.8 setup.py bdist_wheel maix_v831
+- python3.8 setup.py bdist_wheel maix_v83x
 
 > pip install twine
 

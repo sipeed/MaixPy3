@@ -7,27 +7,15 @@
 #{'rect': [9, 229, 9, 9, 145, 9, 145, 229], 'pixels': 12959, 'cx': 77, 'cy': 119, 'rotation': -1.570796251296997}
 
 from maix import camera
-from maix import maix_cv
+from maix import vision
 from PIL import Image ,ImageDraw
 from maix import display
-cv = _v83x_opencv()
-
-#跳过一些帧
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
-tmp = camera.read()
 
 def find_line():
   while True:
     tmp = camera.read()
     if tmp:
-      ma = maix_cv.find_line(tmp)
+      ma = vision.find_line(tmp)
       print(ma)
       draw = display.get_draw()
       draw.line([(ma["rect"][0], ma["rect"][1]), (ma["rect"][2], ma["rect"][3])],fill='white',width=1)

@@ -196,4 +196,5 @@ _maix_py_modules = [
     "evdev",
     "spidev",
     "pyserial"
+    "zbarlight",
 ]

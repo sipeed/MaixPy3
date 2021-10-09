@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# maix_cv.find_blob(pic,hsv,tilt=0)函数说明
+# vision.find_blob(pic,hsv,tilt=0)函数说明
 # 功能:在图片pic中寻找符合hsv颜色区域的色块
 # 输入：pic，240*240尺寸的图片bytes数据
 #     hsv,hsv阈值数组，前三个是最小值，后三个是最大值
@@ -14,7 +14,7 @@
 #tilt_Rect 斜框四个顶点
 #rotation 斜框斜度
 
-from maix import maix_cv
+from maix import vision
 from maix import camera
 from PIL import Image, ImageDraw
 from maix import display
@@ -24,7 +24,7 @@ def find_blob():
     tmp = camera.read()
     if tmp:
         t = time.time()
-        ma = maix_cv.find_blob_lab(tmp,test)
+        ma = vision.find_blob_lab(tmp,test)
         t = time.time() - t
         print("-- forward time: {}s".format(t))
         # print(ma)

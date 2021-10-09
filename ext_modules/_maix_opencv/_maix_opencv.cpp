@@ -23,10 +23,128 @@ namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
-class _maix_image
+struct libmaix_image
+{
+  
+  cv::Mat obj;
+
+  int _load() {
+    
+    return 0;
+  }
+
+  int _save() {
+    
+    return 0;
+  }
+
+};
+
+
+class _maix_image :public libmaix_image
 {
 public:
+  
+  py::list get_blob_lab(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
+  {
+    py::list return_val;
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
+    {
+      string tmp = py_img.cast<string>();
+      if (size[0] == 0 || size[1] == 0)
+      {
+        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
+      }
+      else
+      {
+        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
+      }
+    }
+    else
+    {
+      auto PIL_ = py::module::import("PIL.Image").attr("Image");
+      if (py::isinstance(py_img, PIL_))
+      {
+        auto tobytes = PIL_.attr("tobytes");
+        auto img_bytes = tobytes(py_img);
+        string tmp = img_bytes.cast<string>();
+        auto img_size = py_img.attr("size").cast<vector<int>>();
+        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        input.copyTo(in_img);
+      }
+    }
+    critical = critical > 100 ? 100 : critical;
+    critical = critical < 0 ? 0 : critical;
 
+    Rect rect;
+    rect.x = roi[0];
+    rect.y = roi[1];
+    rect.width = roi[2];
+    rect.height = roi[3];
+    Mat lab_img;
+    cvtColor(in_img(rect), lab_img, COLOR_RGB2Lab);
+
+    vector<Mat> lab_planes;
+    split(lab_img, lab_planes);
+
+    int histSize = 256;
+    float range[] = {0, 256};
+    const float *histRanges = range;
+    Mat l_hist, a_hist, b_hist;
+    calcHist(&lab_planes[0], 1, 0, Mat(), l_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[1], 1, 0, Mat(), a_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[2], 1, 0, Mat(), b_hist, 1, &histSize, &histRanges, true, false);
+
+    float lmax = 0, lnum = 0;
+    float amax = 0, anum = 0;
+    float bmax = 0, bnum = 0;
+    for (int i = 0; i < histSize; i++)
+    {
+      if (l_hist.at<float>(i) > lmax)
+      {
+        lmax = l_hist.at<float>(i);
+        lnum = i;
+      }
+      if (a_hist.at<float>(i) > amax)
+      {
+        amax = a_hist.at<float>(i);
+        anum = i;
+      }
+      if (b_hist.at<float>(i) > bmax)
+      {
+        bmax = b_hist.at<float>(i);
+        bnum = i;
+      }
+    }
+    int min_lnum = int(lnum - critical);
+
+    min_lnum = min_lnum < 0 ? 0 : min_lnum;
+
+    int max_lnum = int(lnum + critical);
+
+    max_lnum = max_lnum > 180 ? 180 : max_lnum;
+
+    int min_anum = int(anum - critical);
+    min_anum = min_anum < 0 ? 0 : min_anum;
+    int max_anum = int(anum + critical);
+    max_anum = max_anum > 255 ? 255 : max_anum;
+
+    int min_bnum = int(bnum - critical);
+    min_bnum = min_bnum < 0 ? 0 : min_bnum;
+    int max_bnum = int(bnum + critical);
+    max_bnum = max_bnum > 255 ? 255 : max_bnum;
+
+    return_val.append(int(min_lnum * 100 / 255));
+    return_val.append(min_anum - 128);
+    return_val.append(min_bnum - 128);
+    return_val.append(int(max_lnum * 100 / 255));
+    return_val.append(max_anum - 128);
+    return_val.append(max_bnum - 128);
+    return return_val;
+  }
   py::bytes test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -806,6 +924,7 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("putpixel", &_maix_image::test)
       .def("format", &_maix_image::test)
       .def("size", &_maix_image::test)
+      .def("load", &_maix_image::test)
       .def("mode", &_maix_image::test)
       .def("save", &_maix_image::test)
       .def("tobytes", &_maix_image::test);

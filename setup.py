@@ -17,9 +17,9 @@ sysstr = platform.system()
 if (sysstr == "Windows"):
   from envs.windows import _maix_modules, _maix_data_files, _maix_py_modules
 elif (sysstr == "Linux"):
-  if 'maix_v831' in sys.argv:
-    sys.argv.remove('maix_v831')
-    from envs.maix_v831 import _maix_modules, _maix_data_files, _maix_py_modules
+  if 'maix_v83x' in sys.argv:
+    sys.argv.remove('maix_v83x')
+    from envs.maix_v83x import _maix_modules, _maix_data_files, _maix_py_modules
   elif 'maix_r329' in sys.argv:
     from envs.maix_r329 import _maix_modules, _maix_data_files, _maix_py_modules
     sys.argv.remove('maix_r329')

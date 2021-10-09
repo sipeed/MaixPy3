@@ -169,8 +169,8 @@ while True:
 | **Platform**         | **Status** |   **Example**    | **config** | **Memory usage** |
 | --------------   | ---------- | ---------------- | --------- | --------- |
 | linux x86_64     | working    | [general](./examples/general/) | [general](./envs/general.py) | unlimited |
-| maix_v831        | working    | [maix_v831](./examples/maix_v831/) | [maix_v831](./envs/maix_v831.py)     | 11M ~ 17M (Max 48M)
-| maix_rv1126      | prepare    |                  |   NULL    |
+| maix_v83x        | working    | [maix_v83x](./examples/maix_v83x/) | [maix_v83x](./envs/maix_v83x.py)     | 11M ~ 17M (Max 48M)
+| maix_r329      | working    | [maix_r329](./examples/maix_r329/) |   [maix_r329](./envs/maix_r329.py)    |  unknown
 | RPi_XXXX         | maybe      |                  |   NULL    |
 | Windows          | build fail |                  |           |
 
@@ -180,7 +180,7 @@ while True:
 
 在 `linux x86_64` 下使用 `python3 setup.py build` 完成通用包的构建。
 
-若是其他平台，以 `maix_v831` 的版型为例，搭配对应平台的 Python3 + 交叉编译链([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613))，运行 `python3.8 setup.py build maix_v831` 从而完成目标平台包的构建。
+若是其他平台，以 `maix_v83x` 的版型为例，搭配对应平台的 Python3 + 交叉编译链([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613))，运行 `python3.8 setup.py build maix_v83x` 从而完成目标平台包的构建。
 
 欢迎提供不同平台的配置到 [MaixPy3/envs/](./envs/) 来适配 MaixPy3 环境。
 
@@ -203,7 +203,7 @@ while True:
 如果你想要提交其他平台的配置，参考如下：
 
 - [general.py](./envs/general.py)
-- [maix_v831.py](./envs/maix_v831.py)
+- [maix_v83x.py](./envs/maix_v83x.py)
 
 ```python
 
@@ -230,7 +230,7 @@ _maix_py_modules = [
 如果你想要提交一些好用的 Python 工具或示例代码，参考如下：
 
 - [general](./examples/general/)
-- [maix_v831](./examples/general/)
+- [maix_v83x](./examples/general/)
 - [rtsp_pyqt](./examples/rtsp_pyqt/)
 
 ## Thanks

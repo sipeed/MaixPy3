@@ -40,41 +40,88 @@ typedef enum
 // #define R329Display
 // #define V831Display
 
-#ifdef R329Display
-class r329_Display
+
+
+
+class _Display
 {
 private:
 public:
     libmaix_disp_t *disp;
-    image_t fb_img;
     int width ;
     int height ;
-    r329_Display(int w,int h);
-    ~r329_Display();
+    _Display(int w,int h);
+    ~_Display();
     pybind11::object draw(pybind11::object py_img,int img_w,int img_h);
     void close();
     void __enter__();
     void __exit__();
-};
+
+
+
+
+#ifdef R329Display
+public:
+    image_t fb_img;
 #endif
 
-#ifdef V831Display
-class v831_Display
-{
-private:
-    
-public:
-    libmaix_disp_t *disp;
-    int width ;
-    int height ;
-    v831_Display(int w,int h);
-    ~v831_Display();
-    pybind11::object draw(pybind11::object py_img,int img_w,int img_h);
-    void close();
-    void __enter__();
-    void __exit__();
-};
+#ifdef V83xDisplay
+// public:
+
 #endif
+
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// #ifdef R329Display
+// class r329_Display
+// {
+// private:
+// public:
+//     libmaix_disp_t *disp;
+//     image_t fb_img;
+//     int width ;
+//     int height ;
+//     r329_Display(int w,int h);
+//     ~r329_Display();
+//     pybind11::object draw(pybind11::object py_img,int img_w,int img_h);
+//     void close();
+//     void __enter__();
+//     void __exit__();
+// };
+// #endif
+
+// #ifdef V831Display
+// class v831_Display
+// {
+// private:
+    
+// public:
+//     libmaix_disp_t *disp;
+//     int width ;
+//     int height ;
+//     v831_Display(int w,int h);
+//     ~v831_Display();
+//     pybind11::object draw(pybind11::object py_img,int img_w,int img_h);
+//     void close();
+//     void __enter__();
+//     void __exit__();
+// };
+// #endif
 
 // #ifdef  __cplusplus
 // extern "C" {

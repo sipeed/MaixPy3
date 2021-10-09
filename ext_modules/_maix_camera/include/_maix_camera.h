@@ -21,6 +21,20 @@ extern "C"
 }
 #endif
 
+
+#ifdef V83xCamera
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+#include "libmaix_image.h"
+
+#ifdef __cplusplus
+}
+#endif
+#endif
+
+
 // #define R329Camera
 // #define V83xCamera
 
@@ -60,87 +74,5 @@ public:
 
 };
 
-
-
-
-
-
-
-
-
-
-// #ifdef R329Camera
-// class r329_camera
-// {
-// private:
-// public:
-//     int width, height, dev_id;
-//     libmaix_cam_t *cam;
-//     uint8_t *img_buff;
-//     r329_camera(int w, int h, int dev_id);
-//     ~r329_camera();
-//     pybind11::object read();
-//     void close();
-//     void __enter__();
-//     void __exit__();
-// };
-// #endif
-
-// #ifdef V831Camera
-
-// #ifdef __cplusplus
-// extern "C"
-// {
-// #endif
-// #include "libmaix_image.h"
-
-// #ifdef __cplusplus
-// }
-// #endif
-
-// class v831_camera
-// {
-// private:
-// public:
-//     int width, height, dev_id;
-//     // width operator=(const int num)       //如果使用的话,可能需要重载赋值运算符
-//     // {
-//     // 	if(num < 640 || num > 480)
-//     // }
-//     libmaix_cam_t *cam;
-//     libmaix_image_t *yuv_img;
-//     libmaix_image_t *rgb_img;
-
-//     v831_camera(int w, int h, int dev_id);
-//     ~v831_camera();
-//     pybind11::list read();
-//     void close();
-//     void __enter__();
-//     void __exit__();
-//     // String str();
-// };
-
-// #endif
-
-
-
-// #ifdef VirtualCamera
-// class virtual_camera
-// {
-// private:
-// public:
-//     int width, height, dev_id;
-//     // width operator=(const int num)       //如果使用的话,可能需要重载赋值运算符
-//     // {
-//     // 	if(num < 640 || num > 480)
-//     // }
-//     virtual_camera(int w, int h, int dev_id);
-//     ~virtual_camera();
-//     pybind11::list read();
-//     void close();
-//     void __enter__();
-//     void __exit__();
-// };
-// #endif
 
 #endif

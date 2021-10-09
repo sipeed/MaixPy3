@@ -30,8 +30,9 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
                                                 "venc_base", "mpp_component", "adecoder", "asound", "venc_base", "hwdisplay",
                                                 "maix_utils", "maix_cam", "maix_image",
                                       ],
-                                      library_dirs=[ ext_so, ],
-                                      extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
+                                      library_dirs=[ext_so, ],
+                                      extra_link_args=[
+                                          "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
                                       define_macros=[
                                           ('V831Camera', None)],
                                       )
@@ -61,42 +62,60 @@ _maix_opencv_module = Pybind11Extension("_maix_opencv",
                                             "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix/_maix_opencv"],
                                         )
 
-_maix_camera_module = Extension('_maix_camera', include_dirs=['ext_modules/_maix_camera/include', 'ext_modules/libmaix/components/libmaix/include'],
-                                sources=get_srcs('ext_modules/_maix_camera'),
-                                libraries=[
-    "dl", "rt", "log", "ion", "pthread", "cdc_base",
-    "MemAdapter", "media_utils", "mpp_vi", "mpp_isp", "ISP",
-    "venc_base", "mpp_component", "adecoder", "asound", "venc_base", "hwdisplay",
-    "maix_utils", "maix_cam", "maix_image",
-],
+
+_maix_camera_module = Pybind11Extension(
+    name='_maix_camera',
+    include_dirs=['ext_modules/_maix_camera/include',
+                  'ext_modules/libmaix/components/libmaix/include'],
+    sources=get_srcs('ext_modules/_maix_camera'),
+    libraries=[
+        # "dl",
+        # "rt",
+        # "log",
+        # "ion",
+        "pthread",
+        # "cdc_base",
+        # "MemAdapter",
+        # "media_utils",
+        # "mpp_vi",
+        # "mpp_isp",
+        # "ISP",
+        # "venc_base",
+        # "mpp_component",
+        # "adecoder",
+        # "asound",
+        # "venc_base",
+        # "hwdisplay",
+        # "maix_utils",
+        "maix_cam",
+        "maix_image",
+    ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
-    extra_compile_args=['-DV831Camera'],
-    extra_link_args=[
-    "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+    extra_compile_args=['-DV83xCamera', '-std=c++11', '-std=gnu++11'],
+    extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
-
 _maix_display_module = Pybind11Extension(
-    name = "_maix_display",
-    include_dirs=['ext_modules/_maix_display/include', 'ext_modules/libmaix/components/libmaix/include'],
+    name="_maix_display",
+    include_dirs=['ext_modules/_maix_display/include',
+                  'ext_modules/libmaix/components/libmaix/include'],
     sources=get_srcs('ext_modules/_maix_display'),
     libraries=[
-    # "dl", 
-    # "rt", 
-    # "log", 
-    # "ion", 
-    "pthread", 
-    # "cdc_base",
-    # "maix_utils", 
-    "maix_disp", 
-    # "maix_image",
+        # "dl",
+        # "rt",
+        # "log",
+        # "ion",
+        "pthread",
+        # "cdc_base",
+        # "maix_utils",
+        "maix_disp",
+        # "maix_image",
     ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
     extra_compile_args=['-DV83xDisplay'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
-    )
-
+)
 
 
 max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')

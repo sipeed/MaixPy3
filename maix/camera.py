@@ -67,7 +67,8 @@ try:
 
     except Exception as e:
         # use libmaix on v831
-        from _maix_camera import V831Camera
+        # from _maix_camera import V831Camera
+        from _maix_camera import R329Camera
 
         class V831MaixVideo(MaixVideo):
 
@@ -75,10 +76,10 @@ try:
                 self.source = source
                 self.cam = None
 
-            def config(self, size=(480, 360)):
+            def config(self, size=(240, 240)):
                 if self.cam == None:
                     super(V831MaixVideo, self).__init__(size)
-                    self.cam = V831Camera(self.width(), self.height(), 0)
+                    self.cam = R329Camera(self.width(), self.height(), 0)
                     import time
                     time.sleep(0.2) # wait init
                     print('[camera] config input size(%d, %d)' %
@@ -101,44 +102,42 @@ try:
 
         camera = V831MaixVideo()
 except Exception as e:
-    pass
+    try:
+        from cv2 import VideoCapture
 
-try:
-    from cv2 import VideoCapture
+        class CvMaixVideo(MaixVideo):
 
-    class CvMaixVideo(MaixVideo):
-
-        def __init__(self, source=0):
-            self.source = source
-            self.cam = None
-
-        def config(self, size=(640, 480), source=None):
-            if self.cam == None:
-                super(CvMaixVideo, self).__init__(size)
-                if source:
-                    self.source = source
-                self.cam = VideoCapture(self.source)
-                print('[camera] config input size(%s, %d, %d)' %
-                    (self.source, self.width(), self.height()))
-
-        def read(self):
-            if self.cam == None:
-                print('[camera] run config(size=(w, h)) before capture.')
-                self.config()
-            ret, frame = self.cam.read()
-            if ret:
-                bgr = frame[..., ::-1]  # bgr2rgb
-                return bgr.tobytes()  # bytes
-            return None
-
-        def __del__(self):
-            if self.cam:
-                self.cam.release()
+            def __init__(self, source=0):
+                self.source = source
                 self.cam = None
 
-    camera = CvMaixVideo()
-except Exception as e:
-    pass
+            def config(self, size=(640, 480), source=None):
+                if self.cam == None:
+                    super(CvMaixVideo, self).__init__(size)
+                    if source:
+                        self.source = source
+                    self.cam = VideoCapture(self.source)
+                    print('[camera] config input size(%s, %d, %d)' %
+                        (self.source, self.width(), self.height()))
+
+            def read(self):
+                if self.cam == None:
+                    print('[camera] run config(size=(w, h)) before capture.')
+                    self.config()
+                ret, frame = self.cam.read()
+                if ret:
+                    bgr = frame[..., ::-1]  # bgr2rgb
+                    return bgr.tobytes()  # bytes
+                return None
+
+            def __del__(self):
+                if self.cam:
+                    self.cam.release()
+                    self.cam = None
+
+        camera = CvMaixVideo()
+    except Exception as e:
+        pass
 
 # registered interface
 capture = camera.capture

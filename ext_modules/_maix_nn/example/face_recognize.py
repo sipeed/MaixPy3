@@ -31,12 +31,12 @@ def get_keys(device):
 class Face_Recognizer:
     def __init__(self, threshold = 0.5, nms = 0.3, max_face_num = 1):
         model = {
-            "param": "/root/models/model_int8.param",
-            "bin": "/root/models/model_int8.bin"
+            "param": "res/model_int8.param",
+            "bin": "res/model_int8.bin"
         }
         model_fe = {
-            "param": "/root/models/fe_res18_117.param",
-            "bin": "/root/models/fe_res18_117.bin"
+            "param": "res/fe_res18_117.param",
+            "bin": "res/fe_res18_117.bin"
         }
         self.input_size = (224, 224, 3)
         input_size_fe = (128, 128, 3)

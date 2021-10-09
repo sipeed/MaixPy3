@@ -49,12 +49,8 @@ def __thumbnail__(src, dst):
 
 try:
     __fastview__ = None
-    from _maix_display import V831Display
-    if __env_config__:
-        __fastview__ = V831Display(__width__, __height__)
-    else:
-        __fastview__ = V831Display(240, 240)
-
+    from _maix_display import Display
+    __fastview__ = Display()
     def __draw__(img):
         global __fastview__
         if isinstance(img, bytes):
@@ -92,11 +88,12 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
 
 
 def fill(box=(0, 0), color=(0, 0, 0, 0)):
-    global __display__
-    if len(box) == 2:
-        box = box + __display__.size
-    __display__.paste(color, box)
-    show(__display__)
+    pass
+    # global __display__
+    # if len(box) == 2:
+    #     box = box + __display__.size
+    # __display__.paste(color, box)
+    # show(__display__)
 
 
 def clear(c=(0, 0, 0, 0)):

@@ -109,22 +109,12 @@ public:
     // return py::bytes();
   }
 
-  _v83x_opencv(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir)
-  {
-    init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
-  }
-
-  int init(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir)
-  {
-  }
-
-  int exit()
+  _v83x_opencv()
   {
   }
 
   ~_v83x_opencv()
   {
-    exit();
   }
 
   py::bytes opencv_test(py::bytes &rgb)
@@ -738,8 +728,7 @@ vector<int> roi_tmp{0, 0, 0, 0};
 PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_v83x_opencv>(m, "_v83x_opencv")
-      .def(pybind11::init<int, int, int, int, int, int>(),
-           py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
+      .def(pybind11::init<>())
       .def("test", &_v83x_opencv::test)
       .def("get_ai", &_v83x_opencv::get_ai)
       .def("get_vi", &_v83x_opencv::get_vi)

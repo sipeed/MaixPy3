@@ -14,7 +14,6 @@
 extern "C"
 {
 #endif
-// #include <stdio.h>
 #include "libmaix_cam.h"
 
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
@@ -74,6 +73,32 @@ public:
     void __enter__();
     void __exit__();
     // String str();
+};
+
+#endif
+
+#ifndef R329Camera
+#ifndef V831Camera
+#define VirtualCamera
+#endif
+#endif
+
+#ifdef VirtualCamera
+class virtual_camera
+{
+private:
+public:
+    int width, height, dev_id;
+    // width operator=(const int num)       //如果使用的话,可能需要重载赋值运算符
+    // {
+    // 	if(num < 640 || num > 480)
+    // }
+    virtual_camera(int w, int h, int dev_id);
+    ~virtual_camera();
+    pybind11::list read();
+    void close();
+    void __enter__();
+    void __exit__();
 };
 #endif
 

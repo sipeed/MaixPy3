@@ -57,4 +57,17 @@ PYBIND11_MODULE(_maix_camera, m)
         .doc() = "Camera(width, height,device_id) -> V831Camera object.\n";
     // .def("str", &v831_Camera::str)
 #endif
+
+#ifdef VirtualCamera
+    pybind11::class_<virtual_camera>(m, "Camera")
+        .def(py::init<int, int, int>(), py::arg("w") = 240, py::arg("h") = 240, py::arg("dev_id") = 0)
+        .def_readwrite("width", &virtual_camera::width)
+        .def_readwrite("height", &virtual_camera::height)
+        .def("read", &virtual_camera::read)
+        .def("close", &virtual_camera::close, R"pbdoc(close()\n\nClose VirtualCamera device.\n)pbdoc")
+        .def("__enter__", &virtual_camera::__enter__)
+        .def("__exit__", &virtual_camera::__exit__)
+        .doc() = "Camera(width, height,device_id) -> VirtualCamera object.\n";
+#endif
+
 }

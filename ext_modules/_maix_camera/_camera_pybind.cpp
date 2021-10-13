@@ -163,10 +163,12 @@ pybind11::list _camera::read()
     for (size_t i = 0; i < 5; i++)
     {
         ret = this->cam->capture(this->cam, (unsigned char *)this->img_buff);
+        cout << "cam:" << ret << endl;
         // not ready， sleep to release CPU
         if (ret == LIBMAIX_ERR_NOT_READY)
         {
             usleep(25 * 1000);
+            debug_line;
             continue;
         }
         if (ret == LIBMAIX_ERR_NONE)

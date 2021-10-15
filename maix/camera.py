@@ -68,9 +68,9 @@ try:
     except Exception as e:
         # use libmaix on v831
         # from _maix_camera import V831Camera
-        from _maix_camera import R329Camera
+        from _maix_camera import Camera
 
-        class V831MaixVideo(MaixVideo):
+        class SpMaixVideo(MaixVideo):
 
             def __init__(self, source="/v831"):
                 self.source = source
@@ -78,8 +78,8 @@ try:
 
             def config(self, size=(240, 240)):
                 if self.cam == None:
-                    super(V831MaixVideo, self).__init__(size)
-                    self.cam = R329Camera(self.width(), self.height(), 0)
+                    super(SpMaixVideo, self).__init__(size)
+                    self.cam = Camera(self.width(), self.height(), 0)
                     import time
                     time.sleep(0.2) # wait init
                     print('[camera] config input size(%d, %d)' %
@@ -100,7 +100,7 @@ try:
                     self.cam.close()
                     self.cam = None
 
-        camera = V831MaixVideo()
+        camera = SpMaixVideo()
 except Exception as e:
     try:
         from cv2 import VideoCapture

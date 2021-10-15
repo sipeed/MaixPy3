@@ -16,41 +16,13 @@ def jupyter(show=False, clear=True):
   except Exception as e:
     remote = None
 
-
-try:
-    # export _MAIX_WIDTH_=640 && export _MAIX_HEIGHT_=480
-    __env_config__ = False
-    __width__, __height__ = (240, 240)
-    __width__, __height__ = (
-        int(os.environ['_MAIX_WIDTH_']), int(os.environ['_MAIX_HEIGHT_']))
-    __env_config__ = True
-except Exception as e:
-    pass
-    # print('[display] tips: os.environ(export) not _MAIX_WIDTH_ or _MAIX_HEIGHT_.')
-finally:
-    __display__ = Image.new("RGB", (__width__, __height__), (0, 0, 0))
-
-
-def get_draw():
-    from PIL import ImageDraw
-    global __display__
-    if __display__:
-        tmp = ImageDraw.Draw(__display__)
-        tmp.paste = __display__.paste
-        return tmp
-    return None
-
-
-def __thumbnail__(src, dst):
-    w, h = src.size
-    if w > dst.width or h > dst.height:
-        src.thumbnail((dst.width, dst.height))
-
+__width__, __height__ = 240, 240
 
 try:
     __fastview__ = None
     from _maix_display import Display
     __fastview__ = Display()
+    __width__, __height__ = __fastview__.width, __fastview__.height
     def __draw__(img):
         global __fastview__
         if isinstance(img, bytes):
@@ -65,6 +37,28 @@ except ModuleNotFoundError as e:
 except Exception as e:
     pass
 
+__display__ = None
+
+def get_display():
+    global __display__
+    if __display__ is None:
+      global __width__, __height__
+      __display__ = Image.new("RGB", (__width__, __height__))
+    return __display__
+
+def get_draw():
+    from PIL import ImageDraw
+    disp = get_display()
+    if disp:
+        tmp = ImageDraw.Draw(disp)
+        tmp.paste = disp.paste
+        return tmp
+    return None
+
+def __thumbnail__(src, dst):
+    w, h = src.size
+    if w > dst.width or h > dst.height:
+        src.thumbnail((dst.width, dst.height))
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
     global __display__, _remote_show
@@ -88,16 +82,14 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
 
 
 def fill(box=(0, 0), color=(0, 0, 0, 0)):
-    pass
-    # global __display__
-    # if len(box) == 2:
-    #     box = box + __display__.size
-    # __display__.paste(color, box)
-    # show(__display__)
+    if len(box) == 2:
+        global __width__, __height__
+        box = box + (__width__, __height__)
+    get_draw().paste(color, box)
+    show(__display__)
 
 
 def clear(c=(0, 0, 0, 0)):
-    global __display__
     fill(color=c)
 
 

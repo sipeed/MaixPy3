@@ -16,7 +16,7 @@ def jupyter(show=False, clear=True):
   except Exception as e:
     remote = None
 
-__width__, __height__ = 240, 240
+__width__, __height__, __mode__= 240, 240, "RGB"
 
 try:
     __fastview__ = None
@@ -42,8 +42,8 @@ __display__ = None
 def get_display():
     global __display__
     if __display__ is None:
-      global __width__, __height__
-      __display__ = Image.new("RGB", (__width__, __height__))
+      global __width__, __height__, __mode__
+      __display__ = Image.new(__mode__, (__width__, __height__))
     return __display__
 
 def get_draw():

@@ -6,6 +6,7 @@ from PIL import Image
 # remote jupyter options
 remote, _remote_show = None, False
 
+
 def jupyter(show=False, clear=True):
   try:
     global remote, _remote_show
@@ -16,13 +17,15 @@ def jupyter(show=False, clear=True):
   except Exception as e:
     remote = None
 
-__width__, __height__, __mode__= 240, 240, "RGB"
+
+__width__, __height__, __mode__ = 240, 240, "RGB"
 
 try:
     __fastview__ = None
     from _maix_display import Display
     __fastview__ = Display()
     __width__, __height__ = __fastview__.width, __fastview__.height
+
     def __draw__(img):
         global __fastview__
         if isinstance(img, bytes):
@@ -39,12 +42,14 @@ except Exception as e:
 
 __display__ = None
 
+
 def get_display():
     global __display__
     if __display__ is None:
       global __width__, __height__, __mode__
       __display__ = Image.new(__mode__, (__width__, __height__))
     return __display__
+
 
 def get_draw():
     from PIL import ImageDraw
@@ -55,10 +60,12 @@ def get_draw():
         return tmp
     return None
 
+
 def __thumbnail__(src, dst):
     w, h = src.size
     if w > dst.width or h > dst.height:
         src.thumbnail((dst.width, dst.height))
+
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
     global __display__, _remote_show, __mode__
@@ -121,7 +128,7 @@ if __name__ == '__main__':
 
     from PIL import Image, ImageDraw
     image = Image.new("RGBA", (40, 40), "#FFFFFFFF")
-    
+
     draw = ImageDraw.Draw(image)
     draw.text((0, 0), u'hello world', (0, 0, 0))
     # image.show()

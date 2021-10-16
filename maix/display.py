@@ -61,7 +61,7 @@ def __thumbnail__(src, dst):
         src.thumbnail((dst.width, dst.height))
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
-    global __display__, _remote_show
+    global __display__, _remote_show, __mode__
     if img is None:
         img = __display__
     if local_show:
@@ -69,7 +69,7 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
             __draw__(img)  # underlying optimization
         else:
             if isinstance(img, bytes):
-                img = Image.frombytes("RGB", box, img)
+                img = Image.frombytes(__mode__, box, img)
                 __thumbnail__(img, __display__)
                 __display__.paste(img, (0, 0))
             elif isinstance(img, Image.Image):

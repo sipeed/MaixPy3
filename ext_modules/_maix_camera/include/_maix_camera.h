@@ -15,27 +15,14 @@ extern "C"
 {
 #endif
 #include "libmaix_cam.h"
-
+#include "libmaix_image.h"
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 #ifdef __cplusplus
 }
 #endif
 
 
-#ifdef V83xCamera
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-#include "libmaix_image.h"
-
-#ifdef __cplusplus
-}
-#endif
-#endif
-
-
-// #define R329Camera
+#define R329Camera
 // #define V83xCamera
 
 #if !defined (R329Camera) && !defined (V83xCamera)
@@ -57,20 +44,26 @@ public:
     void close();
     void __enter__();
     void __exit__();
-#ifdef R329Camera
-public:
-    libmaix_cam_t *cam;
-    uint8_t *img_buff;
 
-#endif
-
-#ifdef V83xCamera
-public:
     libmaix_cam_t *cam;
-    libmaix_image_t *yuv_img;
+    libmaix_cam_t *cam1;
     libmaix_image_t *rgb_img;
 
-#endif
+
+// #ifdef R329Camera
+// public:
+//     libmaix_cam_t *cam;
+//     uint8_t *img_buff;
+
+// #endif
+
+// #ifdef V83xCamera
+// public:
+//     libmaix_cam_t *cam;
+//     libmaix_image_t *yuv_img;
+//     libmaix_image_t *rgb_img;
+
+// #endif
 
 };
 

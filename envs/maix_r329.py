@@ -17,7 +17,7 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ex
                             "jpeg"
                         ],
 )
-
+# export LD_LIBRARY_PATH="LD_LIBRARY_PATH:/usr/local/lib/python3.9/dist-packages/maix"
 # python3.8 -m pip install pybind11
 # _maix_vivo_module = Pybind11Extension("_maix_vivo",
 #                                       include_dirs=[
@@ -136,7 +136,8 @@ _maix_camera_module = Pybind11Extension(
     "maix_cam", 
     # "maix_image",
 ],
-    library_dirs=["/lib",  "/usr/lib", ext_so, ],
+    library_dirs=[ ext_so, ],
+    # library_dirs=["/lib",  "/usr/lib", ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
     extra_compile_args=['-DR329Camera', '-std=c++11', '-std=gnu++11' ],
     extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix"]
@@ -157,7 +158,8 @@ _maix_display_module = Pybind11Extension(
         "maix_disp", 
         # "maix_image",
         ],
-        library_dirs=["/lib",  "/usr/lib", ext_so, ],
+        library_dirs=[ ext_so, ],
+        # library_dirs=["/lib",  "/usr/lib", ext_so, ],
         extra_compile_args=['-DR329Display', '-std=c++11', '-std=gnu++11' ],
         extra_link_args=["-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix"]
     )

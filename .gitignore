@@ -142,3 +142,4 @@ sipeed_v83x_opencv4.1
 ext_modules/_maix_opencv/example/test.py
 .vscode-ctags
 cpython
+start.sh

@@ -25,8 +25,8 @@ namespace py = pybind11;
 
 typedef enum
 {
-    LAB
-    INVALID = 0,
+    LAB = 0,
+    INVALID ,
     BINARY,
     GRAY  ,
     RGB888,          // supported
@@ -358,7 +358,7 @@ public:
     return py::bytes((char *)input.data, size);
   }
 
-  py::list get_blob(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode,int color_m)
+  py::list get_blob_lab(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode,int color_m)
   {
     py::list return_val;
     Mat in_img;
@@ -423,15 +423,15 @@ public:
     min_bnum = min_bnum < 0 ? 0 : min_bnum;
     int max_bnum = int(bnum + critical);
     max_bnum = max_bnum > 255 ? 255 : max_bnum;
-    switch (color_m)
-    {
-    case /* constant-expression */:
-      /* code */
-      break;
+    // switch (color_m)
+    // {
+    // case /* constant-expression */:
+    //   /* code */
+    //   break;
     
-    default:
-      break;
-    }
+    // default:
+    //   break;
+    // }
 
 
     return_val.append(int(min_lnum * 100 / 255));
@@ -866,7 +866,7 @@ PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
-      .def("get_blob_lab", &_maix_vision::get_blob_lab, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("get_blob_lab", &_maix_vision::get_blob_lab, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
       .def("find_blob_lab", &_maix_vision::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
       .def("find_ball_lab", &_maix_vision::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
       .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0);

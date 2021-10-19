@@ -32,12 +32,10 @@ def get_host_ip():
     return ip
 
 
-font = ImageFont.truetype("/home/res/baars.ttf", 27, encoding="unic")
-
-Image.blend
+font = ImageFont.truetype("./resc/baars.ttf", 27, encoding="unic")
 
 canvas = Image.new("RGB", (240, 240), "#2c3e50")
-with Image.open('/home/res/logo.png') as logo:
+with Image.open('./resc/logo.png') as logo:
     canvas.paste(logo, (50, 40, 50 + logo.size[0], 40 + logo.size[1]), logo)
 
 draw = ImageDraw.Draw(canvas)

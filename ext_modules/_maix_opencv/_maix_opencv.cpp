@@ -16,6 +16,11 @@
 #include "opencv2/videoio.hpp"
 #include "opencv2/imgcodecs.hpp"
 
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/imgcodecs/legacy/constants_c.h>
+#include "opencv2/core/types_c.h"
+
 using namespace cv;
 using namespace std;
 
@@ -23,6 +28,7 @@ namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
+<<<<<<< HEAD
 typedef enum
 {
   LAB = 0,
@@ -109,54 +115,42 @@ public:
     calcHist(&lab_planes[0], 1, 0, Mat(), l_hist, 1, &histSize, &histRanges, true, false);
     calcHist(&lab_planes[1], 1, 0, Mat(), a_hist, 1, &histSize, &histRanges, true, false);
     calcHist(&lab_planes[2], 1, 0, Mat(), b_hist, 1, &histSize, &histRanges, true, false);
+=======
+// typedef enum
+// {
+//     LAB = 0,
+//     INVALID ,
+//     BINARY,
+//     GRAY  ,
+//     RGB888,          // supported
+//     RGB565,
+//     RGBA8888,
+//     YUV420SP_NV21,   // supported
 
-    float lmax = 0, lnum = 0;
-    float amax = 0, anum = 0;
-    float bmax = 0, bnum = 0;
-    for (int i = 0; i < histSize; i++)
-    {
-      if (l_hist.at<float>(i) > lmax)
-      {
-        lmax = l_hist.at<float>(i);
-        lnum = i;
-      }
-      if (a_hist.at<float>(i) > amax)
-      {
-        amax = a_hist.at<float>(i);
-        anum = i;
-      }
-      if (b_hist.at<float>(i) > bmax)
-      {
-        bmax = b_hist.at<float>(i);
-        bnum = i;
-      }
-    }
-    int min_lnum = int(lnum - critical);
+// }image_mode_t;
 
-    min_lnum = min_lnum < 0 ? 0 : min_lnum;
+// struct libmaix_image
+// {
+>>>>>>> 8c062fe6ea897d06201d0eabc6153b5a80a10284
 
-    int max_lnum = int(lnum + critical);
+//   cv::Mat obj;
 
-    max_lnum = max_lnum > 180 ? 180 : max_lnum;
+//   int _load() {
 
-    int min_anum = int(anum - critical);
-    min_anum = min_anum < 0 ? 0 : min_anum;
-    int max_anum = int(anum + critical);
-    max_anum = max_anum > 255 ? 255 : max_anum;
+//     return 0;
+//   }
 
-    int min_bnum = int(bnum - critical);
-    min_bnum = min_bnum < 0 ? 0 : min_bnum;
-    int max_bnum = int(bnum + critical);
-    max_bnum = max_bnum > 255 ? 255 : max_bnum;
+//   int _save() {
 
-    return_val.append(int(min_lnum * 100 / 255));
-    return_val.append(min_anum - 128);
-    return_val.append(min_bnum - 128);
-    return_val.append(int(max_lnum * 100 / 255));
-    return_val.append(max_anum - 128);
-    return_val.append(max_bnum - 128);
-    return return_val;
-  }
+//     return 0;
+//   }
+
+// };
+
+// class _maix_image :public libmaix_image
+class _maix_image
+{
+public:
   py::bytes test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -193,7 +187,7 @@ public:
 
       Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
       Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, LINE_AA);
+      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
     }
 
     // vector<Vec4i> p_lines;
@@ -309,7 +303,7 @@ public:
 
       Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
       Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, LINE_AA);
+      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
     }
 
     // vector<Vec4i> p_lines;
@@ -341,6 +335,10 @@ public:
 
   ~_maix_vision()
   {
+<<<<<<< HEAD
+=======
+
+>>>>>>> 8c062fe6ea897d06201d0eabc6153b5a80a10284
   }
 
   py::bytes opencv_test(py::bytes &rgb)
@@ -402,7 +400,52 @@ public:
         bnum = i;
       }
     }
+<<<<<<< HEAD
     switch (co)
+=======
+    int min_lnum = int(lnum - critical);
+
+    min_lnum = min_lnum < 0 ? 0 : min_lnum;
+
+    int max_lnum = int(lnum + critical);
+
+    max_lnum = max_lnum > 180 ? 180 : max_lnum;
+
+    int min_anum = int(anum - critical);
+    min_anum = min_anum < 0 ? 0 : min_anum;
+    int max_anum = int(anum + critical);
+    max_anum = max_anum > 255 ? 255 : max_anum;
+
+    int min_bnum = int(bnum - critical);
+    min_bnum = min_bnum < 0 ? 0 : min_bnum;
+    int max_bnum = int(bnum + critical);
+    max_bnum = max_bnum > 255 ? 255 : max_bnum;
+    // switch (color_m)
+    // {
+    // case /* constant-expression */:
+    //   /* code */
+    //   break;
+
+    // default:
+    //   break;
+    // }
+
+
+    return_val.append(int(min_lnum * 100 / 255));
+    return_val.append(min_anum - 128);
+    return_val.append(min_bnum - 128);
+    return_val.append(int(max_lnum * 100 / 255));
+    return_val.append(max_anum - 128);
+    return_val.append(max_bnum - 128);
+    return return_val;
+  }
+/*
+  py::list get_blob_hsv(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
+  {
+    py::list return_val;
+    Mat in_img;
+    if (py::isinstance<py::bytes>(py_img))
+>>>>>>> 8c062fe6ea897d06201d0eabc6153b5a80a10284
     {
     case 0: //rgb
     {
@@ -488,7 +531,11 @@ public:
   {
     py::list return_val;
     Mat in_img;
+<<<<<<< HEAD
     py_img_to_in_img(py_img, in_img, size, mode);
+=======
+    py_img_to_in_img(py_img,in_img,size,mode);
+>>>>>>> 8c062fe6ea897d06201d0eabc6153b5a80a10284
 
     Mat lab, mask1;
     if (roi[2] != 0 && roi[3] != 0)
@@ -579,7 +626,11 @@ public:
   py::list find_ball_lab(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
   {
     Mat in_img;
+<<<<<<< HEAD
     py_img_to_in_img(py_img, in_img, size, mode);
+=======
+    py_img_to_in_img(py_img,in_img,size,mode);
+>>>>>>> 8c062fe6ea897d06201d0eabc6153b5a80a10284
 
     Mat hsv, mask;
     cvtColor(in_img, hsv, COLOR_RGB2Lab);
@@ -812,18 +863,20 @@ PYBIND11_MODULE(_maix_opencv, m)
 
   pybind11::class_<_maix_image>(m, "Image")
       .def(pybind11::init<>())
-      .def("capture", &_maix_image::test)
-      .def("convert", &_maix_image::test)
-      .def("resize", &_maix_image::test)
-      .def("crop", &_maix_image::test)
-      .def("paste", &_maix_image::test)
-      .def("rotate", &_maix_image::test)
-      .def("getpixel", &_maix_image::test)
-      .def("putpixel", &_maix_image::test)
+      .def("open", &_maix_image::test)
+      .def("save", &_maix_image::test)
       .def("format", &_maix_image::test)
       .def("size", &_maix_image::test)
-      .def("load", &_maix_image::test)
+      .def("tobytes", &_maix_image::test)
+      .def("resize", &_maix_image::test)
+      .def("rotate", &_maix_image::test)
+      .def("crop", &_maix_image::test)
+      .def("convert", &_maix_image::test)
       .def("mode", &_maix_image::test)
-      .def("save", &_maix_image::test)
-      .def("tobytes", &_maix_image::test);
+      .def("draw_ellipse", &_maix_image::test)
+      .def("draw_string", &_maix_image::test)
+      .def("draw_circle", &_maix_image::test)
+      .def("draw_rectangle", &_maix_image::test)
+      .def("draw_line", &_maix_image::test)
+      .def("load_freetype", &_maix_image::test);
 }

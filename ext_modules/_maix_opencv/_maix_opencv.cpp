@@ -358,24 +358,27 @@ public:
     return py::bytes((char *)input.data, size);
   }
 
-  py::list get_blob_lab(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode,int color_m)
+py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, int co, vector<int> size, int mode)
   {
     py::list return_val;
     Mat in_img;
     py_img_to_in_img(py_img,in_img,size,mode);      //获取图像
-
+    
     critical = critical > 100 ? 100 : critical;
     critical = critical < 0 ? 0 : critical;
+
     Rect rect;
     rect.x = roi[0];
     rect.y = roi[1];
     rect.width = roi[2];
     rect.height = roi[3];
-    // Mat lab_img;
+    Mat lab_img;
     // cvtColor(in_img(rect), lab_img, COLOR_RGB2Lab);
 
+    lab_img = in_img(rect);
+
     vector<Mat> lab_planes;
-    split(in_img(rect), lab_planes);
+    split(lab_img, lab_planes);
 
     int histSize = 256;
     float range[] = {0, 256};
@@ -406,146 +409,89 @@ public:
         bnum = i;
       }
     }
-    int min_lnum = int(lnum - critical);
+    switch (co)
+    {
+    case 0: //rgb
+    {
+      return_val.append(lnum);
+      return_val.append(anum);
+      return_val.append(bnum);
+      // return_val.append(int(max_lnum * 100 / 255));
+      // return_val.append(max_anum - 128);
+      // return_val.append(max_bnum - 128);
+      return return_val;
+    }
+    break;
+    case 1: //lab
+    {
 
-    min_lnum = min_lnum < 0 ? 0 : min_lnum;
+      Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
+      Mat lab;
+      cvtColor(rgb, lab, COLOR_RGB2Lab);
+      lnum = lab.at<Vec3b>(0,0)[0];
+      anum = lab.at<Vec3b>(0,0)[1];
+      bnum = lab.at<Vec3b>(0,0)[2];
 
-    int max_lnum = int(lnum + critical);
+      int min_lnum = int(lnum - critical);
+      min_lnum = min_lnum < 0 ? 0 : min_lnum;
+      int max_lnum = int(lnum + critical);
+      max_lnum = max_lnum > 180 ? 180 : max_lnum;
+      int min_anum = int(anum - critical);
+      min_anum = min_anum < 0 ? 0 : min_anum;
+      int max_anum = int(anum + critical);
+      max_anum = max_anum > 255 ? 255 : max_anum;
+      int min_bnum = int(bnum - critical);
+      min_bnum = min_bnum < 0 ? 0 : min_bnum;
+      int max_bnum = int(bnum + critical);
+      max_bnum = max_bnum > 255 ? 255 : max_bnum;
+      return_val.append(int(min_lnum * 100 / 255));
+      return_val.append(min_anum - 128);
+      return_val.append(min_bnum - 128);
+      return_val.append(int(max_lnum * 100 / 255));
+      return_val.append(max_anum - 128);
+      return_val.append(max_bnum - 128);
+      return return_val;
+    }
+    break;
+    case 2: //hsv
+    {
 
-    max_lnum = max_lnum > 180 ? 180 : max_lnum;
+      Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
+      Mat lab;
+      cvtColor(rgb, lab, COLOR_RGB2HSV);
+      lnum = lab.at<Vec3b>(0,0)[0];
+      anum = lab.at<Vec3b>(0,0)[1];
+      bnum = lab.at<Vec3b>(0,0)[2];
 
-    int min_anum = int(anum - critical);
-    min_anum = min_anum < 0 ? 0 : min_anum;
-    int max_anum = int(anum + critical);
-    max_anum = max_anum > 255 ? 255 : max_anum;
-
-    int min_bnum = int(bnum - critical);
-    min_bnum = min_bnum < 0 ? 0 : min_bnum;
-    int max_bnum = int(bnum + critical);
-    max_bnum = max_bnum > 255 ? 255 : max_bnum;
-    // switch (color_m)
-    // {
-    // case /* constant-expression */:
-    //   /* code */
-    //   break;
-    
-    // default:
-    //   break;
-    // }
-
-
-    return_val.append(int(min_lnum * 100 / 255));
-    return_val.append(min_anum - 128);
-    return_val.append(min_bnum - 128);
-    return_val.append(int(max_lnum * 100 / 255));
-    return_val.append(max_anum - 128);
-    return_val.append(max_bnum - 128);
-    return return_val;
+      int min_lnum = int(lnum - critical);
+      min_lnum = min_lnum < 0 ? 0 : min_lnum;
+      int max_lnum = int(lnum + critical);
+      max_lnum = max_lnum > 180 ? 180 : max_lnum;
+      int min_anum = int(anum - critical);
+      min_anum = min_anum < 0 ? 0 : min_anum;
+      int max_anum = int(anum + critical);
+      max_anum = max_anum > 255 ? 255 : max_anum;
+      int min_bnum = int(bnum - critical);
+      min_bnum = min_bnum < 0 ? 0 : min_bnum;
+      int max_bnum = int(bnum + critical);
+      max_bnum = max_bnum > 255 ? 255 : max_bnum;
+      return_val.append(min_lnum);
+      return_val.append(min_anum);
+      return_val.append(min_bnum);
+      return_val.append(max_lnum);
+      return_val.append(max_anum);
+      return_val.append(max_bnum);
+      return return_val;
+    }
+    break;
+    default:
+      
+      break;
+    }
+    return return_val ;
   }
-/*
-  py::list get_blob_hsv(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
-  {
-    py::list return_val;
-    Mat in_img;
-    if (py::isinstance<py::bytes>(py_img))
-    {
-      string tmp = py_img.cast<string>();
-      if (size[0] == 0 || size[1] == 0)
-      {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
-        in_img = input;
-      }
-      else
-      {
-        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
-      }
-    }
-    else
-    {
-      auto PIL_ = py::module::import("PIL.Image").attr("Image");
-
-      if (py::isinstance(py_img, PIL_))
-      {
-        auto tobytes = PIL_.attr("tobytes");
-        auto img_bytes = tobytes(py_img);
-        string tmp = py_img.cast<string>();
-
-        auto mdd = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        in_img = input;
-      }
-    }
-    critical = critical > 100 ? 100 : critical;
-    critical = critical < 0 ? 0 : critical;
-    Rect rect;
-
-    rect.x = roi[0];
-    rect.y = roi[1];
-    rect.width = roi[2];
-    rect.height = roi[3];
-    Mat hsv;
-    cvtColor(in_img(rect), hsv, COLOR_RGB2HSV);
-
-    vector<Mat> hsv_planes;
-    split(hsv, hsv_planes);
-    int histSize = 256;
-    float range[] = {0, 256};
-    const float *histRanges = range;
-    Mat h_hist, s_hist, v_hist;
-    calcHist(&hsv_planes[0], 1, 0, Mat(), h_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&hsv_planes[1], 1, 0, Mat(), s_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&hsv_planes[2], 1, 0, Mat(), v_hist, 1, &histSize, &histRanges, true, false);
-
-    float hmax = 0, hnum = 0;
-    float smax = 0, snum = 0;
-    float vmax = 0, vnum = 0;
-    for (int i = 0; i < histSize; i++)
-    {
-      if (h_hist.at<float>(i) > hmax)
-      {
-        hmax = h_hist.at<float>(i);
-        hnum = i;
-      }
-      if (s_hist.at<float>(i) > smax)
-      {
-        smax = s_hist.at<float>(i);
-        snum = i;
-      }
-      if (v_hist.at<float>(i) > vmax)
-      {
-        vmax = v_hist.at<float>(i);
-        vnum = i;
-      }
-    }
-    int min_hnum = int(hnum - critical);
-
-    min_hnum = min_hnum < 0 ? 0 : min_hnum;
-
-    int max_hnum = int(hnum + critical);
-
-    max_hnum = max_hnum > 180 ? 180 : max_hnum;
-
-    int min_snum = int(snum - critical);
-    min_snum = min_snum < 0 ? 0 : min_snum;
-    int max_snum = int(snum + critical);
-    max_snum = max_snum > 255 ? 255 : max_snum;
-
-    int min_vnum = int(vnum - critical);
-    min_vnum = min_vnum < 0 ? 0 : min_vnum;
-    int max_vnum = int(vnum + critical);
-    max_vnum = max_vnum > 255 ? 255 : max_vnum;
-
-    return_val.append(min_hnum);
-    return_val.append(min_snum);
-    return_val.append(min_vnum);
-    return_val.append(max_hnum);
-    return_val.append(max_snum);
-    return_val.append(max_vnum);
-    return return_val;
-  }
-*/
+  
   py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds, vector<int> size, int mode, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt)
   {
     py::list return_val;
@@ -866,7 +812,8 @@ PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
-      .def("get_blob_lab", &_maix_vision::get_blob_lab, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
+      .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0,py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
+      .def("get_blob_color_max", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0,py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
       .def("find_blob_lab", &_maix_vision::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
       .def("find_ball_lab", &_maix_vision::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
       .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0);

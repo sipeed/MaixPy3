@@ -1,4 +1,4 @@
- 
+
 #include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
@@ -25,39 +25,38 @@ namespace py = pybind11;
 
 typedef enum
 {
-    LAB = 0,
-    INVALID ,
-    BINARY,
-    GRAY  ,
-    RGB888,          // supported
-    RGB565,
-    RGBA8888,
-    YUV420SP_NV21,   // supported
+  LAB = 0,
+  INVALID,
+  BINARY,
+  GRAY,
+  RGB888, // supported
+  RGB565,
+  RGBA8888,
+  YUV420SP_NV21, // supported
 
-}image_mode_t;
+} image_mode_t;
 
 struct libmaix_image
 {
-  
+
   cv::Mat obj;
 
-  int _load() {
-    
+  int _load()
+  {
+
     return 0;
   }
 
-  int _save() {
-    
+  int _save()
+  {
+
     return 0;
   }
-
 };
 
-
-class _maix_image :public libmaix_image
+class _maix_image : public libmaix_image
 {
 public:
-  
   py::list get_blob_lab(py::object py_img, vector<int> &roi, int critical, vector<int> size, int mode)
   {
     py::list return_val;
@@ -225,9 +224,7 @@ public:
   ~_maix_image()
   {
   }
-
 };
-
 
 class _maix_vision
 {
@@ -242,7 +239,7 @@ private:
     int y = abs(y1 - y2);
     return int(round(sqrt(x * x + y * y)));
   }
-  int  py_img_to_in_img(py::object &py_img,Mat &_out,vector<int> &size, int mode)
+  int py_img_to_in_img(py::object &py_img, Mat &_out, vector<int> &size, int mode)
   {
     if (py::isinstance<py::bytes>(py_img))
     {
@@ -275,10 +272,7 @@ private:
     return 0;
   }
 
-
-
 public:
-
   py::bytes test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -347,7 +341,6 @@ public:
 
   ~_maix_vision()
   {
-    
   }
 
   py::bytes opencv_test(py::bytes &rgb)
@@ -358,12 +351,12 @@ public:
     return py::bytes((char *)input.data, size);
   }
 
-py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, int co, vector<int> size, int mode)
+  py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, int co, vector<int> size, int mode)
   {
     py::list return_val;
     Mat in_img;
-    py_img_to_in_img(py_img,in_img,size,mode);      //获取图像
-    
+    py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+
     critical = critical > 100 ? 100 : critical;
     critical = critical < 0 ? 0 : critical;
 
@@ -428,9 +421,9 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
       Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
       Mat lab;
       cvtColor(rgb, lab, COLOR_RGB2Lab);
-      lnum = lab.at<Vec3b>(0,0)[0];
-      anum = lab.at<Vec3b>(0,0)[1];
-      bnum = lab.at<Vec3b>(0,0)[2];
+      lnum = lab.at<Vec3b>(0, 0)[0];
+      anum = lab.at<Vec3b>(0, 0)[1];
+      bnum = lab.at<Vec3b>(0, 0)[2];
 
       int min_lnum = int(lnum - critical);
       min_lnum = min_lnum < 0 ? 0 : min_lnum;
@@ -459,9 +452,9 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
       Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
       Mat lab;
       cvtColor(rgb, lab, COLOR_RGB2HSV);
-      lnum = lab.at<Vec3b>(0,0)[0];
-      anum = lab.at<Vec3b>(0,0)[1];
-      bnum = lab.at<Vec3b>(0,0)[2];
+      lnum = lab.at<Vec3b>(0, 0)[0];
+      anum = lab.at<Vec3b>(0, 0)[1];
+      bnum = lab.at<Vec3b>(0, 0)[2];
 
       int min_lnum = int(lnum - critical);
       min_lnum = min_lnum < 0 ? 0 : min_lnum;
@@ -485,19 +478,18 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
     }
     break;
     default:
-      
+
       break;
     }
-    return return_val ;
+    return return_val;
   }
 
-  
   py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds, vector<int> size, int mode, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt)
   {
     py::list return_val;
     Mat in_img;
-    py_img_to_in_img(py_img,in_img,size,mode);
-    
+    py_img_to_in_img(py_img, in_img, size, mode);
+
     Mat lab, mask1;
     if (roi[2] != 0 && roi[3] != 0)
     {
@@ -583,12 +575,12 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
     }
     return return_val;
   }
-  
+
   py::list find_ball_lab(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
   {
     Mat in_img;
-    py_img_to_in_img(py_img,in_img,size,mode);
-    
+    py_img_to_in_img(py_img, in_img, size, mode);
+
     Mat hsv, mask;
     cvtColor(in_img, hsv, COLOR_RGB2Lab);
     inRange(hsv, Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
@@ -713,16 +705,16 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
   //   }
   //   return std::move(out);
   // }
-    // std::string tmp = static_cast<std::string>(rgb);
-    // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+  // std::string tmp = static_cast<std::string>(rgb);
+  // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
-// A* c = new A(1);
+  // A* c = new A(1);
   py::dict find_line(py::object py_img, vector<int> size, int mode)
   {
     Mat src_gray, dst;
     py::dict return_val;
     Mat in_img;
-    py_img_to_in_img(py_img,in_img,size,mode);
+    py_img_to_in_img(py_img, in_img, size, mode);
     Mat src_gary, mask;
     cvtColor(in_img, src_gray, COLOR_RGB2GRAY); //将图片变成灰度图
     Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
@@ -756,7 +748,7 @@ py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, i
     findContours(dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE, Point());
     if (contours.size() == 0)
     {
-      
+
       return std::move(return_val);
     }
     int area = 0, a_n = 0;
@@ -812,8 +804,8 @@ PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
-      .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0,py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
-      .def("get_blob_color_max", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0,py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0,py::arg("color_m") = 0)
+      .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("get_blob_color_max", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
       .def("find_blob_lab", &_maix_vision::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
       .def("find_ball_lab", &_maix_vision::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
       .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0);

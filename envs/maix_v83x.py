@@ -122,7 +122,8 @@ _maix_display_module = Pybind11Extension(
 
 
 max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
-max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src', ["libmaix.c"]))
+max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
+max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
 _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
                             sources=max_nn_srcs,
                             libraries=[

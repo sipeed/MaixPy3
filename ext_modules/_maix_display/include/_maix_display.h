@@ -1,15 +1,9 @@
 #ifndef _MAIX_DISPLAY_H
 #define _MAIX_DISPLAY_H
 
-#include <iostream>
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
-#include <vector>
-#include <list>
-#include <array>
-#include <map>
-#include <set>
 #ifdef  __cplusplus
 extern "C" {
 #endif

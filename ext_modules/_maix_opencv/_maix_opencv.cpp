@@ -58,63 +58,6 @@ namespace py = pybind11;
 
 // };
 
-double getThreshVal_Otsu_8u( const cv::Mat& _src )
-{
-	cv::Size size = _src.size();
-	if ( _src.isContinuous() )
-	{
-		size.width *= size.height;
-		size.height = 1;
-	}
-	const int N = 256;
-	int i, j, h[N] = {0};
-	for ( i = 0; i < size.height; i++ )
-	{
-		const uchar* src = _src.data + _src.step*i;
-		for ( j = 0; j <= size.width - 4; j += 4 )
-		{
-			int v0 = src[j], v1 = src[j+1];
-			h[v0]++; h[v1]++;
-			v0 = src[j+2]; v1 = src[j+3];
-			h[v0]++; h[v1]++;
-		}
-		for ( ; j < size.width; j++ )
-			h[src[j]]++;
-	}
-
-	double mu = 0, scale = 1./(size.width*size.height);
-	for ( i = 0; i < N; i++ )
-		mu += i*h[i];
-
-	mu *= scale;
-	double mu1 = 0, q1 = 0;
-	double max_sigma = 0, max_val = 0;
-
-	for ( i = 0; i < N; i++ )
-	{
-		double p_i, q2, mu2, sigma;
-
-		p_i = h[i]*scale;
-		mu1 *= q1;
-		q1 += p_i;
-		q2 = 1. - q1;
-
-		if ( std::min(q1,q2) < FLT_EPSILON || std::max(q1,q2) > 1. - FLT_EPSILON )
-			continue;
-
-		mu1 = (mu1 + i*p_i)/q1;
-		mu2 = (mu - q1*mu1)/q2;
-		sigma = q1*q2*(mu1 - mu2)*(mu1 - mu2);
-		if ( sigma > max_sigma )
-		{
-			max_sigma = sigma;
-			max_val = i;
-		}
-	}
-
-	return max_val;
-}
-
 // class _maix_image :public libmaix_image
 class _maix_image
 {
@@ -450,7 +393,7 @@ public:
   {
     py::list return_val;
     cv::Mat in_img;
-    py_img_to_in_img(py_img,in_img,size,mode);
+    py_img_to_in_img(py_img, in_img, size, mode);
 
     cv::Mat lab, mask1;
     if (roi[2] != 0 && roi[3] != 0)
@@ -670,6 +613,56 @@ public:
   // std::string tmp = static_cast<std::string>(rgb);
   // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
+  enum adaptiveMethod
+  {
+      meanFilter,
+      gaaussianFilter,
+      medianFilter
+  };
+
+  void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, double c, adaptiveMethod method = meanFilter)
+  {
+
+    if (src.channels() > 1)
+      cv::cvtColor(src, src, cv::COLOR_RGB2GRAY);
+
+    cv::Mat smooth;
+    switch (method)
+    {
+      case meanFilter:
+        cv::blur(src, smooth, cv::Size(Subsize, Subsize)); //均值滤波
+        break;
+      case gaaussianFilter:
+        cv::GaussianBlur(src, smooth, cv::Size(Subsize, Subsize), 0, 0); //高斯滤波
+        break;
+      case medianFilter:
+        cv::medianBlur(src, smooth, Subsize); //中值滤波
+        break;
+      default:
+        break;
+    }
+
+    smooth = smooth - c;
+
+    //阈值处理
+    src.copyTo(dst);
+    for (int r = 0; r < src.rows; ++r)
+    {
+      const uchar *srcptr = src.ptr<uchar>(r);
+      const uchar *smoothptr = smooth.ptr<uchar>(r);
+      uchar *dstptr = dst.ptr<uchar>(r);
+      for (int c = 0; c < src.cols; ++c)
+      {
+        if (srcptr[c] > smoothptr[c])
+        {
+          dstptr[c] = Maxval;
+        }
+        else
+          dstptr[c] = 0;
+      }
+    }
+  }
+
   // A* c = new A(1);
   py::dict find_line(py::object py_img, vector<int> size, int mode)
   {
@@ -678,34 +671,32 @@ public:
     cv::Mat in_img;
     py_img_to_in_img(py_img, in_img, size, mode);
 
-    cv::imwrite("/tmp/src.jpg", in_img);
+    // cv::imwrite("/tmp/src.jpg", in_img);
 
-    cv::Mat src_gary, mask;
+    cv::Mat src_gary;
     cvtColor(in_img, src_gray, cv::COLOR_RGB2GRAY); //将图片变成灰度图
 
-    // cv::imwrite("/tmp/src_gray_0.jpg", in_img);
+    // cv::imwrite("/tmp/src.jpg", src_gray);
 
     cv::Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
 
-    cv::erode(src_gray, src_gray, element);
+    cv::dilate(src_gray, src_gray, element); // 放大主线
 
-    // cv::imwrite("/tmp/src_gray_1.jpg", in_img);
+    // cv::imwrite("/tmp/src_gray_0.jpg", src_gray);
 
-    cv::dilate(src_gray, src_gray, element);
+    cv::erode(src_gray, src_gray, element); // 消除细线
 
-    // cv::imwrite("/tmp/src_gray_2.jpg", in_img);
+    // cv::imwrite("/tmp/src_gray_1.jpg", src_gray);
 
-    // threshold(src_gray, src_gray, getThreshVal_Otsu_8u(src_gray), 255, 0);
+    // AdaptiveThreshold(src_gray, src_gray, 255, block_size, offset, meanFilter); //
 
-    cv::threshold(src_gray, src_gray, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+    AdaptiveThreshold(src_gray, src_gray, 255, 21, 10, meanFilter); //
 
-    // cv::threshold(src_gray, src_gray, 100, 255, cv::THRESH_BINARY);
+    // cv::imwrite("/tmp/src_gray_2.jpg", src_gray);
 
-    // cv::imwrite("/tmp/src_gray_3.jpg", in_img);
+    cv::dilate(src_gray, dst, element);
 
-    cv::dilate(src_gray, dst, element); //膨胀
-
-    // cv::imwrite("/tmp/src_gray_4.jpg", in_img);
+    // cv::imwrite("/tmp/dst.jpg", dst);
 
     cv::Rect rect;
     rect.x = 0;
@@ -732,9 +723,7 @@ public:
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hierarchy;
 
-    cv::findContours(dst, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point());
-
-    cv::imwrite("/tmp/dst.jpg", dst);
+    cv::findContours(dst, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE, cv::Point());
 
     if (contours.size() == 0)
     {

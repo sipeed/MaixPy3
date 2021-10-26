@@ -21,7 +21,7 @@
 #include <opencv2/imgcodecs/legacy/constants_c.h>
 #include "opencv2/core/types_c.h"
 
-using namespace cv;
+// using namespace cv;
 using namespace std;
 
 namespace py = pybind11;
@@ -58,6 +58,63 @@ namespace py = pybind11;
 
 // };
 
+double getThreshVal_Otsu_8u( const cv::Mat& _src )
+{
+	cv::Size size = _src.size();
+	if ( _src.isContinuous() )
+	{
+		size.width *= size.height;
+		size.height = 1;
+	}
+	const int N = 256;
+	int i, j, h[N] = {0};
+	for ( i = 0; i < size.height; i++ )
+	{
+		const uchar* src = _src.data + _src.step*i;
+		for ( j = 0; j <= size.width - 4; j += 4 )
+		{
+			int v0 = src[j], v1 = src[j+1];
+			h[v0]++; h[v1]++;
+			v0 = src[j+2]; v1 = src[j+3];
+			h[v0]++; h[v1]++;
+		}
+		for ( ; j < size.width; j++ )
+			h[src[j]]++;
+	}
+
+	double mu = 0, scale = 1./(size.width*size.height);
+	for ( i = 0; i < N; i++ )
+		mu += i*h[i];
+
+	mu *= scale;
+	double mu1 = 0, q1 = 0;
+	double max_sigma = 0, max_val = 0;
+
+	for ( i = 0; i < N; i++ )
+	{
+		double p_i, q2, mu2, sigma;
+
+		p_i = h[i]*scale;
+		mu1 *= q1;
+		q1 += p_i;
+		q2 = 1. - q1;
+
+		if ( std::min(q1,q2) < FLT_EPSILON || std::max(q1,q2) > 1. - FLT_EPSILON )
+			continue;
+
+		mu1 = (mu1 + i*p_i)/q1;
+		mu2 = (mu - q1*mu1)/q2;
+		sigma = q1*q2*(mu1 - mu2)*(mu1 - mu2);
+		if ( sigma > max_sigma )
+		{
+			max_sigma = sigma;
+			max_val = i;
+		}
+	}
+
+	return max_val;
+}
+
 // class _maix_image :public libmaix_image
 class _maix_image
 {
@@ -67,22 +124,22 @@ public:
     std::string tmp = static_cast<std::string>(rgb);
     cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
-    cv::Mat output = Mat::zeros(240, 240, CV_8UC4);
+    cv::Mat output = cv::Mat::zeros(240, 240, CV_8UC4);
 
-    Mat gray, edges;
+    cv::Mat gray, edges;
     // Mat standard_hough, probabilistic_hough;
     int min_threshold = 50;
     int max_trackbar = 150;
     int s_trackbar = max_trackbar;
-    int p_trackbar = max_trackbar;
+    // int p_trackbar = max_trackbar;
 
-    cvtColor(input, gray, COLOR_RGB2GRAY);
+    cvtColor(input, gray, cv::COLOR_RGB2GRAY);
 
     Canny(gray, edges, 50, 200, 3);
 
-    cvtColor(edges, output, COLOR_GRAY2BGRA);
+    cvtColor(edges, output, cv::COLOR_GRAY2BGRA);
 
-    vector<Vec2f> s_lines;
+    vector<cv::Vec2f> s_lines;
     // cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
 
     /// 1. Use Standard Hough Transform
@@ -96,9 +153,9 @@ public:
       double x0 = r * cos_t, y0 = r * sin_t;
       double alpha = 1000;
 
-      Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
-      Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
+      cv::Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
+      cv::Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
+      line(output, pt1, pt2, cv::Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
     }
 
     // vector<Vec4i> p_lines;
@@ -144,14 +201,14 @@ private:
     int y = abs(y1 - y2);
     return int(round(sqrt(x * x + y * y)));
   }
-  int py_img_to_in_img(py::object &py_img, Mat &_out, vector<int> &size, int mode)
+  int py_img_to_in_img(py::object &py_img, cv::Mat &_out, vector<int> &size, int mode)
   {
     if (py::isinstance<py::bytes>(py_img))
     {
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
         input.copyTo(_out);
       }
       else
@@ -183,26 +240,26 @@ public:
     std::string tmp = static_cast<std::string>(rgb);
     cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
 
-    cv::Mat output = Mat::zeros(240, 240, CV_8UC4);
+    cv::Mat output = cv::Mat::zeros(240, 240, CV_8UC4);
 
-    Mat gray, edges;
+    cv::Mat gray, edges;
     // Mat standard_hough, probabilistic_hough;
     int min_threshold = 50;
     int max_trackbar = 150;
     int s_trackbar = max_trackbar;
-    int p_trackbar = max_trackbar;
+    // int p_trackbar = max_trackbar;
 
-    cvtColor(input, gray, COLOR_RGB2GRAY);
+    cvtColor(input, gray, cv::COLOR_RGB2GRAY);
 
-    Canny(gray, edges, 50, 200, 3);
+    cv::Canny(gray, edges, 50, 200, 3);
 
-    cvtColor(edges, output, COLOR_GRAY2BGRA);
+    cvtColor(edges, output, cv::COLOR_GRAY2BGRA);
 
-    vector<Vec2f> s_lines;
+    vector<cv::Vec2f> s_lines;
     // cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
 
     /// 1. Use Standard Hough Transform
-    HoughLines(edges, s_lines, 1, CV_PI / 180, min_threshold + s_trackbar, 0, 0);
+    cv::HoughLines(edges, s_lines, 1, CV_PI / 180, min_threshold + s_trackbar, 0, 0);
 
     /// Show the result
     for (size_t i = 0; i < s_lines.size(); i++)
@@ -212,9 +269,9 @@ public:
       double x0 = r * cos_t, y0 = r * sin_t;
       double alpha = 1000;
 
-      Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
-      Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(output, pt1, pt2, Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
+      cv::Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
+      cv::Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
+      cv::line(output, pt1, pt2, cv::Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
     }
 
     // vector<Vec4i> p_lines;
@@ -259,32 +316,32 @@ public:
   py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, int co, vector<int> size, int mode)
   {
     py::list return_val;
-    Mat in_img;
+    cv::Mat in_img;
     py_img_to_in_img(py_img, in_img, size, mode); //获取图像
 
     critical = critical > 100 ? 100 : critical;
     critical = critical < 0 ? 0 : critical;
 
-    Rect rect;
+    cv::Rect rect;
     rect.x = roi[0];
     rect.y = roi[1];
     rect.width = roi[2];
     rect.height = roi[3];
-    Mat lab_img;
+    cv::Mat lab_img;
     // cvtColor(in_img(rect), lab_img, COLOR_RGB2Lab);
 
     lab_img = in_img(rect);
 
-    vector<Mat> lab_planes;
+    vector<cv::Mat> lab_planes;
     split(lab_img, lab_planes);
 
     int histSize = 256;
     float range[] = {0, 256};
     const float *histRanges = range;
-    Mat l_hist, a_hist, b_hist;
-    calcHist(&lab_planes[0], 1, 0, Mat(), l_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&lab_planes[1], 1, 0, Mat(), a_hist, 1, &histSize, &histRanges, true, false);
-    calcHist(&lab_planes[2], 1, 0, Mat(), b_hist, 1, &histSize, &histRanges, true, false);
+    cv::Mat l_hist, a_hist, b_hist;
+    calcHist(&lab_planes[0], 1, 0, cv::Mat(), l_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[1], 1, 0, cv::Mat(), a_hist, 1, &histSize, &histRanges, true, false);
+    calcHist(&lab_planes[2], 1, 0, cv::Mat(), b_hist, 1, &histSize, &histRanges, true, false);
 
     float lmax = 0, lnum = 0;
     float amax = 0, anum = 0;
@@ -323,12 +380,12 @@ public:
     case 1: //lab
     {
 
-      Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
-      Mat lab;
-      cvtColor(rgb, lab, COLOR_RGB2Lab);
-      lnum = lab.at<Vec3b>(0, 0)[0];
-      anum = lab.at<Vec3b>(0, 0)[1];
-      bnum = lab.at<Vec3b>(0, 0)[2];
+      cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
+      cv::Mat lab;
+      cvtColor(rgb, lab, cv::COLOR_RGB2Lab);
+      lnum = lab.at<cv::Vec3b>(0, 0)[0];
+      anum = lab.at<cv::Vec3b>(0, 0)[1];
+      bnum = lab.at<cv::Vec3b>(0, 0)[2];
 
       int min_lnum = int(lnum - critical);
       min_lnum = min_lnum < 0 ? 0 : min_lnum;
@@ -354,12 +411,12 @@ public:
     case 2: //hsv
     {
 
-      Mat rgb(1, 1, CV_8UC3, Scalar(lnum, anum, bnum));
-      Mat lab;
-      cvtColor(rgb, lab, COLOR_RGB2HSV);
-      lnum = lab.at<Vec3b>(0, 0)[0];
-      anum = lab.at<Vec3b>(0, 0)[1];
-      bnum = lab.at<Vec3b>(0, 0)[2];
+      cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
+      cv::Mat lab;
+      cvtColor(rgb, lab, cv::COLOR_RGB2HSV);
+      lnum = lab.at<cv::Vec3b>(0, 0)[0];
+      anum = lab.at<cv::Vec3b>(0, 0)[1];
+      bnum = lab.at<cv::Vec3b>(0, 0)[2];
 
       int min_lnum = int(lnum - critical);
       min_lnum = min_lnum < 0 ? 0 : min_lnum;
@@ -392,23 +449,23 @@ public:
   py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds, vector<int> size, int mode, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt)
   {
     py::list return_val;
-    Mat in_img;
+    cv::Mat in_img;
     py_img_to_in_img(py_img,in_img,size,mode);
 
-    Mat lab, mask1;
+    cv::Mat lab, mask1;
     if (roi[2] != 0 && roi[3] != 0)
     {
-      Rect rect(roi[0], roi[1], roi[2], roi[3]);
-      cvtColor(in_img(rect), lab, COLOR_RGB2Lab);
+      cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
+      cvtColor(in_img(rect), lab, cv::COLOR_RGB2Lab);
     }
     else
     {
-      cvtColor(in_img, lab, COLOR_RGB2Lab);
+      cvtColor(in_img, lab, cv::COLOR_RGB2Lab);
     }
-    Mat mask = Mat::zeros(lab.size(), CV_8UC1);
-    for (int i = 0; i < thresholds.size(); i++)
+    cv::Mat mask = cv::Mat::zeros(lab.size(), CV_8UC1);
+    for (size_t i = 0; i < thresholds.size(); i++)
     {
-      inRange(lab, Scalar(int((thresholds[i][0] * 255) / 100), thresholds[i][1] + 128, thresholds[i][2] + 128), Scalar(int((thresholds[i][3] * 255) / 100), thresholds[i][4] + 128, thresholds[i][5] + 128), mask1);
+      inRange(lab, cv::Scalar(int((thresholds[i][0] * 255) / 100), thresholds[i][1] + 128, thresholds[i][2] + 128), cv::Scalar(int((thresholds[i][3] * 255) / 100), thresholds[i][4] + 128, thresholds[i][5] + 128), mask1);
       mask = mask + mask1;
     }
     if (invert)
@@ -416,25 +473,25 @@ public:
       bitwise_not(mask, mask);
     }
 
-    Mat se = getStructuringElement(MORPH_RECT, Size(x_stride, y_stride), Point(-1, -1)); //开运算,去除噪点
-    morphologyEx(mask, mask, MORPH_OPEN, se);
+    cv::Mat se = getStructuringElement(cv::MORPH_RECT, cv::Size(x_stride, y_stride), cv::Point(-1, -1)); //开运算,去除噪点
+    morphologyEx(mask, mask, cv::MORPH_OPEN, se);
     if (margin != 0)
     {
-      Mat se_t = getStructuringElement(MORPH_RECT, Size(margin, margin), Point(-1, -1)); //闭运算,链接相邻比较近的色块
-      morphologyEx(mask, mask, MORPH_CLOSE, se_t);
+      cv::Mat se_t = getStructuringElement(cv::MORPH_RECT, cv::Size(margin, margin), cv::Point(-1, -1)); //闭运算,链接相邻比较近的色块
+      morphologyEx(mask, mask, cv::MORPH_CLOSE, se_t);
     }
 
-    vector<vector<Point>> contours;
-    vector<Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+    vector<vector<cv::Point>> contours;
+    vector<cv::Vec4i> hiearchy;
+    findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     if (contours.size() == 0)
     {
       return return_val;
     }
-    for (int i = 0; i < contours.size(); i++)
+    for (size_t i = 0; i < contours.size(); i++)
     {
       py::dict val;
-      Rect rects = boundingRect(contours[i]);
+      cv::Rect rects = boundingRect(contours[i]);
       val["x"] = int(rects.x);
       val["y"] = int(rects.y);
       val["w"] = int(rects.width);
@@ -454,8 +511,8 @@ public:
 
       if (tilt)
       {
-        RotatedRect minRect = minAreaRect(contours[i]);
-        Point2f rect_points[4];
+        cv::RotatedRect minRect = minAreaRect(contours[i]);
+        cv::Point2f rect_points[4];
         minRect.points(rect_points);
         py::tuple tmp3 = py::make_tuple(rect_points[0].x, rect_points[0].y, rect_points[1].x, rect_points[1].y, rect_points[2].x, rect_points[2].y, rect_points[3].x, rect_points[3].y);
         val["tilt_Rect"] = tmp3;
@@ -483,20 +540,20 @@ public:
 
   py::list find_ball_lab(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
   {
-    Mat in_img;
+    cv::Mat in_img;
     py_img_to_in_img(py_img, in_img, size, mode);
 
-    Mat hsv, mask;
-    cvtColor(in_img, hsv, COLOR_RGB2Lab);
-    inRange(hsv, Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
+    cv::Mat hsv, mask;
+    cvtColor(in_img, hsv, cv::COLOR_RGB2Lab);
+    inRange(hsv, cv::Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), cv::Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
     // cout << hsv_da <<endl;
-    Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
-    morphologyEx(mask, mask, MORPH_OPEN, se);
-    vector<vector<Point>> contours;
-    vector<Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
+    cv::Mat se = getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5), cv::Point(-1, -1));
+    morphologyEx(mask, mask, cv::MORPH_OPEN, se);
+    vector<vector<cv::Point>> contours;
+    vector<cv::Vec4i> hiearchy;
+    findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
     py::list out;
-    for (int i = 0; i < contours.size(); i++)
+    for (size_t i = 0; i < contours.size(); i++)
     {
       /* 当拟合点数少于6个时，不进行拟合 */
       if (contours[i].size() < 6)
@@ -504,7 +561,7 @@ public:
         break;
       }
       // 圆拟合
-      RotatedRect rrt = fitEllipse(contours[i]);
+      cv::RotatedRect rrt = fitEllipse(contours[i]);
       int cr_x, cr_y, cr_w, cr_h;
       cr_x = rrt.center.x;
       cr_y = rrt.center.y;
@@ -616,18 +673,41 @@ public:
   // A* c = new A(1);
   py::dict find_line(py::object py_img, vector<int> size, int mode)
   {
-    Mat src_gray, dst;
+    cv::Mat src_gray, dst;
     py::dict return_val;
-    Mat in_img;
+    cv::Mat in_img;
     py_img_to_in_img(py_img, in_img, size, mode);
-    Mat src_gary, mask;
-    cvtColor(in_img, src_gray, COLOR_RGB2GRAY); //将图片变成灰度图
-    Mat element = getStructuringElement(MORPH_RECT, Size(5, 5));
-    erode(src_gray, src_gray, element);
-    dilate(src_gray, src_gray, element);
-    threshold(src_gray, src_gray, 0, 255, THRESH_BINARY | THRESH_OTSU);
-    dilate(src_gray, dst, element); //膨胀
-    Rect rect;
+
+    cv::imwrite("/tmp/src.jpg", in_img);
+
+    cv::Mat src_gary, mask;
+    cvtColor(in_img, src_gray, cv::COLOR_RGB2GRAY); //将图片变成灰度图
+
+    // cv::imwrite("/tmp/src_gray_0.jpg", in_img);
+
+    cv::Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+
+    cv::erode(src_gray, src_gray, element);
+
+    // cv::imwrite("/tmp/src_gray_1.jpg", in_img);
+
+    cv::dilate(src_gray, src_gray, element);
+
+    // cv::imwrite("/tmp/src_gray_2.jpg", in_img);
+
+    // threshold(src_gray, src_gray, getThreshVal_Otsu_8u(src_gray), 255, 0);
+
+    cv::threshold(src_gray, src_gray, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+
+    // cv::threshold(src_gray, src_gray, 100, 255, cv::THRESH_BINARY);
+
+    // cv::imwrite("/tmp/src_gray_3.jpg", in_img);
+
+    cv::dilate(src_gray, dst, element); //膨胀
+
+    // cv::imwrite("/tmp/src_gray_4.jpg", in_img);
+
+    cv::Rect rect;
     rect.x = 0;
     rect.y = 0;
     rect.width = dst.cols;
@@ -648,16 +728,21 @@ public:
     rect.width = heigh_t;
     rect.height = dst.rows;
     dst(rect).setTo(255);
-    vector<vector<Point>> contours;
-    vector<Vec4i> hierarchy;
-    findContours(dst, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE, Point());
+
+    vector<vector<cv::Point>> contours;
+    vector<cv::Vec4i> hierarchy;
+
+    cv::findContours(dst, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE, cv::Point());
+
+    cv::imwrite("/tmp/dst.jpg", dst);
+
     if (contours.size() == 0)
     {
 
       return std::move(return_val);
     }
     int area = 0, a_n = 0;
-    for (int i = 1; i < contours.size(); i++)
+    for (size_t i = 1; i < contours.size(); i++)
     {
       int ar = contourArea(contours[i]);
       if (ar > area)
@@ -666,8 +751,8 @@ public:
         a_n = i;
       }
     }
-    RotatedRect minRect = minAreaRect(contours[a_n]);
-    Point2f rect_points[4];
+    cv::RotatedRect minRect = minAreaRect(contours[a_n]);
+    cv::Point2f rect_points[4];
     minRect.points(rect_points);
     py::list tmps;
     tmps.append(int(rect_points[0].x));

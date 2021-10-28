@@ -86,10 +86,12 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
         mjpg.store_mjpg(img)
 
 
-def fill(box=(0, 0), color=(0, 0, 0, 0)):
-    if len(box) == 2:
+def fill(color=(0, 0, 0, 0), box=None):
+    if box is None:
         global __width__, __height__
-        box = box + (__width__, __height__)
+        box = (0, 0, __width__, __height__)
+    if len(box) == 2:
+        box = (0, 0) + box
     get_draw().paste(color, box)
     show(__display__)
 
@@ -100,8 +102,9 @@ def clear(c=(0, 0, 0, 0)):
 
 if __name__ == '__main__':
     clear((255, 0, 0))
-    fill((20, 20, 220, 220), (0, 0, 0))
-    fill((40, 40, 200, 200), (0, 0, 255))
+    fill((255, 0, 0))
+    fill((0, 255, 0), (100, 100))
+    fill((0, 0, 255), (20, 20, 220, 220))
     # show()
 
     from PIL import Image, ImageDraw

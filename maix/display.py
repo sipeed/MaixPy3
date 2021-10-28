@@ -1,5 +1,3 @@
-import io
-import os
 
 from PIL import Image
 
@@ -70,7 +68,7 @@ def __thumbnail__(src, dst):
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
     global __display__, _remote_show, __mode__
     if img is None:
-        img = __display__
+        img = get_display()
     if local_show:
         if __fastview__:
             __draw__(img)  # underlying optimization

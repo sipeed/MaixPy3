@@ -158,7 +158,7 @@ def MaixImageHandlerFactory(q: queue.Queue):
                     self.serve_image(image)
             except KeyboardInterrupt as e:
                 pass
-              
+
         def add_image(self, image: Image):
             self.queue.put(image)
 
@@ -302,9 +302,9 @@ class MjpgReader():
                 break
         else:
             raise RuntimeError("Boundary not detected:", boundary)
-    
+
 if __name__ == '__main__':
-  
+
     start() # test rpyc & mjpg
 
     def unit_test_s():
@@ -333,7 +333,7 @@ if __name__ == '__main__':
         try:
           for content in mr.iter_content():
             print(len(content))
-            
+
             from PIL import Image
             from io import BytesIO
             tmp = Image.open(BytesIO(content))
@@ -347,7 +347,7 @@ if __name__ == '__main__':
         except ValueError as e:
           print(e)
     # unit_test_c()
-    # test_mjpg html <img>
+    # test_mjpg html <img src="http://localhost:18811" />
     from maix import camera, mjpg
     import queue, _maix
 

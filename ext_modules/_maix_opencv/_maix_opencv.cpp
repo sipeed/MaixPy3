@@ -59,75 +59,39 @@ namespace py = pybind11;
 // };
 
 // class _maix_image :public libmaix_image
+// pybind11::class_<_maix_image>(m, "Image")
+//     .def(pybind11::init<>())
+//     .def("load", &_maix_image::test)
+//     .def("save", &_maix_image::test)
+//     .def("format", &_maix_image::test)
+//     .def("size", &_maix_image::test)
+//     .def("tobytes", &_maix_image::test)
+//     .def("resize", &_maix_image::test)
+//     .def("rotate", &_maix_image::test)
+//     .def("crop", &_maix_image::test)
+//     .def("convert", &_maix_image::test)
+//     .def("mode", &_maix_image::test)
+//     .def("draw_ellipse", &_maix_image::test)
+//     .def("draw_string", &_maix_image::test)
+//     .def("draw_circle", &_maix_image::test)
+//     .def("draw_rectangle", &_maix_image::test)
+//     .def("draw_line", &_maix_image::test)
+//     .def("load_freetype", &_maix_image::test);
 class _maix_image
 {
 public:
   py::bytes test(py::bytes &rgb)
   {
-    std::string tmp = static_cast<std::string>(rgb);
-    cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
-    cv::Mat output = cv::Mat::zeros(240, 240, CV_8UC4);
-
-    cv::Mat gray, edges;
-    // Mat standard_hough, probabilistic_hough;
-    int min_threshold = 50;
-    int max_trackbar = 150;
-    int s_trackbar = max_trackbar;
-    // int p_trackbar = max_trackbar;
-
-    cvtColor(input, gray, cv::COLOR_RGB2GRAY);
-
-    Canny(gray, edges, 50, 200, 3);
-
-    cvtColor(edges, output, cv::COLOR_GRAY2BGRA);
-
-    vector<cv::Vec2f> s_lines;
-    // cvtColor(edges, standard_hough, COLOR_GRAY2BGR);
-
-    /// 1. Use Standard Hough Transform
-    HoughLines(edges, s_lines, 1, CV_PI / 180, min_threshold + s_trackbar, 0, 0);
-
-    /// Show the result
-    for (size_t i = 0; i < s_lines.size(); i++)
-    {
-      float r = s_lines[i][0], t = s_lines[i][1];
-      double cos_t = cos(t), sin_t = sin(t);
-      double x0 = r * cos_t, y0 = r * sin_t;
-      double alpha = 1000;
-
-      cv::Point pt1(cvRound(x0 + alpha * (-sin_t)), cvRound(y0 + alpha * cos_t));
-      cv::Point pt2(cvRound(x0 - alpha * (-sin_t)), cvRound(y0 - alpha * cos_t));
-      line(output, pt1, pt2, cv::Scalar(255, 0, 0, 200), 3, cv::LINE_AA);
-    }
-
-    // vector<Vec4i> p_lines;
-    // cvtColor(edges, probabilistic_hough, COLOR_GRAY2BGR);
-
-    // /// 2. Use Probabilistic Hough Transform
-    // HoughLinesP(edges, p_lines, 1, CV_PI / 180, min_threshold + p_trackbar, 30, 10);
-
-    // /// Show the result
-    // for (size_t i = 0; i < p_lines.size(); i++)
-    // {
-    //   Vec4i l = p_lines[i];
-    //   line(output, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(255, 0, 0, 200), 3, LINE_AA);
-    // }
-
-    int size = output.total() * output.elemSize();
-    return py::bytes((char *)output.data, size);
-    // std::vector buff;
-    // cv::imencode(".bmp", image, buff);
-    // std::string image_string(reinterpret_cast<char*>(&buff[0]), buff.size());
-    // return py::bytes();
+    //   puts("test _maix_image");
   }
-
   _maix_image()
   {
+    //   puts("new _maix_image");
   }
 
   ~_maix_image()
   {
+    //   puts("del _maix_image");
   }
 };
 
@@ -275,8 +239,8 @@ private:
   }
 
 public:
-  int COLOR_RGB ;
-  int COLOR_RGBA ;
+  int COLOR_RGB;
+  int COLOR_RGBA;
   int COLOR_L;
   py::bytes test(py::bytes &rgb)
   {
@@ -1075,9 +1039,9 @@ PYBIND11_MODULE(_maix_opencv, m)
   pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
       //图像参数
-      .def_readonly("COLOR_RGB",&_maix_vision::COLOR_RGB)
-      .def_readonly("COLOR_RGBA",&_maix_vision::COLOR_RGBA)
-      .def_readonly("COLOR_L",&_maix_vision::COLOR_L)
+      .def_readonly("COLOR_RGB", &_maix_vision::COLOR_RGB)
+      .def_readonly("COLOR_RGBA", &_maix_vision::COLOR_RGBA)
+      .def_readonly("COLOR_L", &_maix_vision::COLOR_L)
       //opencv原生函数
       .def("opecv_medianBlur", &_maix_vision::_maix_vision_medianBlur, py::arg("py_img"), py::arg("m_size") = 5, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
       .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize_w"), py::arg("ksize_h"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
@@ -1104,7 +1068,7 @@ PYBIND11_MODULE(_maix_opencv, m)
 
   pybind11::class_<_maix_image>(m, "Image")
       .def(pybind11::init<>())
-      .def("open", &_maix_image::test)
+      .def("load", &_maix_image::test)
       .def("save", &_maix_image::test)
       .def("format", &_maix_image::test)
       .def("size", &_maix_image::test)

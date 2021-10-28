@@ -63,6 +63,7 @@ void v_init(_Display *tp)
     tp->width = tp->disp->width;
     tp->height = tp->disp->height;
     tp->display_image = libmaix_image_create(tp->width, tp->height, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, false);
+
     if (NULL == tp->display_image)
     {
         v_close(tp);
@@ -84,13 +85,11 @@ _Display::~_Display()
 
 pybind11::object _Display::draw(pybind11::object py_img, int img_w, int img_h, int mode)
 {
-    uint8_t *in_img = NULL;
-    int img_width = img_w;
-    int img_height = img_h;
+    string tmp;
     if (py::isinstance<py::bytes>(py_img))
     {
-        string tmp = py_img.cast<string>();
-        in_img = (uint8_t *)tmp.c_str();
+        tmp = py_img.cast<string>();
+        this->display_image->data = (void *)(uint8_t *)tmp.c_str();
         this->display_image->mode = libmaix_image_mode_t(mode);
     }
     else
@@ -100,26 +99,28 @@ pybind11::object _Display::draw(pybind11::object py_img, int img_w, int img_h, i
         {
             auto tobytes = PIL_.attr("tobytes");
             auto img_bytes = tobytes(py_img);
-            string tmp = img_bytes.cast<string>();
-            in_img = (uint8_t *)tmp.c_str();
+            tmp = img_bytes.cast<string>();
+            this->display_image->data = (void *)(uint8_t *)tmp.c_str();
             auto img_size = py_img.attr("size").cast<vector<int>>();
             string tmp_mode = py_img.attr("mode").cast<string>();
             if (tmp_mode == "RGB")
                 this->display_image->mode = LIBMAIX_IMAGE_MODE_RGB888;
-            else
-                this->display_image->mode = LIBMAIX_IMAGE_MODE_RGB888;
-            img_width = img_size[0];
-            img_height = img_size[1];
+            else // fit other format
+                return py::none();
+            //     this->display_image->mode = LIBMAIX_IMAGE_MODE_RGB888;
+            img_w = img_size[0];
+            img_h = img_size[1];
         }
     }
-    this->display_image->width = img_width;
-    this->display_image->height = img_height;
-    this->display_image->data = in_img;
+
+    this->display_image->width = img_w;
+    this->display_image->height = img_h;
+
     if (NULL != this->disp)
     {
-        if (this->disp->width >= img_width && this->disp->height >= img_height)
+        if (this->disp->width >= img_w && this->disp->height >= img_h)
         {
-            if (in_img != NULL)
+            if (this->display_image->data != NULL)
             {
                 this->disp->draw_image(this->disp, this->display_image);
             }

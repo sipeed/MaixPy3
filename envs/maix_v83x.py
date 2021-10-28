@@ -30,8 +30,7 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
     library_dirs=[ext_so, ],
     extra_link_args=[
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
-    define_macros=[
-        ('V831Camera', None)],
+    # define_macros=[('V831Camera', None)],
 )
 
 # python3.8 -m pip install pybind11
@@ -116,7 +115,7 @@ _maix_display_module = Pybind11Extension(
         "maix_disp",
     ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
-    extra_compile_args=['-DV83xDisplay'],
+    # extra_compile_args=['-DV83xDisplay'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 

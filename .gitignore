@@ -143,3 +143,4 @@ ext_modules/_maix_opencv/example/test.py
 .vscode-ctags
 cpython
 start.sh
+_maix_opencvbak.cpp

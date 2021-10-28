@@ -138,12 +138,92 @@ private:
   /* data */
   py::object PIL_;
   py::object py_img_tobytes_;
+  //==================================================================
+  //函数名：  Distance
+  //作者：    dianjixz
+  //日期：    2021-10-01
+  //功能：    计算两个二维空间坐标点的欧式距离
+  //输入参数：
+  //          (x1,y1) 坐标一
+  //          (x2,y2) 坐标二
+  //返回值：  int
+  //          两个坐标点的欧式距离
+  //修改记录：
+  //==================================================================
   int Distance(int x1, int y1, int x2, int y2)
   {
     int x = abs(x1 - x2);
     int y = abs(y1 - y2);
     return int(round(sqrt(x * x + y * y)));
   }
+  //==================================================================
+  //函数名：  out_img_to_py_img
+  //作者：    dianjixz
+  //日期：    2021-10-27
+  //功能：    将opencv的Mat图像转换成输出图像,和输入图像保持一致
+  //输入参数：  py_img  _out
+  //          py_img (py::object）输入图像
+  //          _out    (cv::Mat） 将要转换的图像
+  //返回值：  类型（py::object)
+  //          返回转换好的图像
+  //修改记录：
+  //==================================================================
+  py::object out_img_to_py_img(py::object &py_img, cv::Mat &_out)
+  {
+    if (py::isinstance<py::bytes>(py_img))
+    {
+      py::bytes tmp((const char *)_out.data, _out.rows * _out.cols * _out.channels());
+      return tmp;
+    }
+    else
+    {
+      auto _PIL_ = py::module::import("PIL.Image");
+      if (py::isinstance(py_img, this->PIL_))
+      {
+        // auto tobytes = PIL_.attr("tobytes");
+        // auto img_bytes = tobytes(py_img);
+        auto frombytes = _PIL_.attr("frombytes");
+        // py::bytes tmp;
+        py::bytes tmp((const char *)_out.data, _out.rows * _out.cols * _out.channels());
+        if (_out.channels() == 3)
+        {
+          py::str str_tmp = "RGB";
+          py::tuple sizek = py::make_tuple(_out.rows, _out.cols);
+          auto PIL_img = frombytes(str_tmp, sizek, tmp);
+          return PIL_img;
+        }
+        else if (_out.channels() == 4)
+        {
+          py::str str_tmp = "RGBA";
+          py::tuple sizek = py::make_tuple(_out.rows, _out.cols);
+          auto PIL_img = frombytes(str_tmp, sizek, tmp);
+          return PIL_img;
+        }
+        else if (_out.channels() == 1)
+        {
+          py::str str_tmp = "L";
+          py::tuple sizek = py::make_tuple(_out.rows, _out.cols);
+          auto PIL_img = frombytes(str_tmp, sizek, tmp);
+          return PIL_img;
+        }
+      }
+    }
+  }
+  //==================================================================
+  //函数名：  py_img_to_in_img
+  //作者：    dianjixz
+  //日期：    2021-10-01
+  //功能：    将函数的输入图像参数转换成opencv的Mat图像
+  //输入参数：
+  //          py_img  (py::object） 传递的python对象
+  //          _out    (cv::Mat）    转换好输出的图像
+  //          size    (vector<int>) 图像的尺寸(非必须)
+  //          mode    (int)         图像的格式(非必须)
+  //返回值：
+  //          转换成功 0
+  //          转换失败 -1
+  //修改记录：
+  //==================================================================
   int py_img_to_in_img(py::object &py_img, cv::Mat &_out, vector<int> &size, int mode)
   {
     if (py::isinstance<py::bytes>(py_img))
@@ -151,12 +231,14 @@ private:
       string tmp = py_img.cast<string>();
       if (size[0] == 0 || size[1] == 0)
       {
-        cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
+        cv::Mat input(240, 240, mode, const_cast<char *>(tmp.c_str()));
         input.copyTo(_out);
       }
       else
       {
-        cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+        cv::Mat input(size[0], size[1], mode, const_cast<char *>(tmp.c_str()));
+        // cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
         input.copyTo(_out);
       }
     }
@@ -168,16 +250,34 @@ private:
         // auto tobytes = PIL_.attr("tobytes");
         // auto img_bytes = tobytes(py_img);
         auto img_bytes = this->py_img_tobytes_(py_img);
-        string tmp = img_bytes.cast<string>();
+        auto tmp = img_bytes.cast<string>();
         auto img_size = py_img.attr("size").cast<vector<int>>();
-        cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-        input.copyTo(_out);
+        auto img_mode = py_img.attr("mode").cast<string>();
+        if (img_mode == "RGB")
+        {
+          // cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+          cv::Mat input(img_size[0], img_size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
+          input.copyTo(_out);
+        }
+        else if (img_mode == "RGBA")
+        {
+          cv::Mat input(img_size[0], img_size[1], CV_8UC4, const_cast<char *>(tmp.c_str()));
+          input.copyTo(_out);
+        }
+        else if (img_mode == "L" || img_mode == "1")
+        {
+          cv::Mat input(img_size[0], img_size[1], CV_8UC1, const_cast<char *>(tmp.c_str()));
+          input.copyTo(_out);
+        }
       }
     }
     return 0;
   }
 
 public:
+  int COLOR_RGB ;
+  int COLOR_RGBA ;
+  int COLOR_L;
   py::bytes test(py::bytes &rgb)
   {
     std::string tmp = static_cast<std::string>(rgb);
@@ -242,6 +342,9 @@ public:
   {
     this->PIL_ = py::module::import("PIL.Image").attr("Image");
     this->py_img_tobytes_ = this->PIL_.attr("tobytes");
+    this->COLOR_RGB = CV_8UC3;
+    this->COLOR_RGBA = CV_8UC4;
+    this->COLOR_L = CV_8UC1;
   }
 
   ~_maix_vision()
@@ -255,12 +358,143 @@ public:
     int size = input.total() * input.elemSize();
     return py::bytes((char *)input.data, size);
   }
+  // medianBlur   //中值滤波
+  // GaussianBlur //高斯滤波
+  // Canny        //Canny 检测边缘
+  // HoughCircles //霍夫圆变换原理及圆检测
 
+  //==================================================================
+  //函数名：  _maix_vision_medianBlur
+  //作者：    dianjixz
+  //日期：    2021-10-27
+  //功能：    图像中值滤波函数
+  //输入参数：
+  //          py::object py_img     python输入图像对象
+  //          int m_size            中值滤波的核大小
+  //          vector<int> size      图像的尺寸(非必须)
+  //          int mode              图像的格式(非必须)
+  //返回值：
+  //          返回中值滤波后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_medianBlur(py::object py_img, int m_size, vector<int> size, int mode)
+  {
+    cv::Mat in_img;
+    py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Mat dist;
+    medianBlur(in_img, dist, m_size);
+    py::object tmp = out_img_to_py_img(py_img, dist);
+    return tmp;
+  }
+  //==================================================================
+  //函数名：  _maix_vision_GaussianBlur
+  //作者：    dianjixz
+  //日期：    2021-10-27
+  //功能：    图像高斯滤波函数
+  //输入参数：
+  //          py::object py_img               python输入图像对象
+  //          Size ksize:                     高斯内核大小，这个尺寸与前面两个滤波kernel尺寸不同，ksize.width和ksize.height可以不相同但是这两个值必须为正奇数，如果这两个值为0，他们的值将由sigma计算。
+  //          double sigmaX:                  高斯核函数在X方向上的标准偏差
+  //          double sigmaY:                  高斯核函数在Y方向上的标准偏差，如果sigmaY是0，则函数会自动将sigmaY的值设置为与sigmaX相同的值，如果sigmaX和sigmaY都是0，这两个值将由ksize.width和ksize.height计算而来。具体可以参考getGaussianKernel()函数查看具体细节。建议将size、sigmaX和sigmaY都指定出来。
+  //          int borderType=BORDER_DEFAULT:  推断图像外部像素的某种便捷模式，有默认值BORDER_DEFAULT，如果没有特殊需要不用更
+  //          vector<int> size                图像的尺寸(非必须)
+  //          int mode                        图像的格式(非必须)
+  //返回值：
+  //          返回高斯滤波后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_GaussianBlur(py::object py_img, int ksize_w, int ksize_h, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
+  {
+    cv::Mat in_img;
+    py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Mat dist;
+    cv::GaussianBlur(in_img, dist, cv::Size(ksize_w, ksize_h), sigmaX, sigmaY);
+    py::object tmp = out_img_to_py_img(py_img, dist);
+    return tmp;
+  }
+  //==================================================================
+  //函数名：  _maix_vision_Canny
+  //作者：    dianjixz
+  //日期：    2021-10-27
+  //功能：    边缘检测函数
+  //输入参数：
+  //          py::object py_img     python输入图像对象
+  //          int thr_h             最大阈值
+  //          int thr_l             最小阈值
+  //          vector<int> size      图像的尺寸(非必须)
+  //          int mode              图像的格式(非必须)
+  //返回值：
+  //          返回边缘检测函数后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_Canny(py::object py_img, int thr_h, int thr_l, vector<int> size, int mode)
+  {
+    cv::Mat in_img;
+    py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Mat dist;
+    cv::Canny(in_img, dist, thr_h, thr_l);
+    py::object tmp = out_img_to_py_img(py_img, dist);
+    return tmp;
+  }
+  //==================================================================
+  //函数名：  _maix_vision_HoughCircles
+  //作者：    dianjixz
+  //日期：    2021-10-27
+  //功能：    霍夫圆变换原理及圆检测
+  //输入参数：
+  //          py::object py_img     python输入图像对象
+  //          int method            使用的检测方法，目前opencv只有霍夫梯度法一种方法可用，该参数填HOUGH_GRADIENT即可（opencv 4.1.0下）
+  //          double dp             double类型的dp，用来检测圆心的累加器图像的分辨率于输入图像之比的倒数，且此参数允许创建一个比输入图像分辨率低的累加器。上述文字不好理解的话，来看例子吧。例如，如果dp= 1时，累加器和输入图像具有相同的分辨率。如果dp=2，累加器便有输入图像一半那么大的宽度和高度。
+  //          double minDist        为霍夫变换检测到的圆的圆心之间的最小距离
+  //          double param1         它是第三个参数method设置的检测方法的对应的参数。对当前唯一的方法霍夫梯度法CV_HOUGH_GRADIENT，它表示传递给canny边缘检测算子的高阈值，而低阈值为高阈值的一半。
+  //          double param2         也是第三个参数method设置的检测方法的对应的参数，对当前唯一的方法霍夫梯度法HOUGH_GRADIENT，它表示在检测阶段圆心的累加器阈值。它越小的话，就可以检测到更多根本不存在的圆，而它越大的话，能通过检测的圆就更加接近完美的圆形了。
+  //          int minRadius         表示圆半径的最小值
+  //          int maxRadius         表示圆半径的最大值
+  //          vector<int> size      图像的尺寸(非必须)
+  //          int mode              图像的格式(非必须)
+  //返回值：
+  //          返回中值滤波后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_HoughCircles(py::object py_img, int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, vector<int> size, int mode)
+  {
+    cv::Mat in_img;
+    this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Mat dist;
+    vector<cv::Vec3f> circles;
+    cv::HoughCircles(in_img, circles, method, dp, minDist, param1, param2, minRadius, maxRadius);
+    py::list return_val;
+    for (size_t i = 0; i < circles.size(); i++)
+    {
+      py::list tmp;
+      tmp.append(circles[i][0]);
+      tmp.append(circles[i][1]);
+      tmp.append(circles[i][2]);
+      return_val.append(tmp);
+    }
+    return return_val;
+  }
+  //==================================================================
+  //函数名：  get_blob_color_max
+  //作者：    dianjixz
+  //日期：    2021-8-01
+  //功能：    获取框内颜色的最大值
+  //输入参数：
+  //          py::object py_img     python输入图像对象
+  //          vector<int> roi       感兴趣区域最大阈值
+  //          int critical          上下颜色范围宽度(简单扩大范围)
+  //          int co                返回的颜色模式  0:rgb   1:Lab   2:HSV
+  //          vector<int> size      图像的尺寸(非必须)
+  //          int mode              图像的格式(非必须)
+  //返回值：
+  //          返回一个框内颜色的最大值的列表；
+  //修改记录：
+  //==================================================================
   py::list get_blob_color_max(py::object py_img, vector<int> &roi, int critical, int co, vector<int> size, int mode)
   {
     py::list return_val;
     cv::Mat in_img;
-    py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
 
     critical = critical > 100 ? 100 : critical;
     critical = critical < 0 ? 0 : critical;
@@ -271,10 +505,7 @@ public:
     rect.width = roi[2];
     rect.height = roi[3];
     cv::Mat lab_img;
-    // cvtColor(in_img(rect), lab_img, COLOR_RGB2Lab);
-
     lab_img = in_img(rect);
-
     vector<cv::Mat> lab_planes;
     split(lab_img, lab_planes);
 
@@ -388,30 +619,132 @@ public:
     }
     return return_val;
   }
-
-  py::list find_blob_lab(py::object py_img, vector<vector<int>> &thresholds, vector<int> size, int mode, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt)
+  //==================================================================
+  //函数名：  _maix_vision_find_blob
+  //作者：    dianjixz
+  //日期：    2021-8-01
+  //功能：    查找颜色区域
+  //输入参数：
+  //          py::object py_img                   python输入图像对象
+  //          ector<vector<int>> &thresholds      颜色的阈值
+  //          vector<int> roi                     感兴趣区域最大阈值
+  //          int x_stride                        x方向的最小像素
+  //          int y_stride                        y方向的最小像素
+  //          bool invert                         是否反转图像
+  //          int area_threshold                  最小面积阈值
+  //          int pixels_threshold                最小像素阈值
+  //          bool merge                          是否合并相邻的像素块
+  //          int margin                          合并的最小距离
+  //          int tilt                            寻找包裹最小的矩形
+  //          int co                              传入的颜色阈值模式  0:rgb   1:Lab   2:HSV    3:L
+  //          vector<int> size                    图像的尺寸(非必须)
+  //          int mode                            图像的格式(非必须)
+  //返回值：
+  //          返回一个查找到颜色的列表
+  //修改记录：
+  //==================================================================
+  py::list _maix_vision_find_blob(py::object py_img, vector<vector<int>> &thresholds, vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co, vector<int> size, int mode)
   {
     py::list return_val;
     cv::Mat in_img;
-    py_img_to_in_img(py_img, in_img, size, mode);
-
+    py_img_to_in_img(py_img, in_img, size, mode); //获取输入图像
     cv::Mat lab, mask1;
-    if (roi[2] != 0 && roi[3] != 0)
+    bool grasy = 0;
+    switch (co) //转换颜色空间以及颜色阈值
     {
-      cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
-      cvtColor(in_img(rect), lab, cv::COLOR_RGB2Lab);
+    case 0: //rgb
+      if (in_img.channels() != 3)
+        return return_val;
+      if (roi[2] != 0 && roi[3] != 0)
+      {
+        cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
+        lab = in_img(rect);
+      }
+      else
+      {
+        lab = in_img;
+      }
+      break;
+    case 1: //lab
+      if (in_img.channels() != 3)
+        return return_val;
+      if (roi[2] != 0 && roi[3] != 0)
+      {
+        cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
+        cvtColor(in_img(rect), lab, cv::COLOR_RGB2Lab);
+      }
+      else
+      {
+        cvtColor(in_img, lab, cv::COLOR_RGB2Lab);
+      }
+      for (size_t i = 0; i < thresholds.size(); i++)
+      {
+        thresholds[i][0] = int((thresholds[i][0] * 255) / 100);
+        thresholds[i][1] = thresholds[i][1] + 128;
+        thresholds[i][2] = thresholds[i][2] + 128;
+        thresholds[i][3] = int((thresholds[i][3] * 255) / 100);
+        thresholds[i][4] = thresholds[i][4] + 128;
+        thresholds[i][5] = thresholds[i][5] + 128;
+      }
+      break;
+    case 2: //hsv
+      if (in_img.channels() != 3)
+        return return_val;
+      if (roi[2] != 0 && roi[3] != 0)
+      {
+        cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
+        cvtColor(in_img(rect), lab, cv::COLOR_RGB2HSV);
+      }
+      else
+      {
+        cvtColor(in_img, lab, cv::COLOR_RGB2HSV);
+      }
+      for (size_t i = 0; i < thresholds.size(); i++)
+      {
+        thresholds[i][0] = int(thresholds[i][0] / 2);
+        thresholds[i][1] = int(thresholds[i][1] * 2.55);
+        thresholds[i][2] = int(thresholds[i][2] * 2.55);
+        thresholds[i][3] = int(thresholds[i][3] / 2);
+        thresholds[i][4] = int(thresholds[i][4] * 2.55);
+        thresholds[i][5] = int(thresholds[i][5] * 2.55);
+      }
+      break;
+    case 3: //灰度
+      if (in_img.channels() != 1)
+        return return_val;
+      if (roi[2] != 0 && roi[3] != 0)
+      {
+        cv::Rect rect(roi[0], roi[1], roi[2], roi[3]);
+        lab = in_img(rect);
+      }
+      else
+      {
+        lab = in_img;
+      }
+      grasy = 1;
+      break;
+    default: //不在颜色阈值内,返回
+      return return_val;
+      break;
+    }
+    cv::Mat mask = cv::Mat::zeros(lab.size(), CV_8UC1);
+    if (grasy)
+    {
+      for (size_t i = 0; i < thresholds.size(); i++)
+      {
+        cv::inRange(lab, cv::Scalar(thresholds[i][0]), cv::Scalar(thresholds[i][1]), mask1); //分割通道,阈值化
+        mask = mask + mask1;
+      }
     }
     else
     {
-      cvtColor(in_img, lab, cv::COLOR_RGB2Lab);
+      for (size_t i = 0; i < thresholds.size(); i++)
+      {
+        inRange(lab, cv::Scalar(thresholds[i][0], thresholds[i][1], thresholds[i][2]), cv::Scalar(thresholds[i][3], thresholds[i][4], thresholds[i][5]), mask1); //分割通道,阈值化
+        mask = mask + mask1;
+      }
     }
-    cv::Mat mask = cv::Mat::zeros(lab.size(), CV_8UC1);
-    for (size_t i = 0; i < thresholds.size(); i++)
-    {
-      inRange(lab, cv::Scalar(int((thresholds[i][0] * 255) / 100), thresholds[i][1] + 128, thresholds[i][2] + 128), cv::Scalar(int((thresholds[i][3] * 255) / 100), thresholds[i][4] + 128, thresholds[i][5] + 128), mask1);
-      mask = mask + mask1;
-    }
-    if (invert)
+    if (invert) //是否反转图像
     {
       bitwise_not(mask, mask);
     }
@@ -426,7 +759,7 @@ public:
 
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hiearchy;
-    findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
+    findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE); //查找最小矩形轮廓
     if (contours.size() == 0)
     {
       return return_val;
@@ -452,7 +785,7 @@ public:
       val["cx"] = int(rects.x + rects.width / 2);
       val["cy"] = int(rects.y + rects.height / 2);
 
-      if (tilt)
+      if (tilt) //是否需要最小包裹矩形轮廓
       {
         cv::RotatedRect minRect = minAreaRect(contours[i]);
         cv::Point2f rect_points[4];
@@ -480,22 +813,67 @@ public:
     }
     return return_val;
   }
-
-  py::list find_ball_lab(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
+  //==================================================================
+  //函数名：  _maix_vision_find_ball_blob
+  //作者：    dianjixz
+  //日期：    2021-8-01
+  //功能：    查找符合颜色的小球
+  //输入参数：
+  //          py::object py_img                   python输入图像对象
+  //          ector<vector<int>> &thresholds      颜色的阈值
+  //          int co                              传入的颜色阈值模式  0:rgb   1:Lab   2:HSV
+  //          vector<int> size                    图像的尺寸(非必须)
+  //          int mode                            图像的格式(非必须)
+  //返回值：
+  //          返回一个查找到小球的列表
+  //修改记录：
+  //==================================================================
+  py::list _maix_vision_find_ball_blob(py::object py_img, vector<int> &thresholds, int co, vector<int> size, int mode)
   {
     cv::Mat in_img;
-    py_img_to_in_img(py_img, in_img, size, mode);
-
+    py::list out;
+    this->py_img_to_in_img(py_img, in_img, size, mode);
     cv::Mat hsv, mask;
-    cvtColor(in_img, hsv, cv::COLOR_RGB2Lab);
-    inRange(hsv, cv::Scalar(int(thresholds[0] * 255 / 100), thresholds[1] + 128, thresholds[2] + 128), cv::Scalar(int(thresholds[3] * 255 / 100), thresholds[4] + 128, thresholds[5] + 128), mask);
+    switch (co) //转换颜色空间以及颜色阈值
+    {
+    case 0: //rgb
+      if (in_img.channels() != 3)
+        return out;
+      hsv = in_img;
+      break;
+    case 1: //lab
+      if (in_img.channels() != 3)
+        return out;
+      cv::cvtColor(in_img, hsv, cv::COLOR_RGB2Lab);
+      thresholds[0] = int((thresholds[0] * 255) / 100);
+      thresholds[1] = thresholds[1] + 128;
+      thresholds[2] = thresholds[2] + 128;
+      thresholds[3] = int((thresholds[3] * 255) / 100);
+      thresholds[4] = thresholds[4] + 128;
+      thresholds[5] = thresholds[5] + 128;
+      break;
+    case 2: //hsv
+      if (in_img.channels() != 3)
+        return out;
+      cv::cvtColor(in_img, hsv, cv::COLOR_RGB2HSV);
+      thresholds[0] = int(thresholds[0] / 2);
+      thresholds[1] = int(thresholds[1] * 2.55);
+      thresholds[2] = int(thresholds[2] * 2.55);
+      thresholds[3] = int(thresholds[3] / 2);
+      thresholds[4] = int(thresholds[4] * 2.55);
+      thresholds[5] = int(thresholds[5] * 2.55);
+      break;
+    default: //不在颜色阈值内,返回
+      return out;
+      break;
+    }
+    cv::inRange(hsv, cv::Scalar(thresholds[0], thresholds[1], thresholds[2]), cv::Scalar(thresholds[3], thresholds[4], thresholds[5]), mask);
     // cout << hsv_da <<endl;
     cv::Mat se = getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5), cv::Point(-1, -1));
     morphologyEx(mask, mask, cv::MORPH_OPEN, se);
     vector<vector<cv::Point>> contours;
     vector<cv::Vec4i> hiearchy;
     findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
-    py::list out;
     for (size_t i = 0; i < contours.size(); i++)
     {
       /* 当拟合点数少于6个时，不进行拟合 */
@@ -526,98 +904,11 @@ public:
     return std::move(out);
   }
 
-  // py::list find_ball_hsv(py::object py_img, vector<int> &thresholds, vector<int> size, int mode)
-  // {
-  //   // py::list find_ball(py::bytes &rgb, vector<int> &hsv_da)
-  //   // {
-
-  //   Mat in_img;
-  //   if (py::isinstance<py::bytes>(py_img))
-  //   {
-  //     string tmp = py_img.cast<string>();
-  //     if (size[0] == 0 || size[1] == 0)
-  //     {
-  //       cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
-  //       in_img = input;
-  //     }
-  //     else
-  //     {
-  //       cv::Mat input(size[0], size[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-  //       in_img = input;
-  //     }
-  //   }
-  //   else
-  //   {
-  //     auto PIL_ = py::module::import("PIL.Image").attr("Image");
-
-  //     if (py::isinstance(py_img, PIL_))
-  //     {
-  //       auto tobytes = PIL_.attr("tobytes");
-  //       auto img_bytes = tobytes(py_img);
-  //       string tmp = py_img.cast<string>();
-
-  //       auto mdd = py_img.attr("size").cast<vector<int>>();
-  //       cv::Mat input(mdd[0], mdd[1], CV_8UC3, const_cast<char *>(tmp.c_str()));
-  //       in_img = input;
-  //     }
-  //   }
-  //   Mat hsv, mask;
-  //   cvtColor(in_img, hsv, COLOR_RGB2HSV);
-  //   inRange(hsv, Scalar(thresholds[0], thresholds[1], thresholds[2]), Scalar(thresholds[3], thresholds[4], thresholds[5]), mask);
-  //   // cout << hsv_da <<endl;
-  //   Mat se = getStructuringElement(MORPH_RECT, Size(5, 5), Point(-1, -1));
-  //   morphologyEx(mask, mask, MORPH_OPEN, se);
-  //   vector<vector<Point>> contours;
-  //   vector<Vec4i> hiearchy;
-  //   findContours(mask, contours, hiearchy, RETR_EXTERNAL, CHAIN_APPROX_NONE);
-
-  //   py::list out;
-
-  //   for (int i = 0; i < contours.size(); i++)
-  //   {
-  //     /* 当拟合点数少于6个时，不进行拟合 */
-  //     if (contours[i].size() < 6)
-  //     {
-  //       break;
-  //     }
-
-  //     // 圆拟合
-  //     RotatedRect rrt = fitEllipse(contours[i]);
-
-  //     int cr_x, cr_y, cr_w, cr_h;
-
-  //     cr_x = rrt.center.x;
-  //     cr_y = rrt.center.y;
-  //     cr_w = rrt.size.width;
-  //     cr_h = rrt.size.height;
-
-  //     /* 当图形长宽相差太大 或者 图形面积太小时，不进行处理 */
-  //     if ((abs(cr_w - cr_h) > 10) ||
-  //         (cr_w * cr_h) < 400)
-  //     {
-  //       break;
-  //     }
-
-  //     py::list tmp;
-
-  //     tmp.append(cr_x);
-  //     tmp.append(cr_y);
-  //     tmp.append(cr_w);
-  //     tmp.append(cr_h);
-
-  //     out.append(tmp);
-  //   }
-  //   return std::move(out);
-  // }
-  // std::string tmp = static_cast<std::string>(rgb);
-  // cv::Mat input(240, 240, CV_8UC3, const_cast<char *>(tmp.c_str()));
-
   enum adaptiveMethod
   {
-      meanFilter,
-      gaaussianFilter,
-      medianFilter
+    meanFilter,
+    gaaussianFilter,
+    medianFilter
   };
 
   void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, double c, adaptiveMethod method = meanFilter)
@@ -629,17 +920,17 @@ public:
     cv::Mat smooth;
     switch (method)
     {
-      case meanFilter:
-        cv::blur(src, smooth, cv::Size(Subsize, Subsize)); //均值滤波
-        break;
-      case gaaussianFilter:
-        cv::GaussianBlur(src, smooth, cv::Size(Subsize, Subsize), 0, 0); //高斯滤波
-        break;
-      case medianFilter:
-        cv::medianBlur(src, smooth, Subsize); //中值滤波
-        break;
-      default:
-        break;
+    case meanFilter:
+      cv::blur(src, smooth, cv::Size(Subsize, Subsize)); //均值滤波
+      break;
+    case gaaussianFilter:
+      cv::GaussianBlur(src, smooth, cv::Size(Subsize, Subsize), 0, 0); //高斯滤波
+      break;
+    case medianFilter:
+      cv::medianBlur(src, smooth, Subsize); //中值滤波
+      break;
+    default:
+      break;
     }
 
     smooth = smooth - c;
@@ -783,11 +1074,33 @@ PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_maix_vision>(m, "Vision")
       .def(pybind11::init<>())
+      //图像参数
+      .def_readonly("COLOR_RGB",&_maix_vision::COLOR_RGB)
+      .def_readonly("COLOR_RGBA",&_maix_vision::COLOR_RGBA)
+      .def_readonly("COLOR_L",&_maix_vision::COLOR_L)
+      //opencv原生函数
+      .def("opecv_medianBlur", &_maix_vision::_maix_vision_medianBlur, py::arg("py_img"), py::arg("m_size") = 5, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize_w"), py::arg("ksize_h"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("opecv_Canny", &_maix_vision::_maix_vision_Canny, py::arg("py_img"), py::arg("thr_h"), py::arg("thr_l"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("opecv_HoughCircles", &_maix_vision::_maix_vision_HoughCircles, py::arg("py_img"), py::arg("method") = 3, py::arg("dp"), py::arg("minDist"), py::arg("param1"), py::arg("param2"), py::arg("minRadius"), py::arg("maxRadius"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      //基于opencv编写MaixPy3特有函数
       .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
-      .def("get_blob_color_max", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
-      .def("find_blob_lab", &_maix_vision::find_blob_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0)
-      .def("find_ball_lab", &_maix_vision::find_ball_lab, py::arg("py_img"), py::arg("thresholds"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
-      .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0);
+      .def("get_blob_color", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_blob_lab", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_ball_lab", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_circles_blob", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      //基于opencv编写兼容openmv图像处理函数
+      .def("get_histogram", &_maix_vision::test)
+      .def("get_percentile", &_maix_vision::test)
+      .def("get_threshold", &_maix_vision::test)
+      .def("get_statistics", &_maix_vision::test)
+      .def("find_blobs", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 0)
+      .def("find_lines", &_maix_vision::test)
+      .def("find_line_segments", &_maix_vision::test)
+      .def("get_regression", &_maix_vision::test)
+      .def("find_circles", &_maix_vision::test)
+      .def("find_rects", &_maix_vision::test);
 
   pybind11::class_<_maix_image>(m, "Image")
       .def(pybind11::init<>())

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-setup.py file for MaixPy3
+setup.py file for maixpy3
 """
 
 import sys
@@ -31,12 +31,12 @@ data_files.extend(_maix_data_files)
 py_modules.extend(_maix_py_modules)
 
 setup(
-  name='MaixPy3',
-  version='0.3.3',
+  name='maixpy3',
+  version='0.3.4',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",
-  url='https://github.com/sipeed/MaixPy3',
+  url='https://github.com/sipeed/maixpy3',
   description="MaixPy Python3 library",
   long_description=open('README.md', 'r', encoding='UTF-8').read(),
   long_description_content_type='text/markdown',

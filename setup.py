@@ -32,7 +32,7 @@ py_modules.extend(_maix_py_modules)
 
 setup(
   name='MaixPy3',
-  version='0.3.2',
+  version='0.3.3',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",

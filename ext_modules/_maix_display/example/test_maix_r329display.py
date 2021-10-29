@@ -1,6 +1,4 @@
 
-from maix import nn
-
 from PIL import Image
 
 from _maix_display import Display

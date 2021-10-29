@@ -2,13 +2,16 @@
 from PIL import Image
 
 # remote jupyter options
-remote, _remote_show = None, False
+remote, _remote_show, _remote_debug = None, False, False
 
 
-def jupyter(show=False, clear=True):
+def jupyter(show=False, clear=True, debug=True):
   try:
-    global remote, _remote_show
+    from maix import mjpg
+    mjpg.clear_mjpg()
+    global remote, _remote_show, _remote_debug
     _remote_show = show
+    _remote_debug = debug
     if remote != None:
       remote.clear_output = clear
       remote._start_display()
@@ -66,9 +69,18 @@ def __thumbnail__(src, dst):
 
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
-    global __display__, _remote_show, __mode__
+    global __display__, _remote_show, _remote_debug, __mode__
     if img is None:
         img = get_display()
+    else:
+        get_display()
+    if remote_show and _remote_show:
+        from maix import mjpg
+        if _remote_debug:
+            for i in range(9):
+                mjpg.store_mjpg(img)
+        else:
+            mjpg.store_mjpg(img)
     if local_show:
         if __fastview__:
             __draw__(img)  # underlying optimization
@@ -81,9 +93,6 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
                 __thumbnail__(img, __display__)
                 __display__.paste(img, box)
             __display__.show()
-    if remote_show and _remote_show:
-        from maix import mjpg
-        mjpg.store_mjpg(img)
 
 
 def fill(color=(0, 0, 0, 0), box=None):

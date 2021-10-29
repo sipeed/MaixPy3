@@ -90,7 +90,8 @@ class FileImageHandler(BaseHTTPRequestHandler):
         try:
           self.serve_images()
         except KeyboardInterrupt as e:
-          logging.debug('run: ' + str(e)) # BrokenPipeError: [Errno 32] Broken pipe
+          # BrokenPipeError: [Errno 32] Broken pipe
+          logging.debug('run: ' + str(e))
 
     def serve_image(self, image: Image):
         # Part boundary string
@@ -132,18 +133,22 @@ def BytesImageHandlerFactory(q: queue.Queue):
         def serve_images(self):
             i = 0
             t_start = time.time()
-            while True:
-                image = self.queue.get()
-                self.serve_image(image)
-                fps = (i + 1) / (time.time() - t_start)
-                logging.debug("served image %d, overall fps: %0.3f" %
-                             (i + 1, fps))
-                i += 1
+            try:
+                while True:
+                    image = self.queue.get()
+                    self.serve_image(image)
+                    fps = (i + 1) / (time.time() - t_start)
+                    logging.debug("served image %d, overall fps: %0.3f" %
+                                  (i + 1, fps))
+                    i += 1
+            except Exception as e:
+                logging.error(e)
 
         def add_image(self, image: Image):
             self.queue.put(image)
 
     return BytesImageHandler
+
 
 def MaixImageHandlerFactory(q: queue.Queue):
     class MaixImageHandler(FileImageHandler):
@@ -189,6 +194,12 @@ class MjpgServerThread(Thread):
 HostName, RpycPort, MjpgSrv, MjpgPort, MjpgQueue = '0.0.0.0', 18812, None, 18811, None
 
 
+def clear_mjpg():
+    global MjpgQueue
+    if MjpgQueue:
+        MjpgQueue.queue.clear()
+
+
 def store_mjpg(img):
   global MjpgQueue
   if MjpgQueue:
@@ -212,7 +223,8 @@ def start_mjpg(size=8):
   global MjpgSrv, MjpgQueue
   if MjpgSrv == None or MjpgSrv.is_alive() == False:
     MjpgQueue = queue.Queue(maxsize=size)
-    MjpgSrv = MjpgServerThread(HostName, MjpgPort, BytesImageHandlerFactory(q=MjpgQueue))
+    MjpgSrv = MjpgServerThread(
+        HostName, MjpgPort, BytesImageHandlerFactory(q=MjpgQueue))
     MjpgSrv.start()
     from maix import display
     if display.__display__:
@@ -295,7 +307,6 @@ class MjpgReader():
                 length = int(line.decode('utf-8').split(": ")[1])
                 assert length > 0
 
-
     def _skip_to_boundary(self, rd, boundary: bytes):
         for _ in range(10):
             if boundary in rd.readline():
@@ -303,9 +314,10 @@ class MjpgReader():
         else:
             raise RuntimeError("Boundary not detected:", boundary)
 
+
 if __name__ == '__main__':
 
-    start() # test rpyc & mjpg
+    start()  # test rpyc & mjpg
 
     def unit_test_s():
       from_files = False
@@ -328,6 +340,7 @@ if __name__ == '__main__':
           while not image_queue.empty():
               time.sleep(1)
     # unit_test_s()
+
     def unit_test_c():
         mr = MjpgReader("http://127.0.0.1:18811")
         try:
@@ -349,13 +362,16 @@ if __name__ == '__main__':
     # unit_test_c()
     # test_mjpg html <img src="http://localhost:18811" />
     from maix import camera, mjpg
-    import queue, _maix
+    import queue
+    import _maix
 
     Queue = queue.Queue(maxsize=8)
-    mjpg.MjpgServerThread("0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=Queue)).start()
+    mjpg.MjpgServerThread(
+        "0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=Queue)).start()
 
     while True:
         img = camera.capture()
-        jpg = _maix.rgb2jpg(img.convert("RGB").tobytes(), img.width, img.height)
+        jpg = _maix.rgb2jpg(img.convert("RGB").tobytes(),
+                            img.width, img.height)
         Queue.put(mjpg.BytesImage(jpg))
         print(len(jpg))

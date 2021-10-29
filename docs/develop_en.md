@@ -81,6 +81,6 @@ your arm
 - python3 setup.py sdist build
 - python3.8 setup.py bdist_wheel maix_v83x
 
-> pip install twine
+> pip3 install twine
 
 - twine upload dist/* --verbose

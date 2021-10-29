@@ -25,16 +25,16 @@ import time
 
 
 def Canny():
-  tmp = camera.capture()  
-  ma = vision.opecv_Canny(tmp,10,250)
-  display.show(ma)
-
+  tmp = camera.capture()
+  ma = vision.opecv_Canny(tmp, 10, 250)
+  display.show(ma.convert("RGB"))
 
 if __name__ == "__main__":
-  import signal
-  def handle_signal_z(signum, frame):
-      print("APP OVER")
-      exit(0)
-  signal.signal(signal.SIGINT, handle_signal_z)
-  while True:
-    Canny()
+    import signal
+
+    def handle_signal_z(signum, frame):
+            print("APP OVER")
+            exit(0)
+    signal.signal(signal.SIGINT, handle_signal_z)
+    while True:
+            Canny()

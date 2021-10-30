@@ -6,7 +6,7 @@ def show_run_time(func):
         print(func, elapsed_time)
     return time_get
 
-from maix import display, camera
+from maix import display, camera, image
 
 @show_run_time
 def test_quick():
@@ -26,17 +26,11 @@ def test_pillow():
 # <function test_pillow at 0x199fff8> 0.07056433300022036
 test_pillow()
 
-from maix import image
-
 @show_run_time
 def test_opencv():
     tmp = camera.read()
-    image.load(tmp, 224, 224)
-    image.resize(240, 240)
-    display.show(image.tobytes())
+    display.show(image(tmp, 224, 224).resize(240, 240).tobytes())
+
 
 # <function test_opencv at 0x104ea58> 0.02121679200001836
 test_opencv()
-
-while True:
-  test_pillow()

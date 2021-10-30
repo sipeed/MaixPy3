@@ -93,23 +93,24 @@ public:
 
   libmaix_image_t *img;
 
-  bool load(py::bytes rgb, int w, int h)
+  _maix_image &load(py::bytes rgb, int w, int h)
   {
-    bool ret = false;
+    // bool ret = false;
     this->~_maix_image();
     img = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if (img) {
       // printf("load %p\r\n", img->data);
       std::string tmp = static_cast<std::string>(rgb);
       memcpy(img->data, tmp.c_str(), img->width * img->height * 3);
-      ret = true;
+      // ret = true;
     }
-    return ret;
+    // return ret;
+    return *this;
   }
 
-  bool resize(int w, int h)
+  _maix_image &resize(int w, int h)
   {
-    bool ret = false;
+    // bool ret = false;
     if (img) {
       libmaix_image_t *tmp = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
       if (tmp) {
@@ -117,10 +118,11 @@ public:
         cv::Mat dst(w, h, CV_8UC3, tmp->data);
         cv::resize(src, dst, cv::Size(w, h));
         libmaix_image_destroy(&this->img), this->img = tmp;
-        ret = true;
+        // ret = true;
       }
     }
-    return ret;
+    // return ret;
+    return *this;
   }
 
   py::bytes tobytes()

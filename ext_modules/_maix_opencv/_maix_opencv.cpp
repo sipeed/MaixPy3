@@ -21,42 +21,14 @@
 #include <opencv2/imgcodecs/legacy/constants_c.h>
 #include "opencv2/core/types_c.h"
 
+#include "libmaix_cv_image.h"
+
 // using namespace cv;
 using namespace std;
 
 namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
-
-// typedef enum
-// {
-//     LAB = 0,
-//     INVALID ,
-//     BINARY,
-//     GRAY  ,
-//     RGB888,          // supported
-//     RGB565,
-//     RGBA8888,
-//     YUV420SP_NV21,   // supported
-
-// }image_mode_t;
-
-// struct libmaix_image
-// {
-
-//   cv::Mat obj;
-
-//   int _load() {
-
-//     return 0;
-//   }
-
-//   int _save() {
-
-//     return 0;
-//   }
-
-// };
 
 // class _maix_image :public libmaix_image
 // pybind11::class_<_maix_image>(m, "Image")
@@ -80,18 +52,96 @@ namespace py = pybind11;
 class _maix_image
 {
 public:
+  libmaix_err_t libmaix_cv_image_test(libmaix_image_t *src, libmaix_image_t *dst)
+  {
+    libmaix_image_t *rgb888 = libmaix_image_create(240, 240, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    if (rgb888)
+    {
+      printf("w %d h %d p %d \r\n", rgb888->width, rgb888->height, rgb888->mode);
+
+      // libmaix_cv_image_test(rgb888, rgb888);
+
+      // libmaix_cv_image_draw_image_open(rgb888, 20, 20, "/home/res/logo.png");
+
+      libmaix_cv_image_draw_rectangle(rgb888, 0, 0, 240, 240, MaixColor(255, 255, 255), -1);
+
+      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 0, 0, 360, MaixColor(255, 0, 0), 2);
+      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 45, 0, 360, MaixColor(0, 255, 0), 2);
+      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, -45, 0, 360, MaixColor(0, 0, 255), 2);
+      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 90, 0, 360, MaixColor(55, 55, 55), 2);
+
+      libmaix_cv_image_draw_circle(rgb888, 200, 200, 10, MaixColor(255, 0, 0), 1);
+      libmaix_cv_image_draw_circle(rgb888, 150, 200, 20, MaixColor(0, 255, 0), 5);
+      libmaix_cv_image_draw_circle(rgb888, 200, 150, 30, MaixColor(0, 0, 255), 10);
+
+      libmaix_cv_image_draw_rectangle(rgb888, 10, 10, 130, 120, MaixColor(255, 0, 0), 2);
+      libmaix_cv_image_draw_line(rgb888, 10, 10, 130, 120, MaixColor(255, 0, 0), 2);
+      libmaix_cv_image_draw_string(rgb888, 0, 120, "test123[]-=", MaixColor(255, 0, 255), 1.0, 2);
+      // libmaix_cv_image_load_freetype("./txwzs.ttf");
+      // libmaix_cv_image_draw_string(rgb888, 0, 0, u8"123你好鸭asdにほんご", MaixColor(55, 55, 55), 0.8, 1);
+
+      libmaix_image_destroy(&rgb888);
+    }
+    return LIBMAIX_ERR_NONE;
+  }
+
   py::bytes test(py::bytes &rgb)
   {
     //   puts("test _maix_image");
+    return py::none();
   }
+
+  libmaix_image_t *img;
+
+  bool load(py::bytes rgb, int w, int h)
+  {
+    bool ret = false;
+    this->~_maix_image();
+    img = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    if (img) {
+      // printf("load %p\r\n", img->data);
+      std::string tmp = static_cast<std::string>(rgb);
+      memcpy(img->data, tmp.c_str(), img->width * img->height * 3);
+      ret = true;
+    }
+    return ret;
+  }
+
+  bool resize(int w, int h)
+  {
+    bool ret = false;
+    if (img) {
+      libmaix_image_t *tmp = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      if (tmp) {
+        cv::Mat src(img->width, img->height, CV_8UC3, img->data);
+        cv::Mat dst(w, h, CV_8UC3, tmp->data);
+        cv::resize(src, dst, cv::Size(w, h));
+        libmaix_image_destroy(&this->img), this->img = tmp;
+        ret = true;
+      }
+    }
+    return ret;
+  }
+
+  py::bytes tobytes()
+  {
+    if (img) {
+      // printf("tobytes %p\r\n", img->data);
+      return py::bytes((const char *)img->data, img->width * img->height * 3);
+    }
+    return py::none();
+  }
+
   _maix_image()
   {
-    //   puts("new _maix_image");
+    img = NULL;
   }
 
   ~_maix_image()
   {
-    //   puts("del _maix_image");
+    if (!img) {
+      libmaix_image_destroy(&img);
+    }
   }
 };
 
@@ -172,6 +222,7 @@ private:
         }
       }
     }
+    return py::none();
   }
   //==================================================================
   //函数名：  py_img_to_in_img
@@ -1068,12 +1119,12 @@ PYBIND11_MODULE(_maix_opencv, m)
 
   pybind11::class_<_maix_image>(m, "Image")
       .def(pybind11::init<>())
-      .def("load", &_maix_image::test)
+      .def("load", &_maix_image::load, py::arg("rgb"), py::arg("w"), py::arg("h"))
+      .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
+      .def("tobytes", &_maix_image::tobytes)
       .def("save", &_maix_image::test)
       .def("format", &_maix_image::test)
       .def("size", &_maix_image::test)
-      .def("tobytes", &_maix_image::test)
-      .def("resize", &_maix_image::test)
       .def("rotate", &_maix_image::test)
       .def("crop", &_maix_image::test)
       .def("convert", &_maix_image::test)

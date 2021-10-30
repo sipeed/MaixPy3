@@ -141,7 +141,7 @@ public:
 
   ~_maix_image()
   {
-    if (!img) {
+    if (img) {
       libmaix_image_destroy(&img);
     }
   }

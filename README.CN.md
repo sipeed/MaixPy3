@@ -1,12 +1,12 @@
 <p align="center">
-    <img height="120" src="https://maixpy.sipeed.com/static/image/logo.png" title="" alt="MaixPy3 Logo">
+    <img height="120" src="https://wiki.sipeed.com/soft/maixpy/assets/maixpy/maixpy.png" title="" alt="MaixPy3 Logo">
 </p>
 
-# MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/MaixPy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/MaixPy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/MaixPy3.svg?style=social)
+# MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/maixpy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/maixpy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/maixpy3.svg?style=social)
 
 [English](./README.md)  | 简体中文
 
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![PyPI version](https://badge.fury.io/py/MaixPy3.svg)](https://badge.fury.io/py/MaixPy3) ![Python](https://img.shields.io/badge/Python-3.5↗-ff69b4.svg) ![issue](https://img.shields.io/github/issues/sipeed/maixpy3.svg)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![PyPI version](https://badge.fury.io/py/maixpy3.svg)](https://badge.fury.io/py/maixpy3) ![Python](https://img.shields.io/badge/Python-3.5↗-ff69b4.svg) ![issue](https://img.shields.io/github/issues/sipeed/maixpy3.svg)
 
 MaixPy3 是基于 [cpython](https://github.com/python/cpython) 的 Python3 工具包，通过 Python 编程简化在 Linux AI 边缘设备上开发应用。
 

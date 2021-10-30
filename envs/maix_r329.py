@@ -21,62 +21,27 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ex
 # python3.8 -m pip install pybind11
 _maix_opencv_module = Pybind11Extension(
     name = "_maix_opencv",
-    include_dirs=[get_incs('ext_modules/libmaix/components/libmaix/lib/arch/r329/include/opencv4/')],
-    sources=get_srcs('ext_modules/_maix_opencv'),
+    include_dirs=[
+        get_incs(
+            'ext_modules/libmaix/components/libmaix/include'),
+        get_incs(
+            'ext_modules/libmaix/components/libmaix/lib/arch/r329/include/opencv4/'),
+        get_incs(
+            'ext_modules/libmaix/components/maix_cv_image/include')
+    ],
+    sources=get_srcs('ext_modules/_maix_opencv') + get_srcs('ext_modules/libmaix/components/maix_cv_image/src'),
     libraries=[
-        "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
-        # "opencv_aruco",
-        # "opencv_dnn",
-        # "opencv_hfs",
-        # "opencv_optflow",
-        # "opencv_shape",
-        # "opencv_videoio",
-        # "opencv_bgsegm",
-        # "opencv_dpm",
-        # "opencv_highgui",
-        # "opencv_phase_unwrapping",
-        # "opencv_stereo",
-        # "opencv_video",
-        # "opencv_bioinspired",
-        # "opencv_face",
-        # "opencv_imgcodecs",
-        # "opencv_photo",
-        # "opencv_stitching",
-        # "opencv_videostab",
-        # "opencv_calib3d",
-        # "opencv_features2d",
-        # "opencv_img_hash",
-        # "opencv_plot",
-        # "opencv_structured_light",
-        # "opencv_ccalib",
-        # "opencv_flann",
-        # "opencv_imgproc",
-        # "opencv_quality",
-        # "opencv_superres",
-        # "opencv_ximgproc",
-        # "opencv_core",
-        # "opencv_freetype",
-        # "opencv_line_descriptor",
-        # "opencv_reg",
-        # "opencv_surface_matching",
-        # "opencv_xobjdetect",
-        # "opencv_datasets",
-        # "opencv_fuzzy",
-        # "opencv_ml",
-        # "opencv_rgbd",
-        # "opencv_text",
-        # "opencv_xphoto",
-        # "opencv_dnn_objdetect",
-        # "opencv_objdetect",
-        # "opencv_saliency",
-        # "opencv_tracking"
-        ],
-        library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4", ],
-        extra_link_args=[
-            "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/_maix_opencv"
-        ],
-        extra_compile_args=['-std=c++11', '-std=gnu++11' ],
-    )
+        "maix_image", "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
+    ],
+    library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4",
+        ext_so,
+    ],
+    extra_link_args=[
+        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/_maix_opencv",
+        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/",
+    ],
+    extra_compile_args=['-std=c++11', '-std=gnu++11' ],
+)
 
 _maix_camera_module = Pybind11Extension(
     name = '_maix_camera',

@@ -52,7 +52,7 @@ def unit_test():
         img = image.load(tmp, 224, 224)
         img.resize(240, 240)
         img.draw_rectangle(20, 20, 220, 220, color=(0, 255, 0), thickness=4)
-        img.draw_string(20, 120, str(time.time()), scale=1.2, color=(255, 0, 0), thickness=2)
+        img.draw_string(20, 120, str(time.time()), scale=0.6, color=(255, 0, 0), thickness=2)
         display.show(img.tobytes())
 
 unit_test()

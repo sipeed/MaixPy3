@@ -44,12 +44,18 @@ test_opencv()
 
 
 def unit_test():
+    import time
     from maix import display, camera, image
     camera.config((224, 224))
     while True:
         tmp = camera.read()
-        display.show(image.load(tmp, 224, 224).resize(240, 240).tobytes())
+        img = image.load(tmp, 224, 224)
+        img.resize(240, 240)
+        img.draw_rectangle(20, 20, 220, 220, color=(0, 255, 0), thickness=4)
+        img.draw_string(20, 120, str(time.time()), scale=1.2, color=(255, 0, 0), thickness=2)
+        display.show(img.tobytes())
 
+unit_test()
 
 if __name__ == "__main__":
 

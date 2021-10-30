@@ -52,39 +52,6 @@ namespace py = pybind11;
 class _maix_image
 {
 public:
-  libmaix_err_t libmaix_cv_image_test(libmaix_image_t *src, libmaix_image_t *dst)
-  {
-    libmaix_image_t *rgb888 = libmaix_image_create(240, 240, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
-    if (rgb888)
-    {
-      printf("w %d h %d p %d \r\n", rgb888->width, rgb888->height, rgb888->mode);
-
-      // libmaix_cv_image_test(rgb888, rgb888);
-
-      // libmaix_cv_image_draw_image_open(rgb888, 20, 20, "/home/res/logo.png");
-
-      libmaix_cv_image_draw_rectangle(rgb888, 0, 0, 240, 240, MaixColor(255, 255, 255), -1);
-
-      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 0, 0, 360, MaixColor(255, 0, 0), 2);
-      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 45, 0, 360, MaixColor(0, 255, 0), 2);
-      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, -45, 0, 360, MaixColor(0, 0, 255), 2);
-      libmaix_cv_image_draw_ellipse(rgb888, 120, 120, 100, 25, 90, 0, 360, MaixColor(55, 55, 55), 2);
-
-      libmaix_cv_image_draw_circle(rgb888, 200, 200, 10, MaixColor(255, 0, 0), 1);
-      libmaix_cv_image_draw_circle(rgb888, 150, 200, 20, MaixColor(0, 255, 0), 5);
-      libmaix_cv_image_draw_circle(rgb888, 200, 150, 30, MaixColor(0, 0, 255), 10);
-
-      libmaix_cv_image_draw_rectangle(rgb888, 10, 10, 130, 120, MaixColor(255, 0, 0), 2);
-      libmaix_cv_image_draw_line(rgb888, 10, 10, 130, 120, MaixColor(255, 0, 0), 2);
-      libmaix_cv_image_draw_string(rgb888, 0, 120, "test123[]-=", MaixColor(255, 0, 255), 1.0, 2);
-      // libmaix_cv_image_load_freetype("./txwzs.ttf");
-      // libmaix_cv_image_draw_string(rgb888, 0, 0, u8"123你好鸭asdにほんご", MaixColor(55, 55, 55), 0.8, 1);
-
-      libmaix_image_destroy(&rgb888);
-    }
-    return LIBMAIX_ERR_NONE;
-  }
-
   py::bytes test(py::bytes &rgb)
   {
     //   puts("test _maix_image");
@@ -122,6 +89,22 @@ public:
       }
     }
     // return ret;
+    return *this;
+  }
+
+  _maix_image &draw_string(int x, int y, const char *str, double scale, vector<int> color, int thickness)
+  {
+    if (img) {
+      libmaix_cv_image_draw_string(img, x, y, str, scale, MaixColor(color[0], color[1], color[2]), thickness);
+    }
+    return *this;
+  }
+
+  _maix_image &draw_rectangle(int x1, int y1, int x2, int y2, vector<int> color, int thickness)
+  {
+    if (img) {
+      libmaix_cv_image_draw_rectangle(img, x1, y1, x2, y2, MaixColor(color[0], color[1], color[2]), thickness);
+    }
     return *this;
   }
 
@@ -1124,6 +1107,8 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("load", &_maix_image::load, py::arg("rgb"), py::arg("w"), py::arg("h"))
       .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
       .def("tobytes", &_maix_image::tobytes)
+      .def("draw_string", &_maix_image::draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_rectangle", &_maix_image::draw_rectangle, py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
       .def("save", &_maix_image::test)
       .def("format", &_maix_image::test)
       .def("size", &_maix_image::test)
@@ -1132,9 +1117,7 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("convert", &_maix_image::test)
       .def("mode", &_maix_image::test)
       .def("draw_ellipse", &_maix_image::test)
-      .def("draw_string", &_maix_image::test)
       .def("draw_circle", &_maix_image::test)
-      .def("draw_rectangle", &_maix_image::test)
       .def("draw_line", &_maix_image::test)
       .def("load_freetype", &_maix_image::test);
 }

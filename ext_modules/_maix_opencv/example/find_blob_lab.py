@@ -49,3 +49,51 @@ if __name__ == "__main__":
     camera.config(size=(224,224))
     while True:
         find_blob()
+
+# $env/bin/
+# $env/python3/include
+# $env/python3/lib
+
+
+# PYTHONPATH="$env/lib/python3.9/site-packages"
+# # PYTHONPATH="$env/usr/lib/python3.8/site-packages:$basepath//ipkg-install//usr/lib/python3.8/site-packages" \
+
+
+# CC="$env/bin/aarch64-linux-gnu-gcc" \
+# CCSHARED="$env/bin/aarch64-linux-gnu-gcc -fpic" \
+# CXX="$env/bin/aarch64-linux-gnu-g++" \
+# LD="$env/bin/aarch64-linux-gnu-gcc" \
+# LDSHARED="$env/bin/aarch64-linux-gnu-gcc -shared" \
+# CFLAGS="-I$env/python3/include -I$env/python3/include/python3.9" \
+# CPPFLAGS="-I$env/python3/include -I$env/python3/include/python3.9" \
+# LDFLAGS="-L$env/python3/lib -L$env/python3/lib/python3.9 -lpython3.9" \
+# _PYTHON_HOST_PLATFORM="linux_aarch64" \
+# PYTHONDONTWRITEBYTECODE=1 PYTHONOPTIMIZE="" \
+# _python_sysroot="./$env/" \
+# _python_prefix="/usr" \
+# _python_exec_prefix="/usr" \
+# PYTHONPATH="$env/host/lib/python3.9/site-packages" \
+# $env/host/bin/python3.9 $@
+
+
+
+# function pip3.8()
+# {
+#   CC="$tools/arm-openwrt-linux-muslgnueabi-gcc" \
+#   CCSHARED="$tools/arm-openwrt-linux-muslgnueabi-gcc -fpic" \
+#   CXX="$tools/arm-openwrt-linux-muslgnueabi-g++" \
+#   LD="$tools/arm-openwrt-linux-muslgnueabi-gcc" \
+#   LDSHARED="$tools/arm-openwrt-linux-muslgnueabi-gcc -shared" \
+#   CFLAGS="-Os -pipe -march=armv7-a -mtune=cortex-a7 -mfpu=neon -fno-caller-saves -Wno-unused-result -mfloat-abi=hard  -Wformat -Werror=format-security -fstack-protector -D_FORTIFY_SOURCE=1 -Wl,-z,now -Wl,-z,relro" \
+#   CPPFLAGS="-I$env/usr/include -I$header/usr/include -I$header/include -I$header/include/fortify -I$env/usr/include/python3.8" \
+#   LDFLAGS="-L$env/usr/lib -L$env/lib -L$header/usr/lib -L$header/lib -znow -zrelro -lpython3.8" \
+#   _PYTHON_HOST_PLATFORM="linux-armv7l" \
+#   PYTHONPATH="$env/usr/lib/python3.8/site-packages:$basepath/ipkg-install//usr/lib/python3.8/site-packages" \
+#   PYTHONDONTWRITEBYTECODE=1 PYTHONOPTIMIZE="" \
+#   _python_sysroot="./$env/" \
+#   _python_prefix="/usr" \
+#   _python_exec_prefix="/usr" \
+#   $env/host/bin/python3.8 -c "import re;import sys;from pip._internal.cli.main import main;sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0]);sys.exit(main());" $@
+# }
+
+# cpython-39-x86_64-linux-gnu.so

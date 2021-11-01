@@ -95,6 +95,44 @@ public:
   }
 };
 
+class _maix_vision_histogram : public py::list
+{
+private:
+  /* data */
+public:
+  _maix_vision_histogram()
+  {
+  }
+  _maix_vision_histogram(py::list hist)
+  {
+    this->append(hist);
+  }
+  ~_maix_vision_histogram()
+  {
+  }
+  py::object bins()
+  {
+  }
+  py::object l_bins()
+  {
+  }
+  py::object a_bins()
+  {
+  }
+  py::object b_bins()
+  {
+  }
+  py::object get_percentile(float percentile)
+  {
+  }
+  py::object get_threshold()
+  {
+  }
+  py::object get_statistics()
+  {
+  }
+};
+
 class _maix_vision
 {
 
@@ -322,10 +360,6 @@ public:
     int size = input.total() * input.elemSize();
     return py::bytes((char *)input.data, size);
   }
-  // medianBlur   //中值滤波
-  // GaussianBlur //高斯滤波
-  // Canny        //Canny 检测边缘
-  // HoughCircles //霍夫圆变换原理及圆检测
 
   //==================================================================
   //函数名：  _maix_vision_medianBlur
@@ -367,12 +401,12 @@ public:
   //          返回高斯滤波后的图像,图像格式和输入保持一致；
   //修改记录：
   //==================================================================
-  py::object _maix_vision_GaussianBlur(py::object py_img, int ksize_w, int ksize_h, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
+  py::object _maix_vision_GaussianBlur(py::object py_img, std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
   {
     cv::Mat in_img;
     py_img_to_in_img(py_img, in_img, size, mode); //获取图像
     cv::Mat dist;
-    cv::GaussianBlur(in_img, dist, cv::Size(ksize_w, ksize_h), sigmaX, sigmaY);
+    cv::GaussianBlur(in_img, dist, cv::Size(ksize[0], ksize[1]), sigmaX, sigmaY);
     py::object tmp = out_img_to_py_img(py_img, dist);
     return tmp;
   }
@@ -438,6 +472,58 @@ public:
     }
     return return_val;
   }
+  //==================================================================
+  //函数名：  _maix_vision_opencv_calcHist
+  //作者：    dianjixz
+  //日期：    2021-10-29
+  //功能：    opencv计算图像直方图
+  //输入参数：
+  //          py::object py_img     python输入图像对象
+  //          int channels          需要统计直方图的第几通道(默认为0)
+  //          vector<int> &roi      掩膜，，计算掩膜内的直方图  感兴趣区域(默认全部区域)
+  //          int histSize          直方图分成多少个区间，就是 bin的个数(默认256)
+  //          vector<int> ranges     统计像素值得区间(默认(0,256))
+  //          bool uniform          是否对得到的直方图数组进行归一化处理(默认true)
+  //          bool accumulate       在多个图像时，是否累计计算像素值得个数(默认false)
+  //          vector<int> size      图像的尺寸(非必须)(默认(0,0))
+  //          int mode              图像的格式(非必须)(默认16)
+  //返回值：
+  //          返回中值滤波后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_opencv_calcHist(py::object py_img, int channels, vector<int> &roi, int histSize, vector<int> ranges, bool uniform, bool accumulate, vector<int> size, int mode)
+  {
+    py::list return_val;
+    cv::Mat in_img;
+    this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Rect rect;
+    if (roi[2] != 0 && roi[3] != 0)
+    {
+      rect.x = roi[0];
+      rect.y = roi[1];
+      rect.width = roi[2];
+      rect.height = roi[3];
+    }
+    else
+    {
+      rect.x = 0;
+      rect.y = 0;
+      rect.width = in_img.size[0];
+      rect.height = in_img.size[1];
+    }
+    cv::Mat mask = cv::Mat::zeros(in_img.size(), CV_8UC1);
+    mask(rect).setTo(255);
+    float range[] = {ranges[0], ranges[1]};
+    const float *histRanges = {range};
+    cv::Mat _hist;
+    calcHist(&in_img, 1, (const int *)&channels, mask, _hist, 1, (const int *)&histSize, &histRanges, uniform, accumulate);
+    for (int i = 0; i < histSize; i++)
+    {
+      return_val.append(_hist.at<float>(i));
+    }
+    return return_val;
+  }
+
   //==================================================================
   //函数名：  get_blob_color_max
   //作者：    dianjixz
@@ -1032,6 +1118,57 @@ public:
     return_val["rotation"] = k;
     return std::move(return_val);
   }
+  //==================================================================
+  //函数名：  _maix_vision_get_histogram
+  //作者：    dianjixz
+  //日期：    2021-10-29
+  //功能：    在 roi 的所有颜色通道上进行标准化直方图运算，并返回 histogram 对象
+  //输入参数：
+  //          py::object py_img                        python输入图像对象
+  //          vector<vector<int>> &thresholds          thresholds 必须是元组列表。 [(lo, hi), (lo, hi), ..., (lo, hi)] 定义你想追踪的颜色范围,对于灰度图像，每个元组需要包含两个值 - 最小灰度值和最大灰度值。
+  //          bool invert                              反转阈值操作，像素在已知颜色范围之外进行匹配，而非在已知颜色范围内。
+  //          vector<int> &roi                         是感兴趣区域的矩形元组(x，y，w，h)。如果未指定，ROI即整个图像的图像矩形。操作范围仅限于 roi 区域内的像素。
+  //          int bins                                 和其他bin是用于直方图通道的箱数。对于灰度图像，使用 bins
+  //          vector<int> size      图像的尺寸(非必须)(默认(0,0))
+  //          int mode              图像的格式(非必须)(默认16)
+  //返回值：
+  //          返回中值滤波后的图像,图像格式和输入保持一致；
+  //修改记录：
+  //==================================================================
+  py::object _maix_vision_get_histogram(py::object py_img, vector<vector<int>> &thresholds, bool invert, vector<int> &roi, int bins, vector<int> size, int mode)
+  {
+    py::list return_val;
+    cv::Mat in_img;
+    this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
+    cv::Rect rect;
+    if (roi[2] != 0 && roi[3] != 0)
+    {
+      rect.x = roi[0];
+      rect.y = roi[1];
+      rect.width = roi[2];
+      rect.height = roi[3];
+    }
+    else
+    {
+      rect.x = 0;
+      rect.y = 0;
+      rect.width = in_img.size[0];
+      rect.height = in_img.size[1];
+    }
+    cv::Mat mask = cv::Mat::zeros(in_img.size(), CV_8UC1);
+    mask(rect).setTo(255);
+    // vector<float> ranges1;
+
+    // float range[] = {ranges[0], ranges[1]};
+    // const float *histRanges = {range};
+    // cv::Mat _hist;
+    // calcHist(&in_img, 1, (const int*)&channels, mask, _hist, 1, (const int*)&histSize, &histRanges, uniform, accumulate);
+    // for(int i=0;i<histSize;i++)
+    // {
+    //   return_val.append(_hist.at<float>(i));
+    // }
+    // return return_val;
+  }
 };
 
 PYBIND11_MODULE(_maix_opencv, m)
@@ -1044,7 +1181,7 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def_readonly("COLOR_L", &_maix_vision::COLOR_L)
       //opencv原生函数
       .def("opecv_medianBlur", &_maix_vision::_maix_vision_medianBlur, py::arg("py_img"), py::arg("m_size") = 5, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize_w"), py::arg("ksize_h"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
+      .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
       .def("opecv_Canny", &_maix_vision::_maix_vision_Canny, py::arg("py_img"), py::arg("thr_h"), py::arg("thr_l"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
       .def("opecv_HoughCircles", &_maix_vision::_maix_vision_HoughCircles, py::arg("py_img"), py::arg("method") = 3, py::arg("dp"), py::arg("minDist"), py::arg("param1"), py::arg("param2"), py::arg("minRadius"), py::arg("maxRadius"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
       //基于opencv编写MaixPy3特有函数

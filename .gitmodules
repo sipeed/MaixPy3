@@ -1,3 +1,6 @@
 [submodule "ext_modules/libmaix"]
 	path = ext_modules/libmaix
 	url = https://github.com/sipeed/libmaix
+[submodule "ext_modules/_maix_speech/Maix-Speech"]
+	path = ext_modules/_maix_speech/Maix-Speech
+	url = https://github.com/sipeed/Maix-Speech

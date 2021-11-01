@@ -27,7 +27,7 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
             "venc_base", "mpp_component", "adecoder", "asound", "venc_base", "hwdisplay",
             "maix_utils", "maix_cam", "maix_image",
     ],
-    library_dirs=[ext_so, ],
+    library_dirs=[ ext_so, ],
     extra_link_args=[
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
     # define_macros=[('V831Camera', None)],
@@ -39,10 +39,13 @@ _maix_opencv_module = Pybind11Extension("_maix_opencv",
         get_incs(
             'ext_modules/libmaix/components/libmaix/include'),
         get_incs(
-            'ext_modules/libmaix/components/libmaix/lib/arch/v83x/include/opencv4/')
+            'ext_modules/libmaix/components/libmaix/lib/arch/v83x/include/opencv4/'),
+        get_incs(
+            'ext_modules/libmaix/components/maix_cv_image/include')
     ],
-    sources = get_srcs('ext_modules/_maix_opencv'),
+    sources = get_srcs('ext_modules/_maix_opencv') + get_srcs('ext_modules/libmaix/components/maix_cv_image/src'),
     libraries=[
+        "maix_utils", "maix_cam", "maix_image",
         "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
         # "opencv_aruco", "opencv_dnn", "opencv_hfs", "opencv_optflow", "opencv_shape",
         # "opencv_videoio","opencv_bgsegm", "opencv_dpm", "opencv_highgui", "opencv_phase_unwrapping", "opencv_stereo",
@@ -55,9 +58,11 @@ _maix_opencv_module = Pybind11Extension("_maix_opencv",
         # "opencv_gapi", "opencv_objdetect", "opencv_saliency", "opencv_tracking"
     ],
     library_dirs=[
+        ext_so,
         "./ext_modules/libmaix/components/libmaix/lib/arch/v83x/opencv4",
     ],
     extra_link_args=[
+        "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix",
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix/_maix_opencv"
     ],
 )

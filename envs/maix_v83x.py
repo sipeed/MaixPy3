@@ -68,6 +68,33 @@ _maix_opencv_module = Pybind11Extension("_maix_opencv",
 )
 
 
+# python3.8 -m pip install pybind11
+_maix_speech_module = Pybind11Extension("_maix_speech",
+    include_dirs=[
+        get_incs(
+            'ext_modules/_maix_speech/Maix-Speech/components/asr_lib/include'),
+        get_incs(
+            'ext_modules/_maix_speech/Maix-Speech/components/utils/include')
+    ],
+    sources = get_srcs('ext_modules/_maix_speech', exclude=["utils", "projects"]),
+    libraries=[
+        "ms_asr_v83x", "asound"
+    ],
+    library_dirs=[
+        ext_so,
+        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/v83x",
+    ],
+    extra_objects=[
+        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/v83x/libms_asr_v83x.a",
+    ],
+    extra_compile_args=['-D__ARM__', '-D__ARMV7__', '-DCONF_KERNEL_IOMMU', '-DCONF_KERNEL_VERSION_4_9', '-std=c++11', '-std=gnu++11'],
+    extra_link_args=[
+        # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -fPIC -c -s -ffunction-sections -fdata-sections -march=armv7-a  -mtune=cortex-a7" PARENT_SCOPE)
+        # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-unused-variable -fPIC -fexceptions -s -ffunction-sections -fdata-sections -fpermissive -march=armv7-a  -mtune=cortex-a7" PARENT_SCOPE)
+    ],
+)
+
+
 _maix_camera_module = Pybind11Extension(
     name='_maix_camera',
     include_dirs=['ext_modules/_maix_camera/include',
@@ -144,6 +171,7 @@ _maix_modules = [
     _maix_vivo_module,
     _maix_opencv_module,
     # _maix_camera_module,
+    _maix_speech_module,
     _maix_display_module,
     _maix_nn_module
 ]

@@ -42,10 +42,11 @@ class _maix_image
 
 private:
   libmaix_image_t *img;
+    int _maix_image_img_num;
   any maix_pram1[4];
   any maix_pram2[4];
   any opencv_parm1[4];
-  int _maix_image_img_num;
+
 
   int get_to(string &mode)
   {
@@ -1699,35 +1700,15 @@ public:
 
 
 
-PYBIND11_MODULE(_maix_Image, mo)
-{
-  mo.def("new",&_maix_image::test);
-  mo.def("load",&_maix_image::test);
-
-  pybind11::class_<_maix_image>(mo, "Image")
-      .def(pybind11::init<>())
-      .def_readonly("format", &_maix_image::_maix_image_format)
-      .def_readonly("size", &_maix_image::_maix_image_size)
-      .def_readonly("mode", &_maix_image::_maix_image_mode)
-      // .def("new", &_maix_image::_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB")
-      .def("show", &_maix_image::_show)
-      // .def("load", &_maix_image::load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB")
-      .def("save", &_maix_image::save, py::arg("path"))
-      .def("tobytes", &_maix_image::tobytes)
-      .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
-      .def("rotate", &_maix_image::rotate, py::arg("rotate"))
-      .def("crop", &_maix_image::draw_crop, py::arg("thr"))
-      .def("convert", &_maix_image::draw_convert, py::arg("mode") = "RGB")
-      .def("draw_ellipse", &_maix_image::draw_ellipse, py::arg("rect"), py::arg("angle"), py::arg("startAngle"), py::arg("endAngle"), py::arg("color"), py::arg("thickness"))
-      .def("draw_string", &_maix_image::draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("draw_circle", &_maix_image::draw_circle, py::arg("circ"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("draw_rectangle", &_maix_image::draw_rectangle, py::arg("rect"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("draw_line", &_maix_image::draw_line, py::arg("line"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-
-      .def("load_freetype", &_maix_image::test);
+// PYBIND11_MODULE(_maix_Image, mo)
+// {
+//   mo.def("new",&_maix_image::test);
+//   mo.def("load",&_maix_image::test);
 
 
-}
+
+
+// }
 
 
 
@@ -1762,4 +1743,28 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def("get_regression", &_maix_vision::test)
       .def("find_circles", &_maix_vision::test)
       .def("find_rects", &_maix_vision::test);
+
+  pybind11::class_<_maix_image>(mo, "Image")
+      .def(pybind11::init<>())
+      .def_readonly("format", &_maix_image::_maix_image_format)
+      .def_readonly("size", &_maix_image::_maix_image_size)
+      .def_readonly("mode", &_maix_image::_maix_image_mode)
+      .def("new", &_maix_image::_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB")
+      .def("show", &_maix_image::_show)
+      .def("load", &_maix_image::load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB")
+      .def("save", &_maix_image::save, py::arg("path"))
+      .def("tobytes", &_maix_image::tobytes)
+      .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
+      .def("rotate", &_maix_image::rotate, py::arg("rotate"))
+      .def("crop", &_maix_image::draw_crop, py::arg("thr"))
+      .def("convert", &_maix_image::draw_convert, py::arg("mode") = "RGB")
+      .def("draw_ellipse", &_maix_image::draw_ellipse, py::arg("rect"), py::arg("angle"), py::arg("startAngle"), py::arg("endAngle"), py::arg("color"), py::arg("thickness"))
+      .def("draw_string", &_maix_image::draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_circle", &_maix_image::draw_circle, py::arg("circ"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_rectangle", &_maix_image::draw_rectangle, py::arg("rect"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_line", &_maix_image::draw_line, py::arg("line"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+
+      .def("load_freetype", &_maix_image::test);
+
+
 }

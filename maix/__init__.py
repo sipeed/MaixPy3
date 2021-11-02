@@ -46,8 +46,8 @@ except ModuleNotFoundError as e:
 
 try:
   from _maix_opencv import Vision, Image
-  vision, image = Vision(), Image()
-  __all__.extend(['vision', 'image'])
+  # vision, image = Vision(), Image()
+  __all__.extend(['vision', 'Image'])
 except ModuleNotFoundError as e:
   pass
 

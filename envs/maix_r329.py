@@ -31,7 +31,7 @@ _maix_opencv_module = Pybind11Extension(
     ],
     sources=get_srcs('ext_modules/_maix_opencv') + get_srcs('ext_modules/libmaix/components/maix_cv_image/src'),
     libraries=[
-        "maix_image", "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
+        "maix_image","maix_disp", "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
     ],
     library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4",
         ext_so,

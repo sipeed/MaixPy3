@@ -1,5 +1,7 @@
 
 #include <iostream>
+#include "any.hpp"
+
 #include <pybind11/pybind11.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
@@ -22,6 +24,7 @@
 #include "opencv2/core/types_c.h"
 
 #include "libmaix_cv_image.h"
+#include "libmaix_disp.h"
 
 // using namespace cv;
 using namespace std;
@@ -30,105 +33,590 @@ namespace py = pybind11;
 #define heigh_t 10
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
-// class _maix_image :public libmaix_image
-// pybind11::class_<_maix_image>(m, "Image")
-//     .def(pybind11::init<>())
-//     .def("load", &_maix_image::test)
-//     .def("save", &_maix_image::test)
-//     .def("format", &_maix_image::test)
-//     .def("size", &_maix_image::test)
-//     .def("tobytes", &_maix_image::test)
-//     .def("resize", &_maix_image::test)
-//     .def("rotate", &_maix_image::test)
-//     .def("crop", &_maix_image::test)
-//     .def("convert", &_maix_image::test)
-//     .def("mode", &_maix_image::test)
-//     .def("draw_ellipse", &_maix_image::test)
-//     .def("draw_string", &_maix_image::test)
-//     .def("draw_circle", &_maix_image::test)
-//     .def("draw_rectangle", &_maix_image::test)
-//     .def("draw_line", &_maix_image::test)
-//     .def("load_freetype", &_maix_image::test);
+
+
+
+
 class _maix_image
 {
+
+private:
+  libmaix_image_t *img;
+  any maix_pram1[4];
+  any maix_pram2[4];
+  any opencv_parm1[4];
+  int _maix_image_img_num;
+
+  int get_to(string &mode)
+  {
+    if (mode == "L")
+    {
+      return 0;
+    }
+    else if (mode == "RGB16")
+    {
+      return 1;
+    }
+    else if (mode == "RGB")
+    {
+      return 2;
+    }
+    else if (mode == "RGBA")
+    {
+      return 3;
+    }
+    else
+    {
+      PyErr_SetString(PyExc_RuntimeError, "libmaix_disp_create err!");
+      throw py::error_already_set();
+      return -1;
+    }
+  }
+
 public:
+  std::string _maix_image_format;
+  std::string _maix_image_mode;
+  std::vector<int> _maix_image_size;
+  py::dict info;
+
   py::bytes test(py::bytes &rgb)
   {
     //   puts("test _maix_image");
     return py::none();
   }
 
-  libmaix_image_t *img;
-
-  _maix_image &load(py::bytes rgb, int w, int h)
+  _maix_image &_new(vector<int> size, vector<int> color, string image_mode)
   {
-    // bool ret = false;
     this->~_maix_image();
-    img = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
-    if (img) {
-      // printf("load %p\r\n", img->data);
-      std::string tmp = static_cast<std::string>(rgb);
-      memcpy(img->data, tmp.c_str(), img->width * img->height * 3);
-      // ret = true;
-    }
-    // return ret;
+    debug_line;
+    this->_maix_image_img_num = this->get_to(image_mode);
+    debug_line;
+    this->img = libmaix_image_create(size[0], size[1], any_cast<libmaix_image_mode_t>(maix_pram1[this->_maix_image_img_num]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    debug_line;
+    libmaix_cv_image_draw_rectangle(this->img, 0, 0, size[0], size[1], MaixColor(color[0], color[1], color[2]), -1);
+    debug_line;
+    this->_maix_image_mode = image_mode;
+    debug_line;
+    this->_maix_image_size[0] = this->img->width;
+    debug_line;
+    this->_maix_image_size[1] = this->img->height;
+    debug_line;
+    this->_maix_image_format = image_mode;
+    debug_line;
     return *this;
   }
 
-  _maix_image &resize(int w, int h)
+  void _show()
   {
-    // bool ret = false;
-    if (img) {
-      libmaix_image_t *tmp = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
-      if (tmp) {
-        cv::Mat src(img->width, img->height, CV_8UC3, img->data);
-        cv::Mat dst(w, h, CV_8UC3, tmp->data);
-        cv::resize(src, dst, cv::Size(w, h));
-        libmaix_image_destroy(&this->img), this->img = tmp;
-        // ret = true;
+    if(NULL == this->img)
+    {
+      return;
+    }
+      struct libmaix_disp *disp = libmaix_disp_create(0);
+      if(disp)
+      {
+        libmaix_image_t *rgb888 = libmaix_image_create(disp->width, disp->height, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        libmaix_cv_image_draw_rectangle(rgb888, 0, 0, 240, 240, MaixColor(0, 0, 0), -1);
+        libmaix_cv_image_draw_image(this->img, 0, 0, rgb888);
+
+        disp->draw_image(disp, rgb888);
+        libmaix_image_destroy(&rgb888);
+        
       }
-    }
-    // return ret;
-    return *this;
+      libmaix_disp_destroy(&disp);
   }
 
-  _maix_image &draw_string(int x, int y, const char *str, double scale, vector<int> color, int thickness)
+  /*
+  _maix_image &open(std::string filename)
   {
-    if (img) {
-      libmaix_cv_image_draw_string(img, x, y, str, scale, MaixColor(color[0], color[1], color[2]), thickness);
+
+  }
+  _maix_image &save(std::string filename)
+  {
+    
+  }
+  _maix_image &convert(std::string format)
+  {
+    
+  }
+
+  _maix_image &img_new(std::string format)
+  {
+    
+  }
+  _maix_image &copy(std::string format)
+  {
+    
+  }
+  _maix_image &paste(std::string format)
+  {
+    
+  }
+  _maix_image &filter(std::string format)
+  {
+    
+  }
+  _maix_image &blend(std::string format)
+  {
+    
+  }
+
+  _maix_image &split(std::string format)
+  {
+    
+  }
+  _maix_image &composite(std::string format)
+  {
+    
+  }
+  _maix_image &eval(std::string format)
+  {
+    
+  }
+  _maix_image &merge(std::string format)
+  {
+    
+  }
+  _maix_image &draft(std::string format)
+  {
+    
+  }
+  _maix_image &getbands(std::string format)
+  {
+    
+  }
+  _maix_image &getbbox(std::string format)
+  {
+    
+  }
+  _maix_image &getdata(std::string format)
+  {
+    
+  }
+  _maix_image &getextrema(std::string format)
+  {
+    
+  }
+  _maix_image &getpixel(std::string format)
+  {
+    
+  }
+
+  _maix_image &histogram(std::string format)
+  {
+    
+  }
+  _maix_image &load(std::string format)
+  {
+    
+  }
+
+  _maix_image &putdata(std::string format)
+  {
+    
+  }
+  _maix_image &resize(std::string format)
+  {
+    
+  }
+  _maix_image &rotate(std::string format)
+  {
+    
+  }
+  _maix_image &seek(std::string format)
+  {
+    
+  }
+  _maix_image &tell(std::string format)
+  {
+    
+  }
+  _maix_image &thumbnail(std::string format)
+  {
+    
+  }
+  _maix_image &transform(std::string format)
+  {
+    
+  }
+  _maix_image &transform(std::string format)
+  {
+    
+  }
+*/
+
+  _maix_image &load(py::object data, vector<int> size, string image_mode)
+  {
+    if (py::isinstance<py::bytes>(data))
+    {
+      this->~_maix_image();
+      this->_maix_image_img_num = this->get_to(image_mode);
+      this->img = libmaix_image_create(size[0], size[1], any_cast<libmaix_image_mode_t>(maix_pram1[this->_maix_image_img_num]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      if (this->img)
+      {
+        string tmp = data.cast<string>();
+        memcpy(this->img->data, tmp.c_str(), this->img->width * this->img->height * any_cast<int>(maix_pram2[this->_maix_image_img_num]));
+      }
+      this->_maix_image_mode = image_mode;
+      this->_maix_image_size[0] = this->img->width;
+      this->_maix_image_size[1] = this->img->height;
+      this->_maix_image_format = image_mode;
+
+      return *this;
+
+      /*
+      if (image_mode == "RGB")
+      {
+        this->img = libmaix_image_create(size[0], size[1], LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        if (this->img)
+        {
+          string tmp = data.cast<string>();
+          memcpy(this->img->data, tmp.c_str(), this->img->width * this->img->height * 3);
+        }
+        this->mode = "RGB";
+        this->size[0] = this->img->width;
+        this->size[1] = this->img->height;
+        this->format = "RGB";
+
+        return *this;
+      }
+      else if (image_mode == "RGBA")
+      {
+        this->img = libmaix_image_create(size[0], size[1], LIBMAIX_IMAGE_MODE_RGBA8888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        if (this->img)
+        {
+          string tmp = data.cast<string>();
+          memcpy(this->img->data, tmp.c_str(), this->img->width * this->img->height * 4);
+        }
+        this->mode = "RGBA";
+        this->size[0] = this->img->width;
+        this->size[1] = this->img->height;
+        this->format = "RGBA";
+        return *this;
+      }
+      else if (image_mode == "RGB16")
+      {
+        this->img = libmaix_image_create(size[0], size[1], LIBMAIX_IMAGE_MODE_RGB565, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        if (this->img)
+        {
+          string tmp = data.cast<string>();
+          memcpy(this->img->data, tmp.c_str(), this->img->width * this->img->height * 2);
+        }
+        this->mode = "RGB16";
+        this->size[0] = this->img->width;
+        this->size[1] = this->img->height;
+        this->format = "RGB16";
+        return *this;
+      }
+      else if (image_mode == "L")
+      {
+        if (size[0] == 0 || size[1] == 0)
+        {
+          size[0] = 240;
+          size[1] = 240;
+        }
+        this->img = libmaix_image_create(size[0], size[1], LIBMAIX_IMAGE_MODE_GRAY, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        if (this->img)
+        {
+          string tmp = data.cast<string>();
+          memcpy(this->img->data, tmp.c_str(), this->img->width * this->img->height);
+        }
+        this->mode = "L";
+        this->size[0] = this->img->width;
+        this->size[1] = this->img->height;
+        this->format = "L";
+        return *this;
+      }
+      */
     }
     return *this;
   }
-
-  _maix_image &draw_rectangle(int x1, int y1, int x2, int y2, vector<int> color, int thickness)
+  int save(string path)
   {
-    if (img) {
-      libmaix_cv_image_draw_rectangle(img, x1, y1, x2, y2, MaixColor(color[0], color[1], color[2]), thickness);
+    if (this->img)
+    {
+      libmaix_cv_image_draw_image_save(this->img, path.c_str());
     }
-    return *this;
+    return 0;
   }
 
   py::bytes tobytes()
   {
-    if (img) {
-      // printf("tobytes %p\r\n", img->data);
-      return py::bytes((const char *)img->data, img->width * img->height * 3);
+    if (this->img)
+    {
+
+      return py::bytes((const char *)this->img->data, this->img->width * this->img->height * any_cast<int>(maix_pram2[this->_maix_image_img_num]));
+
+      /*
+      switch (this->img->mode)
+      {
+      case LIBMAIX_IMAGE_MODE_RGB888:
+        return py::bytes((const char *)this->img->data, this->img->width * this->img->height * 3);
+        break;
+      case LIBMAIX_IMAGE_MODE_RGBA8888:
+        return py::bytes((const char *)this->img->data, this->img->width * this->img->height * 4);
+        break;
+      case LIBMAIX_IMAGE_MODE_GRAY:
+        return py::bytes((const char *)this->img->data, this->img->width * this->img->height * 1);
+        break;
+      case LIBMAIX_IMAGE_MODE_RGB565:
+        return py::bytes((const char *)this->img->data, this->img->width * this->img->height * 2);
+        break;
+      default:
+        break;
+      }
+      */
     }
     return py::none();
   }
 
+  _maix_image &resize(int w, int h)
+  {
+    if (this->img)
+    {
+      libmaix_image_t *tmp = libmaix_image_create(w, h, this->img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      if (tmp)
+      {
+
+        cv::Mat src(this->img->width, this->img->height, any_cast<int>(opencv_parm1[this->_maix_image_img_num]), this->img->data);
+        cv::Mat dst(w, h, CV_8UC3, tmp->data);
+        cv::resize(src, dst, cv::Size(w, h));
+        libmaix_image_destroy(&this->img), this->img = tmp;
+        this->_maix_image_size[0] = w;
+        this->_maix_image_size[1] = h;
+
+        /*
+        switch (int(this->img->mode))
+        {
+        case (3): //LIBMAIX_IMAGE_MODE_RGB888
+        {
+          cv::Mat src(this->img->width, this->img->height, CV_8UC3, this->img->data);
+          cv::Mat dst(w, h, CV_8UC3, tmp->data);
+          cv::resize(src, dst, cv::Size(w, h));
+          libmaix_image_destroy(&this->img), this->img = tmp;
+        }
+
+        break;
+        case (4): //LIBMAIX_IMAGE_MODE_RGB565
+        {
+          cv::Mat src(this->img->width, this->img->height, CV_8UC2, this->img->data);
+          cv::Mat dst(w, h, CV_8UC2, tmp->data);
+          cv::resize(src, dst, cv::Size(w, h));
+          libmaix_image_destroy(&this->img), this->img = tmp;
+        }
+
+        break;
+        case (5): //LIBMAIX_IMAGE_MODE_RGBA8888
+        {
+          cv::Mat src(this->img->width, this->img->height, CV_8UC4, this->img->data);
+          cv::Mat dst(w, h, CV_8UC4, tmp->data);
+          cv::resize(src, dst, cv::Size(w, h));
+          libmaix_image_destroy(&this->img), this->img = tmp;
+        }
+
+        break;
+        case (2): //LIBMAIX_IMAGE_MODE_GRAY
+        {
+          cv::Mat src(this->img->width, this->img->height, CV_8UC1, this->img->data);
+          cv::Mat dst(w, h, CV_8UC1, tmp->data);
+          cv::resize(src, dst, cv::Size(w, h));
+          libmaix_image_destroy(&this->img), this->img = tmp;
+        }
+
+        break;
+        default:
+          break;
+        }
+
+        */
+      }
+    }
+    return *this;
+  }
+
+  _maix_image &rotate(double rotate)
+  {
+    if (this->img)
+    {
+      libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, this->img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      libmaix_cv_image_rotate(this->img, rotate, &tmp);
+      libmaix_image_destroy(&this->img), this->img = tmp;
+    }
+    return *this;
+  }
+
+  _maix_image &draw_crop(vector<int> thr)
+  {
+
+    if (this->img)
+    {
+      libmaix_image_t *tmp = libmaix_image_create(thr[2], thr[3], this->img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      libmaix_cv_image_crop(this->img, thr[0], thr[1], thr[2], thr[3], &tmp);
+      libmaix_image_destroy(&this->img), this->img = tmp;
+      this->_maix_image_size[0] = thr[2];
+      this->_maix_image_size[1] = thr[3];
+    }
+    return *this;
+  }
+
+  _maix_image &draw_convert(string mode)
+  {
+    if (this->img)
+    {
+      int mode_tmp = this->get_to(mode);
+      libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, any_cast<libmaix_image_mode_t>(maix_pram1[mode_tmp]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      libmaix_cv_image_convert(this->img, any_cast<libmaix_image_mode_t>(maix_pram1[mode_tmp]), &tmp);
+      libmaix_image_destroy(&this->img), this->img = tmp;
+      this->_maix_image_mode = mode;
+
+      /*
+      if (mode == "RGB")
+      {
+        libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        libmaix_cv_image_convert(this->img, LIBMAIX_IMAGE_MODE_RGB888, &tmp);
+        libmaix_image_destroy(&this->img), this->img = tmp;
+      }
+      else if (mode == "RGBA")
+      {
+        libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, LIBMAIX_IMAGE_MODE_RGBA8888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        libmaix_cv_image_convert(this->img, LIBMAIX_IMAGE_MODE_RGBA8888, &tmp);
+        libmaix_image_destroy(&this->img), this->img = tmp;
+      }
+      else if (mode == "RGB16")
+      {
+        libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, LIBMAIX_IMAGE_MODE_RGB565, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        libmaix_cv_image_convert(this->img, LIBMAIX_IMAGE_MODE_RGB565, &tmp);
+        libmaix_image_destroy(&this->img), this->img = tmp;
+      }
+      else if (mode == "L")
+      {
+        libmaix_image_t *tmp = libmaix_image_create(this->img->width, this->img->height, LIBMAIX_IMAGE_MODE_GRAY, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+        libmaix_cv_image_convert(this->img, LIBMAIX_IMAGE_MODE_GRAY, &tmp);
+        libmaix_image_destroy(&this->img), this->img = tmp;
+      }
+      */
+    }
+    return *this;
+  }
+
+  _maix_image &draw_ellipse(vector<int> &rect, double angle, double startAngle, double endAngle, vector<int> color, int thickness)
+  {
+    if (this->img)
+    {
+      libmaix_cv_image_draw_ellipse(this->img, rect[0], rect[1], rect[2], rect[3], angle, startAngle, endAngle, MaixColor(color[0], color[1], color[2]), thickness);
+    }
+    return *this;
+  }
+  _maix_image &draw_string(int x, int y, const char *str, double scale, vector<int> color, int thickness)
+  {
+    if (this->img)
+    {
+      libmaix_cv_image_draw_string(this->img, x, y, str, MaixColor(color[0], color[1], color[2]), scale, thickness);
+    }
+    return *this;
+  }
+
+  _maix_image &draw_circle(vector<int> &circ, vector<int> &color, int thickness)
+  {
+    if (this->img)
+    {
+      libmaix_cv_image_draw_circle(this->img, circ[0], circ[1], circ[2], MaixColor(color[0], color[1], color[2]), thickness);
+    }
+    return *this;
+  }
+
+  _maix_image &draw_rectangle(vector<int> &rect, vector<int> color, int thickness)
+  {
+    if (img)
+    {
+      libmaix_cv_image_draw_rectangle(img, rect[0], rect[1], rect[2], rect[3], MaixColor(color[0], color[1], color[2]), thickness);
+    }
+    return *this;
+  }
+
+  _maix_image &draw_line(vector<int> &lin, vector<int> color, int thickness)
+  {
+    if (img)
+    {
+      libmaix_cv_image_draw_line(this->img, lin[0], lin[1], lin[2], lin[3], MaixColor(color[0], color[1], color[2]), thickness);
+    }
+    return *this;
+  }
+
+  // _maix_image &load_freetype(string &path)
+  // {
+
+  //     libmaix_cv_image_load_freetype(const char *path);
+
+  // }
+
   _maix_image()
   {
     img = NULL;
-  }
+    maix_pram1[0] = LIBMAIX_IMAGE_MODE_GRAY;
+    maix_pram2[0] = 1;
+    opencv_parm1[0] = CV_8UC1;
 
+    maix_pram1[1] = LIBMAIX_IMAGE_MODE_RGB565;
+    maix_pram2[1] = 2;
+    opencv_parm1[1] = CV_8UC2;
+
+    maix_pram1[2] = LIBMAIX_IMAGE_MODE_RGB888;
+    maix_pram2[2] = 3;
+    opencv_parm1[2] = CV_8UC3;
+
+    maix_pram1[3] = LIBMAIX_IMAGE_MODE_RGBA8888;
+    maix_pram2[3] = 4;
+    opencv_parm1[3] = CV_8UC4;
+
+    this->_maix_image_size.push_back(0);
+    this->_maix_image_size.push_back(0);
+  }
   ~_maix_image()
   {
-    if (img) {
+    if (img)
+    {
       libmaix_image_destroy(&img);
     }
   }
 };
+
+
+
+
+
+
+
+_maix_image Image_new(vector<int> size, vector<int> color, string image_mode)
+{
+
+
+
+
+}
+
+_maix_image Image_new(vector<int> size, vector<int> color, string image_mode)
+{
+
+
+  
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class _maix_vision_histogram : public py::list
 {
@@ -1207,6 +1695,42 @@ public:
   }
 };
 
+
+
+
+
+PYBIND11_MODULE(_maix_Image, mo)
+{
+  mo.def("new",&_maix_image::test);
+  mo.def("load",&_maix_image::test);
+
+  pybind11::class_<_maix_image>(mo, "Image")
+      .def(pybind11::init<>())
+      .def_readonly("format", &_maix_image::_maix_image_format)
+      .def_readonly("size", &_maix_image::_maix_image_size)
+      .def_readonly("mode", &_maix_image::_maix_image_mode)
+      // .def("new", &_maix_image::_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB")
+      .def("show", &_maix_image::_show)
+      // .def("load", &_maix_image::load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB")
+      .def("save", &_maix_image::save, py::arg("path"))
+      .def("tobytes", &_maix_image::tobytes)
+      .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
+      .def("rotate", &_maix_image::rotate, py::arg("rotate"))
+      .def("crop", &_maix_image::draw_crop, py::arg("thr"))
+      .def("convert", &_maix_image::draw_convert, py::arg("mode") = "RGB")
+      .def("draw_ellipse", &_maix_image::draw_ellipse, py::arg("rect"), py::arg("angle"), py::arg("startAngle"), py::arg("endAngle"), py::arg("color"), py::arg("thickness"))
+      .def("draw_string", &_maix_image::draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_circle", &_maix_image::draw_circle, py::arg("circ"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_rectangle", &_maix_image::draw_rectangle, py::arg("rect"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+      .def("draw_line", &_maix_image::draw_line, py::arg("line"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
+
+      .def("load_freetype", &_maix_image::test);
+
+
+}
+
+
+
 PYBIND11_MODULE(_maix_opencv, m)
 {
   pybind11::class_<_maix_vision>(m, "Vision")
@@ -1216,45 +1740,26 @@ PYBIND11_MODULE(_maix_opencv, m)
       .def_readonly("COLOR_RGBA", &_maix_vision::COLOR_RGBA)
       .def_readonly("COLOR_L", &_maix_vision::COLOR_L)
       //opencv原生函数
-      .def("opecv_medianBlur", &_maix_vision::_maix_vision_medianBlur, py::arg("py_img"), py::arg("m_size") = 5, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("opecv_Canny", &_maix_vision::_maix_vision_Canny, py::arg("py_img"), py::arg("thr_h"), py::arg("thr_l"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("opecv_HoughCircles", &_maix_vision::_maix_vision_HoughCircles, py::arg("py_img"), py::arg("method") = 3, py::arg("dp"), py::arg("minDist"), py::arg("param1"), py::arg("param2"), py::arg("minRadius"), py::arg("maxRadius"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
+      .def("opecv_medianBlur", &_maix_vision::_maix_vision_medianBlur, py::arg("py_img"), py::arg("m_size") = 5, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("opecv_GaussianBlur", &_maix_vision::_maix_vision_GaussianBlur, py::arg("py_img"), py::arg("ksize"), py::arg("sigmaX"), py::arg("sigmaY"), py::arg("borderType"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("opecv_Canny", &_maix_vision::_maix_vision_Canny, py::arg("py_img"), py::arg("thr_h"), py::arg("thr_l"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("opecv_HoughCircles", &_maix_vision::_maix_vision_HoughCircles, py::arg("py_img"), py::arg("method") = 3, py::arg("dp"), py::arg("minDist"), py::arg("param1"), py::arg("param2"), py::arg("minRadius"), py::arg("maxRadius"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
       //基于opencv编写MaixPy3特有函数
-      .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("get_blob_color", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("find_blob_lab", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("find_ball_lab", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("find_circles_blob", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
-      .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
+      .def("get_blob_lab", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("get_blob_color", &_maix_vision::get_blob_color_max, py::arg("py_img"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("color") = 0, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("find_blob_lab", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("find_ball_lab", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("find_circles_blob", &_maix_vision::_maix_vision_find_ball_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+      .def("find_line", &_maix_vision::find_line, py::arg("py_img"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
       //基于opencv编写兼容openmv图像处理函数
       .def("get_histogram", &_maix_vision::test)
       .def("get_percentile", &_maix_vision::test)
       .def("get_threshold", &_maix_vision::test)
       .def("get_statistics", &_maix_vision::test)
-      .def("find_blobs", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{0, 0}, py::arg("mode") = 16)
+      .def("find_blobs", &_maix_vision::_maix_vision_find_blob, py::arg("py_img"), py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
       .def("find_lines", &_maix_vision::test)
       .def("find_line_segments", &_maix_vision::test)
       .def("get_regression", &_maix_vision::test)
       .def("find_circles", &_maix_vision::test)
       .def("find_rects", &_maix_vision::test);
-
-  pybind11::class_<_maix_image>(m, "Image")
-      .def(pybind11::init<>())
-      .def("load", &_maix_image::load, py::arg("rgb"), py::arg("w"), py::arg("h"))
-      .def("resize", &_maix_image::resize, py::arg("w"), py::arg("h"))
-      .def("tobytes", &_maix_image::tobytes)
-      .def("draw_string", &_maix_image::draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("draw_rectangle", &_maix_image::draw_rectangle, py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("save", &_maix_image::test)
-      .def("format", &_maix_image::test)
-      .def("size", &_maix_image::test)
-      .def("rotate", &_maix_image::test)
-      .def("crop", &_maix_image::test)
-      .def("convert", &_maix_image::test)
-      .def("mode", &_maix_image::test)
-      .def("draw_ellipse", &_maix_image::test)
-      .def("draw_circle", &_maix_image::test)
-      .def("draw_line", &_maix_image::test)
-      .def("load_freetype", &_maix_image::test);
 }

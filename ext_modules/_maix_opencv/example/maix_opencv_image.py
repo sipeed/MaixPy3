@@ -32,11 +32,14 @@ def test_pillow():
 # <function test_pillow at 0x199fff8> 0.07056433300022036
 test_pillow()
 
+display.show(camera.capture())
+
 
 @show_run_time
 def test_opencv():
-    tmp = camera.read()
-    display.show(image(tmp, 224, 224).resize(240, 240).tobytes())
+
+tmp = camera.read()
+display.show(image(tmp, 224, 224).resize(240, 240).tobytes())
 
 
 # <function test_opencv at 0x104ea58> 0.02121679200001836
@@ -44,18 +47,35 @@ test_opencv()
 
 
 def unit_test():
-    import time
-    from maix import display, camera, image
-    camera.config((224, 224))
-    while True:
-        tmp = camera.read()
-        img = image.load(tmp, 224, 224)
-        img.resize(240, 240)
-        img.draw_rectangle(20, 20, 220, 220, color=(0, 255, 0), thickness=4)
-        img.draw_string(20, 120, str(time.time()), scale=0.6, color=(255, 0, 0), thickness=2)
-        display.show(img.tobytes())
+import time
+from maix import display, camera, Image
+img = Image()
+img = img.new()
+
+camera.config((224, 224))
+while True:
+tmp = camera.read()
+img2 = image.load(tmp2, 224, 224).resize(240, 240).draw_rectangle(20, 20, 220, 220, color=(0, 255, 0), thickness=4).draw_string(20, 120, str(time.time()), scale=0.6, color=(255, 0, 0), thickness=2)
+display.show(img.tobytes())
 
 unit_test()
+
+
+
+from maix.image import Image
+img = Image("RGB", color="#FFFFFF")
+image.draw_ellipse(0, 1, "123")
+display.show(image)
+
+
+
+# from PIL import ImageDraw
+# img = Image("RGB", color="#FFFFFF")
+# draw = ImageDraw(img)
+# draw.ellipse((i[0]-i[3]/2, i[1]-i[2]/2, i[0]+i[3]/2, i[1]+i[2]/2), fill ='white', outline ='black', width =1)
+# display.show(img)
+
+
 
 if __name__ == "__main__":
 

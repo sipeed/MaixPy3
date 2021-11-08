@@ -51,6 +51,11 @@ try:
 except ModuleNotFoundError as e:
   pass
 
+try:
+  import _maix_Image as maix_Image
+  __all__.extend(['maix_Image'])
+except ModuleNotFoundError as e:
+  pass
 # try:
 #   import shutil
 #   from PIL import ImageShow

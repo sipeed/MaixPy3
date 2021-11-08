@@ -17,10 +17,8 @@
 # //==================================================================
 
 
-from maix import camera
-from maix import vision
+from maix import camera,vision,display
 from PIL import Image, ImageDraw
-from maix import display
 import time
 
 

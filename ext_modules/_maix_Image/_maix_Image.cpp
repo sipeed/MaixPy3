@@ -272,12 +272,52 @@ void _maix_image::_show()
     auto show = Display();
     auto draw__ = show.attr("draw");
 
-    if(this->_maix_image_width != 240 || this->_maix_image_height != 240)
+    if((this->_maix_image_type == "RGB") && (this->_maix_image_width == 240) && (this->_maix_image_height == 240))
     {
-        this->_resize(240,240);
+        py::bytes tmp((const char *)this->_img->data,240 * 240 * 3);
+        draw__(tmp);
+        return;
     }
-    py::bytes tmp((const char *)this->_img->data,this->_maix_image_size);
-    draw__(tmp);
+    libmaix_image_t *tmp = libmaix_image_create(this->_img->width, this->_img->height, any_cast<libmaix_image_mode_t>(py_to_pram[2][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    if(this->_maix_image_type != "RGB")
+    {
+        if(libmaix_cv_image_convert(this->_img, any_cast<libmaix_image_mode_t>(py_to_pram[2][0]), &tmp) != 0)
+        {
+            libmaix_image_destroy(&tmp);
+            return;
+        }
+        if(this->_maix_image_width == 240 && this->_maix_image_height == 240)
+        {
+            py::bytes tmp_bytes((const char*)tmp->data,240 * 240 * 3);
+            draw__(tmp_bytes); 
+            libmaix_image_destroy(&tmp); 
+            return;
+        }
+        else
+        {
+            libmaix_image_t *tmp_two = libmaix_image_create(240, 240, any_cast<libmaix_image_mode_t>(py_to_pram[2][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+            cv::Mat src(tmp->width, tmp->height, any_cast<int>(py_to_pram[2][2]), tmp->data);
+            cv::Mat dst(240, 240, any_cast<int>(py_to_pram[2][2]), tmp_two->data);
+            cv::resize(src, dst, cv::Size(240, 240));
+
+            py::bytes tmp_bytes((const char*)tmp_two->data,240 * 240 * 3);
+            draw__(tmp_bytes); 
+            libmaix_image_destroy(&tmp); 
+            libmaix_image_destroy(&tmp_two); 
+            return;
+        }
+    }
+    else
+    {
+        cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[2][2]), this->_img->data);
+        cv::Mat dst(240, 240, any_cast<int>(py_to_pram[2][2]), tmp->data);
+        cv::resize(src, dst, cv::Size(240, 240));
+
+        py::bytes tmp_bytes((const char*)tmp->data,240 * 240 * 3);
+        draw__(tmp_bytes); 
+        libmaix_image_destroy(&tmp); 
+        return;
+    }
 }
 
 int _maix_image::_save(std::string file_path, std::string format)
@@ -393,18 +433,17 @@ _maix_image &_maix_image::_convert(std::string mode)
     {
         libmaix_image_t *tmp = libmaix_image_create(this->_img->width, this->_img->height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(mode)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
         if (tmp)
-        {
+        { 
             if(libmaix_cv_image_convert(this->_img, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(mode)][0]), &tmp) == 0)
             {
                 libmaix_image_destroy(&this->_img), this->_img = tmp;
                 this->_maix_image_type = mode;
-                this->_maix_image_size = this->_img->width * this->_img->height * any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(mode)][1]);
+                this->_maix_image_size = this->_img->width * this->_img->height * any_cast<int>(py_to_pram[this->get_to(mode)][1]);
             }
             else
             {
                 libmaix_image_destroy(&tmp);
             }
-            
         }
         else
         {
@@ -564,6 +603,7 @@ PYBIND11_MODULE(_maix_Image, mo)
         //Image继承 version 的方法
         // .def("test", &_maix_image::version_test)
         .def("cv_Canny", &_maix_image::_maix_vision_Canny,py::arg("thr_h"),py::arg("thr_l"))
+        .def("find_blobs", &_maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
 
         //Image继承 image_dsp 的方法
 

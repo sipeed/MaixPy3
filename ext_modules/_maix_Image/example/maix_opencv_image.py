@@ -67,7 +67,7 @@ img = Image("RGB", color="#FFFFFF")
 image.draw_ellipse(0, 1, "123")
 display.show(image)
 
-
+from maix import camera
 
 # from PIL import ImageDraw
 # img = Image("RGB", color="#FFFFFF")
@@ -90,7 +90,7 @@ mk = _maix_Image.open_file("./test.jpg")
 
 
 mk = _maix_Image.new(color = (255,255,255))
-mk.draw_rectangle(0,0,100,130,thickness = 3)
+mk.draw_rectangle(10,10,100,130,(255,10,10),thickness = -1)
 from _maix_display import Display
 __fastview__ = Display()
 __fastview__.draw(mk.tobytes())
@@ -99,8 +99,8 @@ __fastview__.draw(mk.tobytes())
 mk.draw_string(100,100,"nihao",(255,255,255),1.0,3)
 
 # from maix import display, camera
-
-
+[(36, 86, 4, 108, -35, 110)]
+[(36,4,-35,86,108,110)]
 # # from maix import display, camera
 # from PIL import Image
 # image = Image.frombytes(mode="RGB",size=(240,240),data=t)

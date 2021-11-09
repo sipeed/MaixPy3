@@ -51,15 +51,15 @@ int base_img::get_to(std::string &mode)
 void _maix_image::v_init()
 {
     this->_img = NULL;
-    LOG_INFO << "init base img!";
+    // LOG_INFO << "init base img!";
 }
 void _maix_image::v_close()
 {
-    LOG_INFO << "start!";
+    // LOG_INFO << "start!";
     if (this->_img)
     {
         libmaix_image_destroy(&this->_img);
-        LOG_INFO << "libmaix_image_destroy success";
+        // LOG_INFO << "libmaix_image_destroy success";
     }
     this->_maix_image_width = 0;
     this->_maix_image_height = 0;
@@ -68,12 +68,12 @@ void _maix_image::v_close()
 
 _maix_image::_maix_image()
 {
-    LOG_INFO << "_maix_image creat!";
+    // LOG_INFO << "_maix_image creat!";
     this->v_init();
 }
 _maix_image::~_maix_image()
 {
-    LOG_INFO << "~_maix_image del";
+    // LOG_INFO << "~_maix_image del";
     this->v_close();
 }
 std::string _maix_image::str__()
@@ -91,7 +91,7 @@ int _maix_image::len__()
 
 _maix_image &_maix_image::_new(std::vector<int> size, std::vector<int> color, std::string mode)
 {
-    LOG_INFO << "_maix_image::_new start!";
+    // LOG_INFO << "_maix_image::_new start!";
     this->v_close();
     this->_maix_image_type = mode;
     this->_maix_image_width = size[0];
@@ -101,7 +101,7 @@ _maix_image &_maix_image::_new(std::vector<int> size, std::vector<int> color, st
     if (this->_img)
     {
         libmaix_cv_image_draw_rectangle(this->_img, 0, 0, size[0], size[1], MaixColor(color[0], color[1], color[2]), -1);
-        LOG_INFO << "this->_img init success!";
+        // LOG_INFO << "this->_img init success!";
     }
     else
     {
@@ -191,9 +191,9 @@ _maix_image &_maix_image::_load(py::object data, std::vector<int> size, std::str
 
 _maix_image &_maix_image::_open_file(std::string path)
 {
-    LOG_INFO << "clear img" ;
+    // LOG_INFO << "clear img" ;
     this->v_close();
-    LOG_INFO << "call libmaix_cv_image_open_file img" ;
+    // LOG_INFO << "call libmaix_cv_image_open_file img" ;
     libmaix_image_t *tmp_img = NULL;
     if(libmaix_cv_image_open_file(&tmp_img,path.c_str()) != 0)
     {
@@ -203,7 +203,7 @@ _maix_image &_maix_image::_open_file(std::string path)
         return *this;
     }
     this->_img = tmp_img;
-    LOG_INFO << "call libmaix_cv_image_open_file success!";
+    // LOG_INFO << "call libmaix_cv_image_open_file success!";
     this->_maix_image_width = this->_img->width;
     this->_maix_image_height = this->_img->height;
     this->_maix_image_type = "RGB";
@@ -257,7 +257,7 @@ py::object _maix_image::_get_to(std::string im)
 
 _maix_image &_maix_image::_clear()
 {
-    LOG_INFO << "img clear!";
+    // LOG_INFO << "img clear!";
     v_close();
 }
 
@@ -374,11 +374,11 @@ _maix_image &_maix_image::_draw_line(int x1, int y1, int x2, int y2, std::vector
 
 _maix_image &_maix_image::_draw_rectangle(int x, int y, int w, int h, std::vector<int> color, int thickness)
 {
-    LOG_INFO << "start";
+    // LOG_INFO << "start";
     if (this->_img)
     {
         libmaix_cv_image_draw_rectangle(this->_img, x, y, w, h, MaixColor(color[0], color[1], color[2]), thickness);
-        LOG_INFO << "success";
+        // LOG_INFO << "success";
     }
     return *this;
 }
@@ -503,7 +503,7 @@ py::object img_open(std::string path, std::string format)
 
 py::object img_new(std::vector<int> size, std::vector<int> color, std::string mode)
 {
-    LOG_INFO << "new img";
+    // LOG_INFO << "new img";
     //pybind11 python端的实现方法
     auto _maix_Image_ = py::module::import("_maix_Image");
     auto py_Image = _maix_Image_.attr("Image");
@@ -555,7 +555,7 @@ void s_info(std::string s)
 void mode_init()
 {
     nanolog::initialize(nanolog::GuaranteedLogger(), "/var/maixpy3/", "maix_Image", 1);
-    nanolog::set_log_level(nanolog::LogLevel::INFO);
+    nanolog::set_log_level(nanolog::LogLevel::CRIT);
 }
 
 PYBIND11_MODULE(_maix_Image, mo)
@@ -600,10 +600,26 @@ PYBIND11_MODULE(_maix_Image, mo)
         .def("get_pixe", &_maix_image::_get_pixe, py::arg("x"), py::arg("y"))
         // .def("load_freetype", &_maix_image::test)
 
+
+
         //Image继承 version 的方法
+                //基于opencv编写MaixPy3特有函数
+        .def("get_blob_lab", &_maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
+        .def("get_blob_color", &_maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
+        .def("find_blob_lab", &_maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
+        .def("find_ball_lab", &_maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
+        .def("find_circles_blob", &_maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
+        .def("find_line", &_maix_image::find_line)
+        
+
+
+
+
+        
+                //基于opencv编写兼容openmv图像处理函数
         // .def("test", &_maix_image::version_test)
         .def("cv_Canny", &_maix_image::_maix_vision_Canny,py::arg("thr_h"),py::arg("thr_l"))
-        .def("find_blobs", &_maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1, py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = 16)
+        .def("find_blobs", &_maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
 
         //Image继承 image_dsp 的方法
 

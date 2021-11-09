@@ -122,7 +122,7 @@ _maix_modules = [
     libi2c_module,
     _maix_module,
     # _maix_vivo_module,
-    # _maix_opencv_module,
+    _maix_opencv_module,
     _maix_image,
     _maix_camera_module,
     _maix_display_module,

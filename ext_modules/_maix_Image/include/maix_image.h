@@ -292,7 +292,7 @@ public:
   //          返回一个框内颜色的最大值的列表；
   //修改记录：
   //==================================================================
-  py::list get_blob_color_max(std::vector<int> &roi, int critical, int co, std::vector<int> size, int mode);
+  py::list get_blob_color_max(std::vector<int> &roi, int critical, int co);
 
   //==================================================================
   //函数名：  _maix_vision_find_blob
@@ -317,7 +317,7 @@ public:
   //          返回一个查找到颜色的列表
   //修改记录：
   //==================================================================
-  py::list _maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co, std::vector<int> size, int mode);
+  py::list _maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co);
 
   //==================================================================
   //函数名：  _maix_vision_find_ball_blob
@@ -334,9 +334,9 @@ public:
   //          返回一个查找到小球的列表
   //修改记录：
   //==================================================================
-  py::list _maix_vision_find_ball_blob(std::vector<int> &thresholds, int co, std::vector<int> size, int mode);
+  py::list _maix_vision_find_ball_blob(std::vector<int> &thresholds, int co);
 
-  py::dict find_line(std::vector<int> size, int mode);
+  py::dict find_line();
 
   //==================================================================
   //函数名：  _maix_vision_get_histogram

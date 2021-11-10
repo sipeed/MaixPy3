@@ -86,7 +86,7 @@ std::string maix_image::str__()
 {
   std::string info_str;
   std::stringstream ss;
-  ss << "{\"w\":" << this->_maix_image_width << ", \"h\":" << this->_maix_image_height << ", \"type\"=" << this->_maix_image_type << ", \"size\":" << this->_maix_image_size << "}";
+  ss << "<_maix_image.Image\"width\":" << this->_maix_image_width << ", \"height\":" << this->_maix_image_height << ", \"type\"=" << this->_maix_image_type << ", \"size\":" << this->_maix_image_size << ">";
   info_str = ss.str();
   return info_str;
 }
@@ -399,7 +399,7 @@ maix_image &maix_image::_draw_ellipse(int cx, int cy, int rx, int ry, double ang
   return *this;
 }
 
-maix_image &maix_image::_draw_string(int x, int y, std::string str, std::vector<int> color, double scale, int thickness)
+maix_image &maix_image::_draw_string(int x, int y, std::string str, double scale, std::vector<int> color, int thickness)
 {
   if (this->_img)
   {
@@ -587,7 +587,7 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("draw_rectangle", &maix_image::_draw_rectangle, py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
       .def("draw_circle", &maix_image::_draw_circle, py::arg("x"), py::arg("y"), py::arg("radius"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
       .def("draw_ellipse", &maix_image::_draw_ellipse, py::arg("cx"), py::arg("xy"), py::arg("rx"), py::arg("ry"), py::arg("angle"), py::arg("startAngle"), py::arg("endAngle"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
-      .def("draw_string", &maix_image::_draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("scale") = 1.0, py::arg("thickness") = 1)
+      .def("draw_string", &maix_image::_draw_string, py::arg("x"), py::arg("y"), py::arg("str"), py::arg("scale") = 1.0, py::arg("color") = std::vector<int>{127, 127, 127}, py::arg("thickness") = 1)
       .def("rotate", &maix_image::_rotate, py::arg("rotate"))
       .def("convert", &maix_image::_convert, py::arg("mode") = "RGB")
       .def("crop", &maix_image::_draw_crop, py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))

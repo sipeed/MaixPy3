@@ -388,7 +388,7 @@ public:
   maix_image &_draw_line(int x1, int y1, int x2, int y2, std::vector<int> color, int thickness);
   maix_image &_draw_rectangle(int x, int y, int w, int h, std::vector<int> color, int thickness);
   maix_image &_draw_circle(int x, int y, int r, std::vector<int> color, int thickness);
-  maix_image &_draw_string(int x, int y, std::string str, std::vector<int> color, double scale, int thickness);
+  maix_image &_draw_string(int x, int y, std::string str, double scale, std::vector<int> color, int thickness);
   maix_image &_draw_ellipse(int cx, int cy, int rx, int ry, double angle, double startAngle, double endAngle, std::vector<int> color, int thickness);
   maix_image &_rotate(double rotate);
   maix_image &_convert(std::string mode);

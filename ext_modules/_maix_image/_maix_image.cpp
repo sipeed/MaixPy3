@@ -86,7 +86,7 @@ std::string maix_image::str__()
 {
   std::string info_str;
   std::stringstream ss;
-  ss << "<_maix_image.Image\"width\":" << this->_maix_image_width << ", \"height\":" << this->_maix_image_height << ", \"type\"=" << this->_maix_image_type << ", \"size\":" << this->_maix_image_size << ">";
+  ss << "<_maix_image.Image \"width\":" << this->_maix_image_width << ", \"height\":" << this->_maix_image_height << ", \"type\"=" << this->_maix_image_type << ", \"size\":" << this->_maix_image_size << ">";
   info_str = ss.str();
   return info_str;
 }
@@ -97,10 +97,11 @@ int maix_image::len__()
 
 static inline libmaix_image_t * libmaix_image_create_patch(libmaix_image_t *self, int w, int h, libmaix_image_mode_t m, libmaix_image_layout_t l, void *d, bool i)
 {
-  // printf("libmaix_image_create_patch %p\r\n", self);
+  // printf("1 libmaix_image_create_patch %p %d %d\r\n", self, w, h);
   // libmaix_image_destroy(&self);
   // return libmaix_image_create(w, h, m, l, d, i);
-  if ((self == NULL) || (self->width != w && self->width != w && self->mode != m)) {
+  if ((self == NULL) || (self->width != w || self->height != h && self->mode != m)) {
+    // if (self != NULL) printf("2 libmaix_image_create_patch %p %d %d\r\n", self, self->width, self->height);
     libmaix_image_destroy(&self);
     return libmaix_image_create(w, h, m, l, d, i);
   }
@@ -305,7 +306,7 @@ void maix_image::_show()
     else
     {
       libmaix_image_t *tmp_two = libmaix_image_create(240, 240, any_cast<libmaix_image_mode_t>(py_to_pram[2][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
-      cv::Mat src(tmp->width, tmp->height, any_cast<int>(py_to_pram[2][2]), tmp->data);
+      cv::Mat src(tmp->height, tmp->width, any_cast<int>(py_to_pram[2][2]), tmp->data);
       cv::Mat dst(240, 240, any_cast<int>(py_to_pram[2][2]), tmp_two->data);
       cv::resize(src, dst, cv::Size(240, 240));
 
@@ -318,7 +319,7 @@ void maix_image::_show()
   }
   else
   {
-    cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[2][2]), this->_img->data);
+    cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[2][2]), this->_img->data);
     cv::Mat dst(240, 240, any_cast<int>(py_to_pram[2][2]), tmp->data);
     cv::resize(src, dst, cv::Size(240, 240));
 
@@ -355,9 +356,11 @@ maix_image &maix_image::_resize(int w, int h)
     libmaix_image_t *tmp = libmaix_image_create(w, h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if (tmp)
     {
-      cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
-      cv::Mat dst(w, h, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), tmp->data);
-      cv::resize(src, dst, cv::Size(w, h));
+
+      cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+      cv::Mat dst(h, w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), tmp->data);
+      cv::resize(src, dst, cv::Size(h, w));
+
       libmaix_image_destroy(&this->_img), this->_img = tmp;
       this->_maix_image_height = h;
       this->_maix_image_width = w;

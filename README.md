@@ -1,12 +1,12 @@
 <p align="center">
-    <img height="120" src="https://maixpy.sipeed.com/static/image/logo.png" title="" alt="MaixPy3 Logo">
+    <img height="120" src="https://wiki.sipeed.com/soft/maixpy/assets/maixpy/maixpy.png" title="" alt="MaixPy3 Logo">
 </p>
 
-# MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/MaixPy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/MaixPy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/MaixPy3.svg?style=social)
+# MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/maixpy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/maixpy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/maixpy3.svg?style=social)
 
-English | [简体中文](./README.CN.md) 
+English | [简体中文](./README.CN.md)
 
-[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![PyPI version](https://badge.fury.io/py/MaixPy3.svg)](https://badge.fury.io/py/MaixPy3) ![Python](https://img.shields.io/badge/Python-3.5↗-ff69b4.svg) ![issue](https://img.shields.io/github/issues/sipeed/maixpy3.svg)
+[![MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![PyPI version](https://badge.fury.io/py/maixpy3.svg)](https://badge.fury.io/py/maixpy3) ![Python](https://img.shields.io/badge/Python-3.5↗-ff69b4.svg) ![issue](https://img.shields.io/github/issues/sipeed/maixpy3.svg)
 
 MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpython), which simplifies the development of applications on Linux AI edge devices through Python programming.
 
@@ -18,6 +18,16 @@ MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpytho
 -  [Develop](#Develop)
 -  [Thanks](#Thanks)
 -  [License](#License)
+
+## Install
+
+use network.
+
+- `pip install maixpy3`
+
+[use wheel.](https://pypi.org/project/maixpy3/#files)
+
+- `pip install maixpy3-*.whl`
 
 ## Usage
 

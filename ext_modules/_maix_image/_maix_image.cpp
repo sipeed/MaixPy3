@@ -95,15 +95,26 @@ int maix_image::len__()
   return this->_maix_image_size;
 }
 
+static inline libmaix_image_t * libmaix_image_create_patch(libmaix_image_t *self, int w, int h, libmaix_image_mode_t m, libmaix_image_layout_t l, void *d, bool i)
+{
+  // printf("libmaix_image_create_patch %p\r\n", self);
+  // libmaix_image_destroy(&self);
+  // return libmaix_image_create(w, h, m, l, d, i);
+  if ((self == NULL) || (self->width != w && self->width != w && self->mode != m)) {
+    libmaix_image_destroy(&self);
+    return libmaix_image_create(w, h, m, l, d, i);
+  }
+  return self;
+}
+
 maix_image &maix_image::_new(std::vector<int> size, std::vector<int> color, std::string mode)
 {
   // // LOG_INFO << "maix_image::_new start!";
-  this->v_close();
   this->_maix_image_type = mode;
   this->_maix_image_width = size[0];
   this->_maix_image_height = size[1];
   this->_maix_image_size = this->_maix_image_width * this->_maix_image_height * any_cast<int>(this->py_to_pram[this->get_to(this->_maix_image_type)][1]);
-  this->_img = libmaix_image_create(size[0], size[1], any_cast<libmaix_image_mode_t>(this->py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+  this->_img = libmaix_image_create_patch(this->_img, size[0], size[1], any_cast<libmaix_image_mode_t>(this->py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (this->_img)
   {
     libmaix_cv_image_draw_rectangle(this->_img, 0, 0, size[0], size[1], MaixColor(color[0], color[1], color[2]), -1);
@@ -120,13 +131,12 @@ maix_image &maix_image::_new(std::vector<int> size, std::vector<int> color, std:
 
 maix_image &maix_image::_load(py::object data, std::vector<int> size, std::string mode)
 {
-  this->v_close();
   if (py::isinstance<py::bytes>(data))
   {
     this->_maix_image_type = mode;
     this->_maix_image_width = size[0];
     this->_maix_image_height = size[1];
-    this->_img = libmaix_image_create(this->_maix_image_width, this->_maix_image_height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+    this->_img = libmaix_image_create_patch(this->_img, this->_maix_image_width, this->_maix_image_height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     this->_maix_image_size = this->_maix_image_width * this->_maix_image_height * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]);
     if (this->_img)
     {
@@ -176,7 +186,7 @@ maix_image &maix_image::_load(py::object data, std::vector<int> size, std::strin
       this->_maix_image_type = data.attr("mode").cast<std::string>();
       this->_maix_image_width = img_size[0];
       this->_maix_image_height = img_size[1];
-      this->_img = libmaix_image_create(this->_maix_image_width, this->_maix_image_height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      this->_img = libmaix_image_create_patch(this->_img, this->_maix_image_width, this->_maix_image_height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
       this->_maix_image_size = this->_maix_image_width * this->_maix_image_height * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]);
       if (this->_img)
       {
@@ -340,8 +350,7 @@ py::bytes maix_image::_tobytes()
 
 maix_image &maix_image::_resize(int w, int h)
 {
-
-  if (this->_img)
+  if (this->_img && this->_img->width != w && this->_img->height != h)
   {
     libmaix_image_t *tmp = libmaix_image_create(w, h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
     if (tmp)

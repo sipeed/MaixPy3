@@ -82,6 +82,9 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
         else:
             mjpg.store_mjpg(img)
     if local_show:
+        import _maix_image
+        if isinstance(img, _maix_image.Image):
+            img = img.tobytes()
         if __fastview__:
             __draw__(img)  # underlying optimization
         else:

@@ -76,6 +76,12 @@ maix_image::~maix_image()
   // // LOG_INFO << "~maix_image del";
   this->v_close();
 }
+
+std::string maix_image::repr__()
+{
+  return std::string("");
+}
+
 std::string maix_image::str__()
 {
   std::string info_str;
@@ -199,7 +205,7 @@ maix_image &maix_image::_open_file(std::string path)
   {
     this->v_close();
     // LOG_INFO << "open file err! " << path << "exec or don't read !";
-    std::cout << "open file err! " << path << "exec or don't read !" << std::endl;
+    // std::cout << "open file err! " << path << "exec or don't read !" << std::endl;
     return *this;
   }
   this->_img = tmp_img;
@@ -445,7 +451,7 @@ maix_image &maix_image::_convert(std::string mode)
   }
   else
   {
-    std::cout << "please load image!" << std::endl;
+    // std::cout << "please load image!" << std::endl;
   }
   return *this;
 }
@@ -484,43 +490,43 @@ std::vector<int> maix_image::_get_pixe(int x, int y)
   return color_val;
 }
 
-py::object img_open(std::string path, std::string format)
-{
-  auto _maix_Image_ = py::module::import("maix_image");
-  auto py_Image = _maix_Image_.attr("Image");
-  auto py_img_obj = py_Image();
-  auto py_fun_open = py_img_obj.attr("open_file");
-  py_fun_open(path);
-  return py_img_obj;
-}
+// py::object img_open(std::string path, std::string format)
+// {
+//   auto _maix_Image_ = py::module::import("maix_image");
+//   auto py_Image = _maix_Image_.attr("Image");
+//   auto py_img_obj = py_Image();
+//   auto py_fun_open = py_img_obj.attr("open_file");
+//   py_fun_open(path);
+//   return py_img_obj;
+// }
 
-py::object img_new(std::vector<int> size, std::vector<int> color, std::string mode)
-{
-  // // LOG_INFO << "new img";
-  //pybind11 python端的实现方法
-  auto _maix_Image_ = py::module::import("maix_image");
-  auto py_Image = _maix_Image_.attr("Image");
-  auto py_img_obj = py_Image();
-  auto py_fun_new = py_img_obj.attr("new");
-  py_fun_new(size, color, mode);
-  return py_img_obj;
-  //pybind11 C++端的实现方法
-  // maix_image *img_val = NULL;
-  // img_val = new maix_image();
-  // img_nu.push_back(img_val);
-  // img_val->_new(size, color, mode);
-  // return img_val;
-}
+// py::object img_new(std::vector<int> size, std::vector<int> color, std::string mode)
+// {
+//   // // LOG_INFO << "new img";
+//   //pybind11 python端的实现方法
+//   auto _maix_Image_ = py::module::import("_maix_image");
+//   auto py_Image = _maix_Image_.attr("Image");
+//   auto py_img_obj = py_Image();
+//   auto py_fun_new = py_img_obj.attr("new");
+//   py_fun_new(size, color, mode);
+//   return py_img_obj;
+//   // pybind11 C++端的实现方法
+//   // maix_image *img_val = NULL;
+//   // img_val = new maix_image();
+//   // img_nu.push_back(img_val);
+//   // img_val->_new(size, color, mode);
+//   // return img_val;
+// }
 
-py::object img_load(py::bytes data, std::vector<int> size, std::string mode)
-{
-  auto _maix_Image_ = py::module::import("maix_image");
-  auto py_Image = _maix_Image_.attr("Image");
-  auto py_img_obj = py_Image();
-  auto py_fun_load = py_img_obj.attr("load");
-  py_fun_load(data, size, mode);
-  return py_img_obj;
-}
+// py::object img_load(py::bytes data, std::vector<int> size, std::string mode)
+// {
+//   auto _maix_Image_ = py::module::import("maix_image");
+//   auto py_Image = _maix_Image_.attr("Image");
+//   auto py_img_obj = py_Image();
+//   auto py_fun_load = py_img_obj.attr("load");
+//   py_fun_load(data, size, mode);
+//   return py_img_obj;
+// }
 
 // static void s_log(int nu)
 // {
@@ -550,9 +556,9 @@ PYBIND11_MODULE(_maix_image, mo)
 {
   // mode_init();
   // mo.def("set_log", &s_log, py::arg("level") = 3);
-  mo.def("open", &img_open, py::arg("path"), py::arg("format") = "RGB");
-  mo.def("new", &img_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB");
-  mo.def("load", &img_load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB");
+  // mo.def("open", &img_open, py::arg("path"), py::arg("format") = "RGB");
+  // mo.def("new", &img_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB");
+  // mo.def("load", &img_load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB");
 
   pybind11::class_<maix_image>(mo, "Image")
       .def(pybind11::init<>())
@@ -565,7 +571,7 @@ PYBIND11_MODULE(_maix_image, mo)
 
       //Image重载自己python类的方法
       .def("__str__", &maix_image::str__)
-      .def("__repr__", &maix_image::str__)
+      .def("__repr__", &maix_image::repr__)
       .def("__len__", &maix_image::len__)
 
       //Image自己的方法

@@ -370,6 +370,7 @@ public:
   void v_init();
   void v_close();
 
+  std::string repr__();
   std::string str__();
   int len__();
 

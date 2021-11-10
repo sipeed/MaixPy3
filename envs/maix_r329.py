@@ -6,8 +6,8 @@ from .utils import get_incs, get_srcs
 
 
 
-# libi2c_module = Extension('pylibi2c',  include_dirs=[
-#                           'ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
+libi2c_module = Extension('pylibi2c',  include_dirs=[
+                          'ext_modules/libi2c/src'], sources=get_srcs('ext_modules/libi2c/src'))
 
 ext_so = "./ext_modules/libmaix/components/libmaix/lib/arch/r329"
 
@@ -92,7 +92,7 @@ _maix_display_module = Pybind11Extension(
 # )
 
 _maix_modules = [
-    # libi2c_module,
+    libi2c_module,
     _maix_module,
     # _maix_vivo_module,
     _maix_opencv_module,

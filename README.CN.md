@@ -19,6 +19,16 @@ MaixPy3 是基于 [cpython](https://github.com/python/cpython) 的 Python3 工�
 -  [Thanks](#Thanks)
 -  [License](#License)
 
+## Install
+
+通过网络直接安装。
+
+- `pip install maixpy3`
+
+[使用离线包直接安装](https://pypi.org/project/maixpy3/#files)
+
+- `pip install maixpy3-*.whl`
+
 ## Usage
 
 在屏幕上显示摄像机的图像。

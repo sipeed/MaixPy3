@@ -183,7 +183,7 @@ _maix_image &_maix_image::_load(py::object data, std::vector<int> size, std::str
                 this->_maix_image_size = 0;
             }
             return *this;
-        }  
+        }
 #endif
     }
         return *this;
@@ -289,8 +289,8 @@ void _maix_image::_show()
         if(this->_maix_image_width == 240 && this->_maix_image_height == 240)
         {
             py::bytes tmp_bytes((const char*)tmp->data,240 * 240 * 3);
-            draw__(tmp_bytes); 
-            libmaix_image_destroy(&tmp); 
+            draw__(tmp_bytes);
+            libmaix_image_destroy(&tmp);
             return;
         }
         else
@@ -301,9 +301,9 @@ void _maix_image::_show()
             cv::resize(src, dst, cv::Size(240, 240));
 
             py::bytes tmp_bytes((const char*)tmp_two->data,240 * 240 * 3);
-            draw__(tmp_bytes); 
-            libmaix_image_destroy(&tmp); 
-            libmaix_image_destroy(&tmp_two); 
+            draw__(tmp_bytes);
+            libmaix_image_destroy(&tmp);
+            libmaix_image_destroy(&tmp_two);
             return;
         }
     }
@@ -314,8 +314,8 @@ void _maix_image::_show()
         cv::resize(src, dst, cv::Size(240, 240));
 
         py::bytes tmp_bytes((const char*)tmp->data,240 * 240 * 3);
-        draw__(tmp_bytes); 
-        libmaix_image_destroy(&tmp); 
+        draw__(tmp_bytes);
+        libmaix_image_destroy(&tmp);
         return;
     }
 }
@@ -404,7 +404,7 @@ _maix_image &_maix_image::_draw_string(int x, int y, std::string str, std::vecto
 {
     if (this->_img)
     {
-        libmaix_cv_image_draw_string(this->_img, x, y, str.c_str(), MaixColor(color[0], color[1], color[2]), scale, thickness);
+        libmaix_cv_image_draw_string(this->_img, x, y, str.c_str(), scale, MaixColor(color[0], color[1], color[2]), thickness);
     }
     return *this;
 }
@@ -433,7 +433,7 @@ _maix_image &_maix_image::_convert(std::string mode)
     {
         libmaix_image_t *tmp = libmaix_image_create(this->_img->width, this->_img->height, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(mode)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
         if (tmp)
-        { 
+        {
             if(libmaix_cv_image_convert(this->_img, any_cast<libmaix_image_mode_t>(py_to_pram[this->get_to(mode)][0]), &tmp) == 0)
             {
                 libmaix_image_destroy(&this->_img), this->_img = tmp;
@@ -517,7 +517,7 @@ py::object img_new(std::vector<int> size, std::vector<int> color, std::string mo
     // img_nu.push_back(img_val);
     // img_val->_new(size, color, mode);
     // return img_val;
-    
+
 }
 
 py::object img_load(py::bytes data, std::vector<int> size, std::string mode)
@@ -610,12 +610,12 @@ PYBIND11_MODULE(_maix_Image, mo)
         .def("find_ball_lab", &_maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
         .def("find_circles_blob", &_maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
         .def("find_line", &_maix_image::find_line)
-        
 
 
 
 
-        
+
+
                 //基于opencv编写兼容openmv图像处理函数
         // .def("test", &_maix_image::version_test)
         .def("cv_Canny", &_maix_image::_maix_vision_Canny,py::arg("thr_h"),py::arg("thr_l"))

@@ -43,7 +43,7 @@ _maix_opencv_module = Pybind11Extension(
 )
 
 
-_maix_image = Pybind11Extension(
+_maix_image_module = Pybind11Extension(
     name = "_maix_Image",
     include_dirs=[
         get_incs(
@@ -123,7 +123,7 @@ _maix_modules = [
     _maix_module,
     # _maix_vivo_module,
     _maix_opencv_module,
-    _maix_image,
+    _maix_image_module,
     _maix_camera_module,
     _maix_display_module,
     # _maix_nn_module

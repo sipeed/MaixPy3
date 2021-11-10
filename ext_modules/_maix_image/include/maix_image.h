@@ -28,16 +28,13 @@
 
 #include "libmaix_cv_image.h"
 #include "libmaix_disp.h"
-#include "NanoLog.hpp"
+// #include "NanoLog.hpp"
 
-#define enable_PIL            //启用PIL支持
-
-
-
+#define enable_PIL //启用PIL支持
 
 namespace py = pybind11;
 
-class base_img
+class any_image
 {
 private:
 public:
@@ -48,11 +45,11 @@ public:
   int _maix_image_height;
   std::string _maix_image_type;
   int _maix_image_size;
-  base_img();
-  // ~base_img();
+  any_image();
+  // ~any_image();
 };
 
-class _maix_version : virtual public base_img
+class maix_version : virtual public any_image
 {
 private:
   int Distance(int x1, int y1, int x2, int y2);
@@ -178,7 +175,7 @@ private:
   //   }
 
 public:
-  _maix_version();
+  maix_version();
   void version_test();
 
   //==================================================================
@@ -359,7 +356,7 @@ public:
 };
 
 //最终类的继承,采用虚继承方案进行继承
-class _maix_image : virtual public base_img, public _maix_version
+class maix_image : virtual public any_image, public maix_version
 {
 private:
 public:
@@ -368,8 +365,8 @@ public:
   // int _maix_image_height;
   // std::string _maix_image_type;
   // int _maix_image_size;
-  _maix_image();
-  ~_maix_image();
+  maix_image();
+  ~maix_image();
   void v_init();
   void v_close();
 
@@ -379,22 +376,22 @@ public:
   void _show();
   int _save(std::string file_path, std::string format);
   py::bytes _tobytes();
-  _maix_image &_new(std::vector<int> size, std::vector<int> color, std::string mode);
-  _maix_image &_load(py::object data, std::vector<int> size, std::string mode);
-  _maix_image &_open_file(std::string path);
+  maix_image &_new(std::vector<int> size, std::vector<int> color, std::string mode);
+  maix_image &_load(py::object data, std::vector<int> size, std::string mode);
+  maix_image &_open_file(std::string path);
   py::object _get_to(std::string im);
-  _maix_image &_clear();
+  maix_image &_clear();
 
-  // _maix_image &_load_freetype();
-  _maix_image &_resize(int w, int h);
-  _maix_image &_draw_line(int x1, int y1, int x2, int y2, std::vector<int> color, int thickness);
-  _maix_image &_draw_rectangle(int x, int y, int w, int h, std::vector<int> color, int thickness);
-  _maix_image &_draw_circle(int x, int y, int r, std::vector<int> color, int thickness);
-  _maix_image &_draw_string(int x, int y, std::string str, std::vector<int> color, double scale, int thickness);
-  _maix_image &_draw_ellipse(int cx, int cy, int rx, int ry, double angle, double startAngle, double endAngle, std::vector<int> color, int thickness);
-  _maix_image &_rotate(double rotate);
-  _maix_image &_convert(std::string mode);
-  _maix_image &_draw_crop(int x, int y, int w, int h);
+  // maix_image &_load_freetype();
+  maix_image &_resize(int w, int h);
+  maix_image &_draw_line(int x1, int y1, int x2, int y2, std::vector<int> color, int thickness);
+  maix_image &_draw_rectangle(int x, int y, int w, int h, std::vector<int> color, int thickness);
+  maix_image &_draw_circle(int x, int y, int r, std::vector<int> color, int thickness);
+  maix_image &_draw_string(int x, int y, std::string str, std::vector<int> color, double scale, int thickness);
+  maix_image &_draw_ellipse(int cx, int cy, int rx, int ry, double angle, double startAngle, double endAngle, std::vector<int> color, int thickness);
+  maix_image &_rotate(double rotate);
+  maix_image &_convert(std::string mode);
+  maix_image &_draw_crop(int x, int y, int w, int h);
   std::vector<int> _get_pixe(int x, int y);
 };
 

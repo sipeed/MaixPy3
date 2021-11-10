@@ -8,7 +8,7 @@ except ModuleNotFoundError as e:
   pass
 
 try:
-  import _maix_Image as image
-  __all__.extend(['maix_Image'])
+  import _maix_image as Image
+  __all__.extend(['Image'])
 except ModuleNotFoundError as e:
   pass

@@ -1,4 +1,4 @@
-from maix import maix_Image
+from maix import Image
 import time
 import gc
 
@@ -9,7 +9,7 @@ def handle_signal_z(signum, frame):
 signal.signal(signal.SIGINT, handle_signal_z)
 
 while True:
-    img = maix_Image.new(size=(240,240),color = (255,0,0),mode = "RGB")
+    img = Image.new(size=(240,240),color = (255,0,0),mode = "RGB")
     #写字
     img.draw_string(10,200,"hello word!",(0,0,255),1)
     img.show()
@@ -33,7 +33,7 @@ while True:
 
 
 # while True:
-#     img = maix_Image.new(size=(240,240),color = (255,0,0),mode = "RGB")
+#     img = _maix_image.new(size=(240,240),color = (255,0,0),mode = "RGB")
 #     img.draw_string(10,200,"hello word!",(0,0,255),1)
 #     img.show()
 #     img.clear()

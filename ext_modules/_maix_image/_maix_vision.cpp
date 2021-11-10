@@ -1,26 +1,26 @@
 #include "maix_image.h"
 
-_maix_version::_maix_version()
+maix_version::maix_version()
 {
-  LOG_INFO << "Load the maix_Version module success!";
+  // LOG_INFO << "Load the maix_Version module success!";
 }
 
-void _maix_version::version_test()
+void maix_version::version_test()
 {
 }
 
-int _maix_version::Distance(int x1, int y1, int x2, int y2)
+int maix_version::Distance(int x1, int y1, int x2, int y2)
 {
   int x = abs(x1 - x2);
   int y = abs(y1 - y2);
   return int(round(sqrt(x * x + y * y)));
 }
 
-void _maix_version::_maix_vision_medianBlur(int m_size)
+void maix_version::_maix_vision_medianBlur(int m_size)
 {
 }
 
-void _maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
+void maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
 {
   //     cv::Mat in_img;
   //     py_img_to_in_img(py_img, in_img, size, mode); //获取图像
@@ -30,23 +30,24 @@ void _maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sig
   //     return tmp;
 }
 
-void _maix_version::_maix_vision_Canny(int thr_h, int thr_l)
+void maix_version::_maix_vision_Canny(int thr_h, int thr_l)
 {
-  if(this->_img)
+  if (this->_img)
   {
     cv::Mat input(this->_maix_image_width, this->_maix_image_height, any_cast<int>(this->py_to_pram[this->get_to(this->_maix_image_type)][2]), const_cast<char *>((char *)this->_img->data));
     cv::Mat dist;
-    cv::Canny(input,dist,thr_h,thr_l);
+    cv::Canny(input, dist, thr_h, thr_l);
     this->_maix_image_size = this->_maix_image_width * this->_maix_image_height;
-    memcpy(this->_img->data,dist.data,this->_maix_image_size);
+    memcpy(this->_img->data, dist.data, this->_maix_image_size);
     this->_maix_image_type = "L";
     this->_img->mode = any_cast<libmaix_image_mode_t>(this->py_to_pram[0][0]);
   }
-  else
-    std::cout << "please load image!" << std::endl;
+  else {
+    // std::cout << "please load image!" << std::endl;
+  }
 }
 
-void _maix_version::_maix_vision_HoughCircles(int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, std::vector<int> size, int mode)
+void maix_version::_maix_vision_HoughCircles(int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, std::vector<int> size, int mode)
 {
   // cv::Mat in_img;
   // this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
@@ -65,7 +66,7 @@ void _maix_version::_maix_vision_HoughCircles(int method, double dp, double minD
   // return return_val;
 }
 
-py::object _maix_version::_maix_vision_opencv_calcHist(int channels, std::vector<int> &roi, int histSize, std::vector<int> ranges, bool uniform, bool accumulate, std::vector<int> size, int mode)
+py::object maix_version::_maix_vision_opencv_calcHist(int channels, std::vector<int> &roi, int histSize, std::vector<int> ranges, bool uniform, bool accumulate, std::vector<int> size, int mode)
 {
   py::list return_val;
   // cv::Mat in_img;
@@ -98,7 +99,7 @@ py::object _maix_version::_maix_vision_opencv_calcHist(int channels, std::vector
   return return_val;
 }
 
-py::list _maix_version::get_blob_color_max(std::vector<int> &roi, int critical, int co)
+py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, int co)
 {
   py::list return_val;
   cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
@@ -229,9 +230,9 @@ py::list _maix_version::get_blob_color_max(std::vector<int> &roi, int critical, 
   return return_val;
 }
 
-py::list _maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi,\
- int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, \
- int tilt, int co)
+py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi,
+                                              int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin,
+                                              int tilt, int co)
 {
   py::list return_val;
   cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
@@ -403,7 +404,7 @@ py::list _maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &th
   return return_val;
 }
 
-py::list _maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
+py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
 {
   py::list out;
   cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
@@ -530,7 +531,7 @@ void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, d
   }
 }
 #define heigh_t 10
-py::dict _maix_version::find_line()
+py::dict maix_version::find_line()
 {
   py::dict return_val;
   cv::Mat src_gray, dst;
@@ -627,7 +628,7 @@ py::dict _maix_version::find_line()
   return return_val;
 }
 
-py::object _maix_version::_maix_vision_get_histogram(std::vector<std::vector<int>> &thresholds, bool invert, std::vector<int> &roi, int bins, std::vector<int> size, int mode)
+py::object maix_version::_maix_vision_get_histogram(std::vector<std::vector<int>> &thresholds, bool invert, std::vector<int> &roi, int bins, std::vector<int> size, int mode)
 {
   py::list return_val;
   // cv::Mat in_img;

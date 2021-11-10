@@ -82,14 +82,16 @@ if __name__ == "__main__":
     unit_test()
 
 
-from PIL import Image;import _maix_Image;from maix import display, camera;mk = _maix_Image.new(color = (255,0,0));mk.draw_rectangle(0,0,100,130,thickness = 3);display.show(mk.tobytes())
+from PIL import Image
+
+from maix import display, camera;mk = _maix_image.new(color = (255,0,0));mk.draw_rectangle(0,0,100,130,thickness = 3);display.show(mk.tobytes())
 
 
-import _maix_Image
-mk = _maix_Image.open_file("./test.jpg")
+import _maix_image
+mk = _maix_image.open_file("./test.jpg")
 
 
-mk = _maix_Image.new(color = (255,255,255))
+mk = _maix_image.new(color = (255,255,255))
 mk.draw_rectangle(10,10,100,130,(255,10,10),thickness = -1)
 from _maix_display import Display
 __fastview__ = Display()
@@ -117,13 +119,13 @@ mk.draw_string(100,100,"nihao",(255,255,255),1.0,3)
 # display.show(t)
 
 
-mk = _maix_Image.Image()
+mk = _maix_image.Image()
 md = mk.tobytes()
 
 
 display.show(camera.capture())
 
-mk = _maix_Image.new(color = (255,0,0))
+mk = _maix_image.new(color = (255,0,0))
 print(mk)
 mk.cv_Canny(10,20)
 

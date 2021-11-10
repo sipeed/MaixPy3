@@ -17,7 +17,7 @@
 # //==================================================================
 
 
-from maix import camera,display,maix_Image
+from maix import camera, display, Image
 import time
 camera.config(size=(240,240))
 

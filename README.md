@@ -19,6 +19,16 @@ MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpytho
 -  [Thanks](#Thanks)
 -  [License](#License)
 
+## Install
+
+use network.
+
+- `pip install maixpy3`
+
+[use wheel.](https://pypi.org/project/maixpy3/#files)
+
+- `pip install maixpy3-*.whl`
+
 ## Usage
 
 Display the camera image on the screen.

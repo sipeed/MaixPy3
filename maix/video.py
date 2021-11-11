@@ -3,13 +3,15 @@ class MaixVideo():
 
     def __init__(self, size=(640, 480)):
         self._width, self._height = size
-        
+        from maix import image
+        self.img = image.Image()
+
     def width(self):
         return self._width
-      
+
     def height(self):
         return self._height
-      
+
     def write(self):
         pass  # for file
 
@@ -20,6 +22,12 @@ class MaixVideo():
         pass
 
     def capture(self):
+        tmp = self.read()
+        if tmp:
+            return self.img.load(tmp, (self._width, self._height), "RGB")
+        return None
+
+    def old_capture(self):
         from PIL import Image
         tmp = self.read()
         if tmp:

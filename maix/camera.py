@@ -19,7 +19,7 @@ try:
                         from PIL import Image
                         from maix import display
                         self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = _vo_dir, ai_dir = _ai_dir)
-                        
+
                         display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
 
                         display.__fastview__ = self.cam
@@ -62,7 +62,7 @@ try:
             def __del__(self):
                 if self.cam:
                     self.cam = None
-                    
+
         camera = V831VivoMaixVideo()
 
     except Exception as e:
@@ -146,6 +146,14 @@ config = camera.config
 height = camera.height
 width = camera.width
 close = camera.close
+
+
+import _maix_image
+def get_image():
+    __img_data_ = camera.read()
+    return _maix_image.load(__img_data_,(camera.width(),camera.height()),"RGB")
+
+# get_image
 
 if __name__ == '__main__':
     camera.config((224, 224))

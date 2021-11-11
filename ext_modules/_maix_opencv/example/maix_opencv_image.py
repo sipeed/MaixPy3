@@ -32,6 +32,8 @@ def test_pillow():
 # <function test_pillow at 0x199fff8> 0.07521499999984371
 test_pillow()
 
+display.show(camera.capture())
+
 
 @show_run_time
 def test_opencv():
@@ -59,6 +61,26 @@ def unit_test():
 
 unit_test()
 
+
+
+from maix.image import Image
+img = Image("RGB", color="#FFFFFF")
+image.draw_ellipse(0, 1, "123")
+display.show(image)
+
+
+
+# from PIL import ImageDraw
+# img = Image("RGB", color="#FFFFFF")
+# draw = ImageDraw(img)
+# draw.ellipse((i[0]-i[3]/2, i[1]-i[2]/2, i[0]+i[3]/2, i[1]+i[2]/2), fill ='white', outline ='black', width =1)
+# display.show(img)
+
+
+
 if __name__ == "__main__":
 
     unit_test()
+
+
+

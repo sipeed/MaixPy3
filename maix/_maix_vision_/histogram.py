@@ -1,10 +1,10 @@
-#!/usr/bin/env python
-
 # //==================================================================
-# //函数名：  vision.opecv_Canny函数说明
+# //函数名：  _maix_visionpy.histogram类说明
 # //作者：    dianjixz
-# //日期：    2021-10-28
-# //功能：    边缘检测函数
+# //日期：    2021-10-29
+# //功能说明：    直方图对象是由 vision.get_histogram 返回。 灰度直方图有一个包
+# //            含多个二进制的通道。所有二进制都进行标准化，使其总和为1。RGB888
+# //            有三个包含多个二进制的通道。所有二进制都进行标准化，使其总和为1。
 # //输入参数：  vision.opecv_Canny(img, thr_h, thr_l, size=(0,0),mode=0)
 # //          py_img            图像对象,PIL图像或bytes图像(如果不是240*240的rgb数据需要提供size和mode参数)
 # //          thr_h             最大阈值
@@ -15,24 +15,5 @@
 # //          返回边缘检测函数后的图像,图像格式和输入保持一致；
 # //修改记录：
 # //==================================================================
-
-
-from maix import camera,vision,display
-from PIL import Image, ImageDraw
-import time
-
-
-def Canny():
-  tmp = camera.capture()
-  ma = vision.opecv_Canny(tmp, 10, 250)
-  display.show(ma.convert("RGB"))
-
-if __name__ == "__main__":
-    import signal
-
-    def handle_signal_z(signum, frame):
-            print("APP OVER")
-            exit(0)
-    signal.signal(signal.SIGINT, handle_signal_z)
-    while True:
-            Canny()
+class histogram(list):
+    pass

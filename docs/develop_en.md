@@ -71,10 +71,25 @@ your x86
 
 - python setup.py build
 
-your arm
+your v83x
 
-- source ../toolchain_v83x_linux_x86/envsetup.sh
+- source /opt/v83x/envsetup.sh
+
 - python3.8 setup.py build maix_v83x
+
+- adb shell "pip install /root/maixpy3-0.3.5-cp38-cp38-linux_armv7l.whl --upgrade"
+
+- python3.8 setup.py bdist_wheel maix_v83x && adb push ./dist/maixpy3-0.3.5-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.3.5-cp38-cp38-linux_armv7l.whl --upgrade"
+
+your r329
+
+- source /opt/r329_linux_x86_python3.9_toolchain/envsetup.sh
+
+- python3.9 setup.py build maix_r329
+
+- python3.9 setup.py bdist_wheel maix_r329 && scp ./dist/maixpy3-0.3.5-cp38-cp38-linux_armv7l.whl root@192.168.0.42:~/
+
+- pip uninstall maixpy3 -y && pip install ~/maixpy3-0.3.5*.whl
 
 ## pypi upload
 

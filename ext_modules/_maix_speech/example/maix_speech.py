@@ -1,6 +1,4 @@
 
-import _maix_speech
-
 def show_run_time(func):
     import timeit
     def time_get():
@@ -10,12 +8,34 @@ def show_run_time(func):
 
 
 @show_run_time
-def unit_test():
+def code_unit_test():
     import _maix_speech
+    t = _maix_speech.Asr()
+    t.open()
+    t.clear()
+    t.run()
+    t.clear()
+    t.exit()
 
+# unit_test()
 
-# <function unit_test at 0x199ebd8> 0.011696916999881068
-unit_test()
+@show_run_time
+def unit_test():
+    from maix import display, camera
+    import time
+    import _maix_speech
+    t = _maix_speech.Asr()
+    try:
+      t.open()
+      t.clear()
+      for i in range(30):
+        display.show(camera.capture())
+        # t.clear()
+        t.run()
+        # time.sleep(0.1)
+    finally:
+      t.exit()
+
 
 if __name__ == "__main__":
 

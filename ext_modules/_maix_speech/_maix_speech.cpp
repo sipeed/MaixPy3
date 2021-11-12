@@ -26,158 +26,146 @@ namespace py = pybind11;
 
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
-struct _maix_asr
+struct maix_asr
 {
   static bool init;
   static int tick;
 
-  static void my_rawcb(void *data, int len) //data struct: pnyp_t data[len][BEAM_CNT]
+  static void asr_rawcb(void *data, int len) //data struct: pnyp_t data[len][BEAM_CNT]
   {
-    pnyp_t *res = (pnyp_t *)data;
-    printf("===================================\n");
-    for (int t = 0; t < len; t++)
+    // pnyp_t *res = (pnyp_t *)data;
+    // printf("===================================\n");
+    // for (int t = 0; t < len; t++)
+    // {
+    //   pnyp_t *pp = res + BEAM_CNT * t;
+    //   if (1)
+    //   {
+    //     printf("T=%04d ====:", tick);
+    //     tick += 1;
+    //     for (int i = 0; i < 3; i++)
+    //     { //BEAM_CNT
+    //       printf("  %4d %-6s: %.3f;", pp[i].idx, am_vocab[pp[i].idx], ((float)(pp[i].p)));
+    //     }
+    //   }
+    //   printf("\n");
+    // }
+    // printf("####\n");
+    return;
+  }
+
+  static py::object py_asr_digit_cb;
+
+  static void _asr_digit_cb(void *data, int len)
+  {
+    // printf("digit_res1: %s : %d %d\n", tmp.c_str(), tmp.length(), len);
+    if (py_asr_digit_cb != py::none())
     {
-      pnyp_t *pp = res + BEAM_CNT * t;
-      if (1)
-      {
-        printf("T=%04d ====:", tick);
-        tick += 1;
-        for (int i = 0; i < 3; i++)
-        { //BEAM_CNT
-          printf("  %4d %-6s: %.3f;", pp[i].idx, am_vocab[pp[i].idx], ((float)(pp[i].p)));
-        }
-      }
-      printf("\n");
+      py_asr_digit_cb(string((const char *)data).c_str());
     }
-    printf("####\n");
-    return;
   }
 
-  static void my_digitcb(void *data, int len)
+  void set_dig(int blank_ms, py::object cb)
   {
-    char *digit_res = (char *)data;
-    char digit_res1[32];
-    memset(digit_res1, ' ', 32);
-    digit_res1[32 - 1] = 0;
-    memcpy(digit_res1, digit_res, strlen(digit_res));
-    printf("digit_res1: %s\n", digit_res);
-    return;
-  }
-
-  static void my_lvcsrcb(void *data, int len)
-  {
-    char *words = ((char **)data)[0];
-    char *pnys = ((char **)data)[1];
-
-    printf("PNYS: %s\nHANS: %s\n", pnys, words);
-    return;
-  }
-
-  static void my_kwscb(void *data, int len)
-  {
-    float *p = (float *)data;
-    float maxp = -1;
-    int maxi = 0;
-    for (int i = 0; i < len; i++)
+    if (blank_ms != 0)
     {
-      printf("\tkw%d: %.3f;", i, p[i]);
-      if (p[i] > maxp)
+      size_t decoder_args[1] = {640};
+      int res = ms_asr_decoder_cfg(DECODER_DIG, _asr_digit_cb, &decoder_args, 1);
+      if (res == 0)
       {
-        maxp = p[i];
-        maxi = i;
+        py_asr_digit_cb = cb;
       }
-    }
-    printf("\n");
-    return;
-  }
-
-  static void set_dig(int flag)
-  {
-    size_t decoder_args[10];
-    int res = 0;
-    if (flag)
-    {                        //init
-      decoder_args[0] = 640; //blank_t ms
-      res = ms_asr_decoder_cfg(DECODER_DIG, my_digitcb, &decoder_args, 1);
-      if (res != 0)
+      else
       {
-        printf("DECODER_DIG init error!\n");
-      };
+        py_asr_digit_cb = py::none();
+      }
     }
     else
     {
       ms_asr_decoder_cfg(DECODER_DIG, NULL, NULL, 0);
     }
-    return;
   }
 
-  static void set_kws(int flag)
+  static py::object py_asr_kws_cb;
+
+  static void _asr_kws_cb(void *data, int len)
   {
-    static char *my_kw_tbl[3] = {
-        (char *)"xiao3 ai4 tong2 xue2",
-        (char *)"tian1 mao1 jing1 ling2",
-        (char *)"tian1 qi4 zen3 me yang4"};
+    if (py_asr_kws_cb != py::none())
+    {
+      py::list tmps;
+      float *nums = (float *)data;
+      for (int i = 0; i < len; i++)
+        tmps.append(nums[i]);
+      py_asr_kws_cb(tmps);
+    }
+  }
 
-    static float my_kw_gate[3] = {
-        0.1, 0.1, 0.1};
+  void set_kws(py::list keywords, py::list similars, py::object cb, int auto_similar)
+  {
+    int kl = py::len(keywords), sl = py::len(similars);
+    if (keywords != py::none() && kl > 0 && sl > 0)
+    {
+      char *asr_kw_tbl[kl];
+      float asr_kw_gate[kl];
+      for (int i = 0; i < kl; i++) {
+        py::list tmp = keywords[i].cast<py::list>();
+        asr_kw_tbl[i] = (char *)tmp[0].cast<std::string>().c_str();
+        asr_kw_gate[i] = tmp[1].cast<float>();
+      }
 
-    size_t decoder_args[10];
-    int res = 0;
-    if (flag)
-    { //init
-      decoder_args[0] = (size_t)my_kw_tbl;
-      decoder_args[1] = (size_t)my_kw_gate;
+      size_t decoder_args[4];
+      decoder_args[0] = (size_t)asr_kw_tbl;
+      decoder_args[1] = (size_t)asr_kw_gate;
       decoder_args[2] = 3;
-      decoder_args[3] = 1; //auto similar //自动去除音调 近音处理
-      printf("qqqq");
-      res = ms_asr_decoder_cfg(DECODER_KWS, my_kwscb, &decoder_args, 3);
-      printf("aaaa");
-      if (res != 0)
+      decoder_args[3] = auto_similar; //自动去除音调 近音处理
+      int res = ms_asr_decoder_cfg(DECODER_KWS, _asr_kws_cb, &decoder_args, 4);
+      if (res == 0)
       {
-        printf("DECODER_KWS init error!\n");
-        goto out1;
-      };
-      char *similar_pnys0[1] = {(char *)"xiang3"}; //每个最多注册10个近音词
-      ms_asr_kws_reg_similar((char *)"xiao3", similar_pnys0, 1);
-      char *similar_pnys1[3] = {(char *)"xin1", (char *)"ting1", (char *)"jin1"};
-      ms_asr_kws_reg_similar((char *)"jing1", similar_pnys1, 3);
+        for (int i = 0; i < sl; i++) {
+          py::list tmp = similars[i].cast<py::list>();
+          int len = py::len(tmp);
+          char *similar_pnys[len - 1] = { }; // remove self and similar < 10
+          for (int i = 0, sum = (len - 1) > 10 ? 10 : len; i < 10; i++) {
+              similar_pnys[i] = (char *)tmp[i + 1].cast<std::string>().c_str();
+          }
+          ms_asr_kws_reg_similar((char *)tmp.cast<std::string>().c_str(), similar_pnys, len - 1);
+        }
+        py_asr_kws_cb = cb;
+      }
     }
     else
     {
       ms_asr_decoder_cfg(DECODER_KWS, NULL, NULL, 0);
     }
-  out1:
+  }
+
+  static py::object py_asr_lvcsr_cb;
+
+  static void _asr_lvcsr_cb(void *data, int len)
+  {
+    if (py_asr_lvcsr_cb != py::none())
+    {
+      py_asr_lvcsr_cb(string((const char *)((char **)data)[0]), string((const char *)((char **)data)[1]));
+    }
     return;
   }
 
-  static void set_lvcsr(int flag)
+  void set_lvcsr(string sfst_name, string sym_name, string phones_txt, string words_txt, float beam, float bg_prob, float scale, bool is_mmap, py::object cb)
   {
-    size_t decoder_args[10];
-    int res = 0;
-    if (flag)
-    { //init
-
-      decoder_args[0] = (size_t)"/root/test_files/lmS/lg_6m.sfst";
-      decoder_args[1] = (size_t)"/root/test_files/lmS/lg_6m.sym";
-      decoder_args[2] = (size_t)"/root/test_files/lmS/phones.bin";
-      decoder_args[3] = (size_t)"/root/test_files/lmS/words_utf.bin";
+    if (sfst_name != "")
+    {
+      size_t decoder_args[8];
+      decoder_args[0] = (size_t)sfst_name.c_str();
+      decoder_args[1] = (size_t)sym_name.c_str();
+      decoder_args[2] = (size_t)phones_txt.c_str();
+      decoder_args[3] = (size_t)words_txt.c_str();
+      memcpy(&decoder_args[4], &beam, sizeof(beam));
+      memcpy(&decoder_args[5], &bg_prob, sizeof(bg_prob));
+      memcpy(&decoder_args[6], &scale, sizeof(scale));
+      decoder_args[7] = (size_t)is_mmap;
+      int res = ms_asr_decoder_cfg(DECODER_LVCSR, _asr_lvcsr_cb, &decoder_args, 8);
+      if (res == 0)
       {
-        float tmp = (8.0);
-        memcpy(&decoder_args[4], &tmp, sizeof(float));
-      }
-      {
-        float tmp = (10.0);
-        memcpy(&decoder_args[5], &tmp, sizeof(float));
-      }
-      {
-        float tmp = (0.5);
-        memcpy(&decoder_args[6], &tmp, sizeof(float));
-      }
-      decoder_args[7] = (size_t)0; //printf("#\n");
-      res = ms_asr_decoder_cfg(DECODER_LVCSR, my_lvcsrcb, &decoder_args, 0);
-      if (res != 0)
-      {
-        printf("DECODER_LVCSR init error!\n");
+        py_asr_lvcsr_cb = cb;
       };
     }
     else
@@ -194,14 +182,18 @@ struct _maix_asr
     ms_asr_clear();
   }
 
-  bool open()
+  bool open(string device_name, string model_name, int device_type, int model_in_len, int strip_l, int strip_r, int phone_type, int agc)
   {
     if (init)
       return init;
 
+    // am_args_t am_args = {(char *)model_name.c_str(), model_in_len, strip_l, strip_r, phone_type, agc};
+
     am_args_t am_args = {"/root/test_files/cnnctc/cnnctc_3332_192", 192, 6, 6, CN_PNYTONE, 1};
 
-    int res = ms_asr_init(DEVICE_WAV, "/root/test_files/1.2.wav", &am_args, 0x00);
+    printf("[open] %s, %d, %d\n", device_name.c_str(), model_name.c_str(), device_type);
+
+    int res = ms_asr_init(device_type, (char *)device_name.c_str(), &am_args, 0x00);
 
     if (res != 0)
     {
@@ -209,20 +201,12 @@ struct _maix_asr
       return -1;
     }
 
-    // if (opts.do_raw)
+    res = ms_asr_decoder_cfg(DECODER_RAW, asr_rawcb, NULL, 0);
+    if (res == 0)
     {
-      res = ms_asr_decoder_cfg(DECODER_RAW, my_rawcb, NULL, 0);
-      if (res == 0)
-      {
-        // if (opts.do_dig)
-        set_dig(1);
-        // if (opts.do_kws)
-        set_kws(1);
-        // if (opts.do_lvcsr)
-        set_lvcsr(1);
-        init = true;
-      }
+      init = true;
     }
+
     return init;
   }
 
@@ -248,38 +232,39 @@ struct _maix_asr
     }
   }
 
-  _maix_asr()
+  maix_asr()
   {
   }
 
-  ~_maix_asr()
+  ~maix_asr()
   {
     exit();
   }
 };
 
-bool _maix_asr::init = false;
-int _maix_asr::tick = 0;
+bool maix_asr::init = false;
+int maix_asr::tick = 0;
+py::object maix_asr::py_asr_digit_cb;
+py::object maix_asr::py_asr_kws_cb;
+py::object maix_asr::py_asr_lvcsr_cb;
 
 PYBIND11_MODULE(_maix_speech, m)
 {
-  m.def("test_callback1", [](const py::object &func)
-        { return func(); });
-  m.def("test_callback2", [](const py::object &func)
-        { return func("Hello", 'x', true, 5); });
-  m.def("test_callback3", [](const std::function<int(int)> &func)
-        { return "func(43) = " + std::to_string(func(43)); });
-  m.def("test_callback4", []() -> std::function<int(int)> { return [](int i)
-                                                            { return i + 1; }; });
-  m.def("test_callback5", []()
-        { return py::cpp_function([](int i)
-                                  { return i + 1; },
-                                  py::arg("number")); });
-
-  pybind11::class_<_maix_asr>(m, "Asr")
+  pybind11::class_<maix_asr>(m, "Asr")
       .def(pybind11::init<>())
-      .def("open", &_maix_asr::open)
-      .def("run", &_maix_asr::run)
-      .def("exit", &_maix_asr::exit)
-      .def("clear", &_maix_asr::clear);
+      .def("open", &maix_asr::open,
+           py::arg("device_name"), py::arg("model_name"), py::arg("device_type") = DEVICE_PCM,
+           py::arg("model_in_len") = 192, py::arg("strip_l") = 6, py::arg("strip_r") = 6,
+           py::arg("phone_type") = CN_PNYTONE, py::arg("agc") = 1)
+      .def("run", &maix_asr::run)
+      .def("set_dig", &maix_asr::set_dig, py::arg("blank_ms") = 0, py::arg("cb") = py::none())
+      // float beam, float bg_prob, float scale, bool is_mmap,
+      .def("set_lvcsr", &maix_asr::set_lvcsr, py::arg("sfst_name") = "", py::arg("sym_name") = "",
+           py::arg("phones_txt") = "", py::arg("words_txt") = "", py::arg("beam") = 8.0,
+           py::arg("bg_prob") = 10.0, py::arg("scale") = 0.5, py::arg("is_mmap") = 0, py::arg("cb") = py::none())
+      .def("set_kws", &maix_asr::set_kws,
+           py::arg("keywords") = py::list(), py::arg("similars") = py::list(),
+           py::arg("cb") = py::none(), py::arg("auto_similar") = true)
+      .def("exit", &maix_asr::exit)
+      .def("clear", &maix_asr::clear);
 }

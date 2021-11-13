@@ -58,11 +58,11 @@ def unit_test():
       "/root/test_files/lmS/words_utf.bin",
       8.0, 10.0, 0.5, 0, asr_lvcsr)
 
-    for i in range(10):
+    for i in range(20):
       # display.show(camera.capture())
       # t.clear()
-      asr.run()
-      time.sleep(0.05)
+      asr.run(1)
+      # time.sleep(0.05)
 
 
 if __name__ == "__main__":

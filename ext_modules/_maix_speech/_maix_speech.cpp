@@ -200,34 +200,29 @@ struct maix_asr
     if (init)
       return init;
 
-    // am_args_t am_args = {(char *)model_name.c_str(), model_in_len, strip_l, strip_r, phone_type, agc};
+    string _device(device_name), _model(model_name);
 
-    am_args_t am_args = {"/root/test_files/cnnctc/cnnctc_3332_192", 192, 6, 6, CN_PNYTONE, 1};
+    am_args_t am_args = {(char *)_model.c_str(), model_in_len, strip_l, strip_r, phone_type, agc};
 
-    printf("[open] %s, %d, %d\n", device_name.c_str(), model_name.c_str(), device_type);
+    int res = ms_asr_init(device_type, (char *)_device.c_str(), &am_args, 0);
 
-    int res = ms_asr_init(device_type, (char *)device_name.c_str(), &am_args, 0x00);
-
-    if (res != 0)
-    {
-      printf("ms_asr_init error!\n");
-      return -1;
-    }
-
-    res = ms_asr_decoder_cfg(DECODER_RAW, asr_rawcb, NULL, 0);
     if (res == 0)
     {
-      init = true;
+      res = ms_asr_decoder_cfg(DECODER_RAW, asr_rawcb, NULL, 0);
+      if (res == 0)
+      {
+        init = true;
+      }
     }
 
     return init;
   }
 
-  bool run()
+  bool run(int frame)
   {
     if (!init)
       return false;
-    int frames = ms_asr_run(1); //1 frame default 768ms(am_xxyy_192)
+    int frames = ms_asr_run(frame); //1 frame default 768ms(am_xxyy_192)
     if (frames < 1)
     {
       printf("run out\n");
@@ -269,7 +264,7 @@ PYBIND11_MODULE(_maix_speech, m)
            py::arg("device_name"), py::arg("model_name"), py::arg("device_type") = DEVICE_MIC,
            py::arg("model_in_len") = 192, py::arg("strip_l") = 6, py::arg("strip_r") = 6,
            py::arg("phone_type") = CN_PNYTONE, py::arg("agc") = 1)
-      .def("run", &maix_asr::run)
+      .def("run", &maix_asr::run, py::arg("frame") = 1)
       .def("set_dig", &maix_asr::set_dig, py::arg("blank_ms") = 0, py::arg("cb") = py::none())
       // float beam, float bg_prob, float scale, bool is_mmap,
       .def("set_lvcsr", &maix_asr::set_lvcsr, py::arg("sfst_name") = "", py::arg("sym_name") = "",

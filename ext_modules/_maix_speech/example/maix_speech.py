@@ -27,7 +27,8 @@ def unit_test():
     import time
     import _maix_speech
     asr = _maix_speech.Asr()
-    asr.open("/root/test_files/1.2.wav", "/root/test_files/cnnctc/cnnctc_3332_192", 2)
+    # asr.open("/root/test_files/1.2.wav", "/root/test_files/cnnctc/cnnctc_3332_192", 2)
+    asr.open("hw:0,0", "/root/test_files/cnnctc/cnnctc_3332_192")
     asr.clear()
 
     def asr_dig(info):
@@ -61,7 +62,7 @@ def unit_test():
       # display.show(camera.capture())
       # t.clear()
       asr.run()
-      # time.sleep(0.1)
+      time.sleep(0.05)
 
 
 if __name__ == "__main__":

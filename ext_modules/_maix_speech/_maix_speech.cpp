@@ -266,7 +266,7 @@ PYBIND11_MODULE(_maix_speech, m)
   pybind11::class_<maix_asr>(m, "Asr")
       .def(pybind11::init<>())
       .def("open", &maix_asr::open,
-           py::arg("device_name"), py::arg("model_name"), py::arg("device_type") = DEVICE_PCM,
+           py::arg("device_name"), py::arg("model_name"), py::arg("device_type") = DEVICE_MIC,
            py::arg("model_in_len") = 192, py::arg("strip_l") = 6, py::arg("strip_r") = 6,
            py::arg("phone_type") = CN_PNYTONE, py::arg("agc") = 1)
       .def("run", &maix_asr::run)

@@ -36,8 +36,8 @@ def unit_test():
 
     keywords = [
       ["qi1 ba1 jiu3", 0.1],
-      ["san1 si4 wu3", 0.1],
-      ["yi1 nian2", 0.1],
+      ["yi1 nian2", 0.2],
+      ["san1 si4 wu3", 0.3],
     ]
     similars = [
       ["xiao3", "xiang3"],
@@ -57,7 +57,7 @@ def unit_test():
       "/root/test_files/lmS/words_utf.bin",
       8.0, 10.0, 0.5, 0, asr_lvcsr)
 
-    for i in range(30):
+    for i in range(10):
       # display.show(camera.capture())
       # t.clear()
       asr.run()

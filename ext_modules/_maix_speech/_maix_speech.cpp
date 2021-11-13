@@ -101,33 +101,46 @@ struct maix_asr
 
   void set_kws(py::list keywords, py::list similars, py::object cb, int auto_similar)
   {
-    int kl = py::len(keywords), sl = py::len(similars);
-    if (keywords != py::none() && kl > 0 && sl > 0)
+    int kl = py::len(keywords);
+    if (keywords != py::none() && kl > 0)
     {
-      char *asr_kw_tbl[kl];
+      std::string asr_kw_str[kl];
+      char *asr_kw_tbl[kl] = { 0 }; // .cast<std::string>()).c_str(); have q
       float asr_kw_gate[kl];
+
       for (int i = 0; i < kl; i++) {
-        py::list tmp = keywords[i].cast<py::list>();
-        asr_kw_tbl[i] = (char *)tmp[0].cast<std::string>().c_str();
+        py::list tmp = static_cast<py::list>(keywords[i]);
+        // asr_kw_tbl[i] = (char *)(tmp[0].cast<std::string>()).c_str();
+        asr_kw_str[i] = tmp[0].cast<std::string>();
+        asr_kw_tbl[i] = (char *)asr_kw_str[i].c_str();
         asr_kw_gate[i] = tmp[1].cast<float>();
+        // printf("set_kws keywords %s %f \r\n", asr_kw_tbl[i], asr_kw_gate[i]);
       }
+
+      // for (int i = 0; i < kl; i++) {
+      //   printf("set_kws my_kw_tbl %s %f \r\n", asr_kw_tbl[i], asr_kw_gate[i]);
+      // }
 
       size_t decoder_args[4];
       decoder_args[0] = (size_t)asr_kw_tbl;
       decoder_args[1] = (size_t)asr_kw_gate;
-      decoder_args[2] = 3;
+      decoder_args[2] = kl;
       decoder_args[3] = auto_similar; //自动去除音调 近音处理
       int res = ms_asr_decoder_cfg(DECODER_KWS, _asr_kws_cb, &decoder_args, 4);
+
       if (res == 0)
       {
-        for (int i = 0; i < sl; i++) {
-          py::list tmp = similars[i].cast<py::list>();
-          int len = py::len(tmp);
-          char *similar_pnys[len - 1] = { }; // remove self and similar < 10
-          for (int i = 0, sum = (len - 1) > 10 ? 10 : len; i < 10; i++) {
-              similar_pnys[i] = (char *)tmp[i + 1].cast<std::string>().c_str();
+        int sl = py::len(similars);
+        if (sl > 0) {
+          for (int i = 0; i < sl; i++) {
+            py::list tmp = similars[i].cast<py::list>();
+            int len = py::len(tmp) - 1;
+            char *similar_pnys[len] = { }; // remove self and similar < 10
+            for (int i = 0, sum = len > 10 ? 10 : len; i < sum; i++) {
+                similar_pnys[i] = (char *)tmp[i + 1].cast<std::string>().c_str();
+            }
+            ms_asr_kws_reg_similar((char *)tmp[0].cast<std::string>().c_str(), similar_pnys, len);
           }
-          ms_asr_kws_reg_similar((char *)tmp.cast<std::string>().c_str(), similar_pnys, len - 1);
         }
         py_asr_kws_cb = cb;
       }

@@ -137,7 +137,7 @@ _maix_speech_module = Pybind11Extension("_maix_speech",
     extra_objects=[
         "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/r329/libms_asr_r329.a",
     ],
-    extra_compile_args=['-march=armv8-a'],
+    extra_compile_args=['-march=armv8-a', '-std=c++11', '-std=gnu++11'],
     # extra_compile_args=['-D__ARM__', '-D__ARMV7__', '-DCONF_KERNEL_IOMMU', '-DCONF_KERNEL_VERSION_4_9', '-std=c++11', '-std=gnu++11'],
     extra_link_args=[
         # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -fPIC -c -s -ffunction-sections -fdata-sections -march=armv7-a  -mtune=cortex-a7" PARENT_SCOPE)

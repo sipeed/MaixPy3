@@ -89,6 +89,8 @@ your r329
 
 - pip uninstall maixpy3 -y && pip install ~/maixpy3-0.3.5-cp39*.whl
 
+> pypi upload manylinux2014_aarch64
+
 ## pypi upload
 
 - python3 setup.py sdist build

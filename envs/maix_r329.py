@@ -118,11 +118,40 @@ _maix_display_module = Pybind11Extension(
 #     extra_link_args=[-Wl,-rpath=/usr/lib/python3.8/site-packages/maix -DR329]
 # )
 
+# python3.8 -m pip install pybind11
+_maix_speech_module = Pybind11Extension("_maix_speech",
+    include_dirs=[
+        get_incs(
+            'ext_modules/_maix_speech/Maix-Speech/components/asr_lib/include'),
+        get_incs(
+            'ext_modules/_maix_speech/Maix-Speech/components/utils/include')
+    ],
+    sources = get_srcs('ext_modules/_maix_speech', exclude=["utils", "projects"]),
+    libraries=[
+        "ms_asr_r329", "aipudrv", "asound"
+    ],
+    library_dirs=[
+        ext_so,
+        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/r329",
+    ],
+    extra_objects=[
+        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/r329/libms_asr_r329.a",
+    ],
+    extra_compile_args=['-march=armv8-a'],
+    # extra_compile_args=['-D__ARM__', '-D__ARMV7__', '-DCONF_KERNEL_IOMMU', '-DCONF_KERNEL_VERSION_4_9', '-std=c++11', '-std=gnu++11'],
+    extra_link_args=[
+        # set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-unused-variable -fPIC -c -s -ffunction-sections -fdata-sections -march=armv7-a  -mtune=cortex-a7" PARENT_SCOPE)
+        # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare -Wno-unused-variable -fPIC -fexceptions -s -ffunction-sections -fdata-sections -fpermissive -march=armv7-a  -mtune=cortex-a7" PARENT_SCOPE)
+    ],
+)
+
+
 _maix_modules = [
     libi2c_module,
     _maix_module,
     # _maix_vivo_module,
     # _maix_opencv_module,
+    _maix_speech_module,
     _maix_image_module,
     _maix_camera_module,
     _maix_display_module,
@@ -132,7 +161,7 @@ _maix_modules = [
 _maix_data_files = [
     ('/maix', get_srcs(ext_so, ['so'])),
     # ('/maix', get_srcs("./ext_modules/_maix_image/lib", ['so'])),
-    ('/maix/_maix_opencv/', get_srcs("ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4", ['so'])),  # depend system provide
+    # ('/maix/_maix_opencv/', get_srcs("ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4", ['so'])),  # depend system provide
 ]
 
 _maix_py_modules = [

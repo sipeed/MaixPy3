@@ -1,4 +1,12 @@
 
+import time
+from maix import display, camera
+from _maix_display import Display
+import _maix_image
+from PIL import Image
+from maix import camera
+from maix.image import Image
+from maix import display, camera, Image
 from maix import display, camera, image
 
 
@@ -38,6 +46,7 @@ display.show(camera.capture())
 @show_run_time
 def test_opencv():
 
+
 tmp = camera.read()
 display.show(image(tmp, 224, 224).resize(240, 240).tobytes())
 
@@ -47,27 +56,25 @@ test_opencv()
 
 
 def unit_test():
-import time
-from maix import display, camera, Image
+
+
 img = Image()
 img = img.new()
 
 camera.config((224, 224))
 while True:
 tmp = camera.read()
-img2 = image.load(tmp2, 224, 224).resize(240, 240).draw_rectangle(20, 20, 220, 220, color=(0, 255, 0), thickness=4).draw_string(20, 120, str(time.time()), scale=0.6, color=(255, 0, 0), thickness=2)
+img2 = image.load(tmp2, 224, 224).resize(240, 240).draw_rectangle(20, 20, 220, 220, color=(
+    0, 255, 0), thickness=4).draw_string(20, 120, str(time.time()), scale=0.6, color=(255, 0, 0), thickness=2)
 display.show(img.tobytes())
 
 unit_test()
 
 
-
-from maix.image import Image
 img = Image("RGB", color="#FFFFFF")
 image.draw_ellipse(0, 1, "123")
 display.show(image)
 
-from maix import camera
 
 # from PIL import ImageDraw
 # img = Image("RGB", color="#FFFFFF")
@@ -76,33 +83,30 @@ from maix import camera
 # display.show(img)
 
 
-
 if __name__ == "__main__":
 
     unit_test()
 
 
-from PIL import Image
+mk = _maix_image.new(color=(255, 0, 0))
+mk.draw_rectangle(0, 0, 100, 130, thickness=3)
+display.show(mk.tobytes())
 
-from maix import display, camera;mk = _maix_image.new(color = (255,0,0));mk.draw_rectangle(0,0,100,130,thickness = 3);display.show(mk.tobytes())
 
-
-import _maix_image
 mk = _maix_image.open_file("./test.jpg")
 
 
-mk = _maix_image.new(color = (255,255,255))
-mk.draw_rectangle(10,10,100,130,(255,10,10),thickness = -1)
-from _maix_display import Display
+mk = _maix_image.new(color=(255, 255, 255))
+mk.draw_rectangle(10, 10, 100, 130, (255, 10, 10), thickness=-1)
 __fastview__ = Display()
 __fastview__.draw(mk.tobytes())
 
 
-mk.draw_string(100,100,"nihao",(255,255,255),1.0,3)
+mk.draw_string(100, 100, "nihao", (255, 255, 255), 1.0, 3)
 
 # from maix import display, camera
 [(36, 86, 4, 108, -35, 110)]
-[(36,4,-35,86,108,110)]
+[(36, 4, -35, 86, 108, 110)]
 # # from maix import display, camera
 # from PIL import Image
 # image = Image.frombytes(mode="RGB",size=(240,240),data=t)
@@ -125,14 +129,14 @@ md = mk.tobytes()
 
 display.show(camera.capture())
 
-mk = _maix_image.new(color = (255,0,0))
+mk = _maix_image.new(color=(255, 0, 0))
 print(mk)
-mk.cv_Canny(10,20)
+mk.cv_Canny(10, 20)
 
-mk.draw_rectangle(0,0,100,100,thickness = 3)
+mk.draw_rectangle(0, 0, 100, 100, thickness=3)
 display.show(mk.tobytes())
 
 
-image = Image.frombytes(mode="RGB",size=(240,240),data=md)
+image = Image.frombytes(mode="RGB", size=(240, 240), data=md)
 
 display.show(image)

@@ -1,114 +1,25 @@
 #include "maix_image.h"
-
+// Mat img
+// img.cols 宽
+// img.rows 高
+// Mat::Mat(int rows, int cols, int type, void* data, size_t step=AUTO_STEP)
 maix_version::maix_version()
 {
-  // LOG_INFO << "Load the maix_Version module success!";
 }
-
-void maix_version::version_test()
-{
-}
-
-int maix_version::Distance(int x1, int y1, int x2, int y2)
+int Distance(int x1, int y1, int x2, int y2)
 {
   int x = abs(x1 - x2);
   int y = abs(y1 - y2);
   return int(round(sqrt(x * x + y * y)));
 }
-
-void maix_version::_maix_vision_medianBlur(int m_size)
-{
-}
-
-void maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
-{
-  //     cv::Mat in_img;
-  //     py_img_to_in_img(py_img, in_img, size, mode); //获取图像
-  //     cv::Mat dist;
-  //     cv::GaussianBlur(in_img, dist, cv::Size(ksize[0], ksize[1]), sigmaX, sigmaY);
-  //     py::object tmp = out_img_to_py_img(py_img, dist);
-  //     return tmp;
-}
-
-void maix_version::_maix_vision_Canny(int thr_h, int thr_l)
-{
-  if (this->_img)
-  {
-    cv::Mat input(this->_maix_image_width, this->_maix_image_height, any_cast<int>(this->py_to_pram[this->get_to(this->_maix_image_type)][2]), const_cast<char *>((char *)this->_img->data));
-    cv::Mat dist;
-    cv::Canny(input, dist, thr_h, thr_l);
-    this->_maix_image_size = this->_maix_image_width * this->_maix_image_height;
-    memcpy(this->_img->data, dist.data, this->_maix_image_size);
-    this->_maix_image_type = "L";
-    this->_img->mode = any_cast<libmaix_image_mode_t>(this->py_to_pram[0][0]);
-  }
-  else {
-    // std::cout << "please load image!" << std::endl;
-  }
-}
-
-void maix_version::_maix_vision_HoughCircles(int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, std::vector<int> size, int mode)
-{
-  // cv::Mat in_img;
-  // this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
-  // cv::Mat dist;
-  // vector<cv::Vec3f> circles;
-  // cv::HoughCircles(in_img, circles, method, dp, minDist, param1, param2, minRadius, maxRadius);
-  // py::list return_val;
-  // for (size_t i = 0; i < circles.size(); i++)
-  // {
-  //   py::list tmp;
-  //   tmp.append(circles[i][0]);
-  //   tmp.append(circles[i][1]);
-  //   tmp.append(circles[i][2]);
-  //   return_val.append(tmp);
-  // }
-  // return return_val;
-}
-
-py::object maix_version::_maix_vision_opencv_calcHist(int channels, std::vector<int> &roi, int histSize, std::vector<int> ranges, bool uniform, bool accumulate, std::vector<int> size, int mode)
-{
-  py::list return_val;
-  // cv::Mat in_img;
-  // this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
-  // cv::Rect rect;
-  // if (roi[2] != 0 && roi[3] != 0)
-  // {
-  //   rect.x = roi[0];
-  //   rect.y = roi[1];
-  //   rect.width = roi[2];
-  //   rect.height = roi[3];
-  // }
-  // else
-  // {
-  //   rect.x = 0;
-  //   rect.y = 0;
-  //   rect.width = in_img.size[0];
-  //   rect.height = in_img.size[1];
-  // }
-  // cv::Mat mask = cv::Mat::zeros(in_img.size(), CV_8UC1);
-  // mask(rect).setTo(255);
-  // float range[] = {ranges[0], ranges[1]};
-  // const float *histRanges = {range};
-  // cv::Mat _hist;
-  // calcHist(&in_img, 1, (const int *)&channels, mask, _hist, 1, (const int *)&histSize, &histRanges, uniform, accumulate);
-  // for (int i = 0; i < histSize; i++)
-  // {
-  //   return_val.append(_hist.at<float>(i));
-  // }
-  return return_val;
-}
-
 py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, int co)
 {
   py::list return_val;
-  cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+  cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
   cv::Mat in_img;
   src.copyTo(in_img);
-
   critical = critical > 100 ? 100 : critical;
   critical = critical < 0 ? 0 : critical;
-
   cv::Rect rect;
   rect.x = roi[0];
   rect.y = roi[1];
@@ -118,7 +29,6 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
   lab_img = in_img(rect);
   std::vector<cv::Mat> lab_planes;
   split(lab_img, lab_planes);
-
   int histSize = 256;
   float range[] = {0, 256};
   const float *histRanges = range;
@@ -126,7 +36,6 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
   calcHist(&lab_planes[0], 1, 0, cv::Mat(), l_hist, 1, &histSize, &histRanges, true, false);
   calcHist(&lab_planes[1], 1, 0, cv::Mat(), a_hist, 1, &histSize, &histRanges, true, false);
   calcHist(&lab_planes[2], 1, 0, cv::Mat(), b_hist, 1, &histSize, &histRanges, true, false);
-
   float lmax = 0, lnum = 0;
   float amax = 0, anum = 0;
   float bmax = 0, bnum = 0;
@@ -155,22 +64,17 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
     return_val.append(lnum);
     return_val.append(anum);
     return_val.append(bnum);
-    // return_val.append(int(max_lnum * 100 / 255));
-    // return_val.append(max_anum - 128);
-    // return_val.append(max_bnum - 128);
     return return_val;
   }
   break;
   case 1: //lab
   {
-
     cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
     cv::Mat lab;
     cvtColor(rgb, lab, cv::COLOR_RGB2Lab);
     lnum = lab.at<cv::Vec3b>(0, 0)[0];
     anum = lab.at<cv::Vec3b>(0, 0)[1];
     bnum = lab.at<cv::Vec3b>(0, 0)[2];
-
     int min_lnum = int(lnum - critical);
     min_lnum = min_lnum < 0 ? 0 : min_lnum;
     int max_lnum = int(lnum + critical);
@@ -194,14 +98,12 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
   break;
   case 2: //hsv
   {
-
     cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
     cv::Mat lab;
     cvtColor(rgb, lab, cv::COLOR_RGB2HSV);
     lnum = lab.at<cv::Vec3b>(0, 0)[0];
     anum = lab.at<cv::Vec3b>(0, 0)[1];
     bnum = lab.at<cv::Vec3b>(0, 0)[2];
-
     int min_lnum = int(lnum - critical);
     min_lnum = min_lnum < 0 ? 0 : min_lnum;
     int max_lnum = int(lnum + critical);
@@ -224,23 +126,19 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
   }
   break;
   default:
-
     break;
   }
   return return_val;
 }
-
-py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi,
-                                              int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin,
-                                              int tilt, int co)
+py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co)
 {
   py::list return_val;
-  cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+  cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
   cv::Mat in_img;
   src.copyTo(in_img);
   cv::Mat lab, mask1;
   bool grasy = 0;
-  switch (co) //转换颜色空间以及颜色阈值
+  switch (co)
   {
   case 0: //rgb
     if (in_img.channels() != 3)
@@ -313,7 +211,7 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
     }
     grasy = 1;
     break;
-  default: //不在颜色阈值内,返回
+  default:
     return return_val;
     break;
   }
@@ -322,7 +220,7 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
   {
     for (size_t i = 0; i < thresholds.size(); i++)
     {
-      cv::inRange(lab, cv::Scalar(thresholds[i][0]), cv::Scalar(thresholds[i][1]), mask1); //分割通道,阈值化
+      cv::inRange(lab, cv::Scalar(thresholds[i][0]), cv::Scalar(thresholds[i][1]), mask1);
       mask = mask + mask1;
     }
   }
@@ -330,26 +228,24 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
   {
     for (size_t i = 0; i < thresholds.size(); i++)
     {
-      cv::inRange(lab, cv::Scalar(thresholds[i][0], thresholds[i][1], thresholds[i][2]), cv::Scalar(thresholds[i][3], thresholds[i][4], thresholds[i][5]), mask1); //分割通道,阈值化
+      cv::inRange(lab, cv::Scalar(thresholds[i][0], thresholds[i][1], thresholds[i][2]), cv::Scalar(thresholds[i][3], thresholds[i][4], thresholds[i][5]), mask1);
       mask = mask + mask1;
     }
   }
-  if (invert) //是否反转图像
+  if (invert)
   {
     cv::bitwise_not(mask, mask);
   }
-
-  cv::Mat se = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(x_stride, y_stride), cv::Point(-1, -1)); //开运算,去除噪点
+  cv::Mat se = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(x_stride, y_stride), cv::Point(-1, -1));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, se);
   if (margin != 0)
   {
-    cv::Mat se_t = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(margin, margin), cv::Point(-1, -1)); //闭运算,链接相邻比较近的色块
+    cv::Mat se_t = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(margin, margin), cv::Point(-1, -1));
     cv::morphologyEx(mask, mask, cv::MORPH_CLOSE, se_t);
   }
-
   std::vector<std::vector<cv::Point>> contours;
   std::vector<cv::Vec4i> hiearchy;
-  cv::findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE); //查找最小矩形轮廓
+  cv::findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
   if (contours.size() == 0)
   {
     return return_val;
@@ -358,10 +254,6 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
   {
     py::dict val;
     cv::Rect rects = cv::boundingRect(contours[i]);
-    val["x"] = int(rects.x);
-    val["y"] = int(rects.y);
-    val["w"] = int(rects.width);
-    val["h"] = int(rects.height);
     if (int(rects.width) * int(rects.width) < area_threshold)
     {
       continue;
@@ -370,20 +262,22 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
     {
       continue;
     }
+    val["x"] = int(rects.x);
+    val["y"] = int(rects.y);
+    val["w"] = int(rects.width);
+    val["h"] = int(rects.height);
     val["pixels"] = int(cv::contourArea(contours[i]));
-
     val["cx"] = int(rects.x + rects.width / 2);
     val["cy"] = int(rects.y + rects.height / 2);
-
-    if (tilt) //是否需要最小包裹矩形轮廓
+    if (tilt)
     {
       cv::RotatedRect minRect = cv::minAreaRect(contours[i]);
       cv::Point2f rect_points[4];
       minRect.points(rect_points);
       py::tuple tmp3 = py::make_tuple(rect_points[0].x, rect_points[0].y, rect_points[1].x, rect_points[1].y, rect_points[2].x, rect_points[2].y, rect_points[3].x, rect_points[3].y);
       val["tilt_Rect"] = tmp3;
-      int tmp1 = this->Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
-      int tmp2 = this->Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
+      int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
+      int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
       float x1, y1, k;
       if (tmp1 > tmp2)
       {
@@ -403,15 +297,14 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
   }
   return return_val;
 }
-
 py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
 {
   py::list out;
-  cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+  cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
   cv::Mat in_img;
   src.copyTo(in_img);
   cv::Mat hsv, mask;
-  switch (co) //转换颜色空间以及颜色阈值
+  switch (co)
   {
   case 0: //rgb
     if (in_img.channels() != 3)
@@ -440,12 +333,11 @@ py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds,
     thresholds[4] = int(thresholds[4] * 2.55);
     thresholds[5] = int(thresholds[5] * 2.55);
     break;
-  default: //不在颜色阈值内,返回
+  default:
     return out;
     break;
   }
   cv::inRange(hsv, cv::Scalar(thresholds[0], thresholds[1], thresholds[2]), cv::Scalar(thresholds[3], thresholds[4], thresholds[5]), mask);
-  // cout << hsv_da <<endl;
   cv::Mat se = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5), cv::Point(-1, -1));
   cv::morphologyEx(mask, mask, cv::MORPH_OPEN, se);
   std::vector<std::vector<cv::Point>> contours;
@@ -453,23 +345,20 @@ py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds,
   cv::findContours(mask, contours, hiearchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
   for (size_t i = 0; i < contours.size(); i++)
   {
-    // 当拟合点数少于6个时，不进行拟合
     if (contours[i].size() < 6)
     {
-      break;
+      continue;
     }
-    // 圆拟合
     cv::RotatedRect rrt = fitEllipse(contours[i]);
     int cr_x, cr_y, cr_w, cr_h;
     cr_x = rrt.center.x;
     cr_y = rrt.center.y;
     cr_w = rrt.size.width;
     cr_h = rrt.size.height;
-    // 当图形长宽相差太大 或者 图形面积太小时，不进行处理
     if ((abs(cr_w - cr_h) > 10) ||
         (cr_w * cr_h) < 400)
     {
-      break;
+      continue;
     }
     py::list tmp;
     tmp.append(cr_x);
@@ -478,10 +367,97 @@ py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds,
     tmp.append(cr_h);
     out.append(tmp);
   }
-
   return out;
 }
+#define heigh_t 10
+py::dict find_line_old(cv::Mat &src)
+{
+  cv::Mat src_gray, dst;
+  py::dict return_val;
+  cv::Mat in_img = src;
+  cv::Mat src_gary, mask;
+  cv::cvtColor(in_img, src_gray, cv::COLOR_RGB2GRAY); //将图片变成灰度图
+  cv::Mat element = getStructuringElement(cv::MORPH_RECT, cv::Size(5, 5));
+  cv::erode(src_gray, src_gray, element);
+  cv::dilate(src_gray, src_gray, element);
+  cv::threshold(src_gray, src_gray, 0, 255, cv::THRESH_BINARY | cv::THRESH_OTSU);
+  cv::dilate(src_gray, dst, element); //膨胀
+  cv::Rect rect;
+  rect.x = 0;
+  rect.y = 0;
+  rect.width = dst.cols;
+  rect.height = heigh_t;
+  dst(rect).setTo(255);
+  rect.x = 0;
+  rect.y = dst.rows - heigh_t;
+  rect.width = dst.cols;
+  rect.height = heigh_t;
+  dst(rect).setTo(255);
+  rect.x = 0;
+  rect.y = 0;
+  rect.width = heigh_t;
+  rect.height = dst.rows;
+  dst(rect).setTo(255);
+  rect.x = dst.cols - heigh_t;
+  rect.y = 0;
+  rect.width = heigh_t;
+  rect.height = dst.rows;
+  dst(rect).setTo(255);
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+  cv::findContours(dst, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE, cv::Point());
+  if (contours.size() == 0)
+  {
 
+    return std::move(return_val);
+  }
+  int area = 0, a_n = 0;
+  for (size_t i = 1; i < contours.size(); i++)
+  {
+    int ar = contourArea(contours[i]);
+    if (ar > area)
+    {
+      area = ar;
+      a_n = i;
+    }
+  }
+  cv::RotatedRect minRect = cv::minAreaRect(contours[a_n]);
+  cv::Point2f rect_points[4];
+  minRect.points(rect_points);
+  py::list tmps;
+  tmps.append(int(rect_points[0].x));
+  tmps.append(int(rect_points[0].y));
+  tmps.append(int(rect_points[1].x));
+  tmps.append(int(rect_points[1].y));
+  tmps.append(int(rect_points[2].x));
+  tmps.append(int(rect_points[2].y));
+  tmps.append(int(rect_points[3].x));
+  tmps.append(int(rect_points[3].y));
+  return_val["rect"] = tmps;
+  return_val["pixels"] = area;
+  int cx, cy;
+  cx = int((((rect_points[0].x - rect_points[1].x) + (rect_points[2].x - rect_points[1].x)) / 2) + rect_points[1].x);
+  cy = int((((rect_points[0].y - rect_points[1].y) + (rect_points[2].y - rect_points[1].y)) / 2) + rect_points[1].y);
+  return_val["cx"] = cx;
+  return_val["cy"] = cy;
+  int tmp1 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[1].x), int(rect_points[1].y));
+  int tmp2 = Distance(int(rect_points[0].x), int(rect_points[0].y), int(rect_points[3].x), int(rect_points[3].y));
+  float x1, y1, k;
+  if (tmp1 > tmp2)
+  {
+    x1 = rect_points[1].x - rect_points[0].x;
+    y1 = rect_points[1].y - rect_points[0].y;
+    k = atan(y1 / x1);
+  }
+  else
+  {
+    x1 = rect_points[3].x - rect_points[0].x;
+    y1 = rect_points[3].y - rect_points[0].y;
+    k = atan(y1 / x1);
+  }
+  return_val["rotation"] = k;
+  return std::move(return_val);
+}
 enum adaptiveMethod
 {
   meanFilter,
@@ -509,10 +485,7 @@ void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, d
   default:
     break;
   }
-
   smooth = smooth - c;
-
-  //阈值处理
   src.copyTo(dst);
   for (int r = 0; r < src.rows; ++r)
   {
@@ -530,12 +503,16 @@ void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, d
     }
   }
 }
-#define heigh_t 10
-py::dict maix_version::find_line()
+
+py::dict maix_version::find_line(int func)
 {
+  cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+  if (func == 0)
+  {
+    return find_line_old(src);
+  }
   py::dict return_val;
   cv::Mat src_gray, dst;
-  cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
   cv::Mat in_img;
   src.copyTo(in_img);
   // cv::imwrite("/tmp/src.jpg", in_img);
@@ -625,39 +602,5 @@ py::dict maix_version::find_line()
     k = atan(y1 / x1);
   }
   return_val["rotation"] = k;
-  return return_val;
-}
-
-py::object maix_version::_maix_vision_get_histogram(std::vector<std::vector<int>> &thresholds, bool invert, std::vector<int> &roi, int bins, std::vector<int> size, int mode)
-{
-  py::list return_val;
-  // cv::Mat in_img;
-  // this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
-  // cv::Rect rect;
-  // if (roi[2] != 0 && roi[3] != 0)
-  // {
-  //   rect.x = roi[0];
-  //   rect.y = roi[1];
-  //   rect.width = roi[2];
-  //   rect.height = roi[3];
-  // }
-  // else
-  // {
-  //   rect.x = 0;
-  //   rect.y = 0;
-  //   rect.width = in_img.size[0];
-  //   rect.height = in_img.size[1];
-  // }
-  // cv::Mat mask = cv::Mat::zeros(in_img.size(), CV_8UC1);
-  // mask(rect).setTo(255);
-  // // vector<float> ranges1;
-  // // float range[] = {ranges[0], ranges[1]};
-  // // const float *histRanges = {range};
-  // // cv::Mat _hist;
-  // // calcHist(&in_img, 1, (const int*)&channels, mask, _hist, 1, (const int*)&histSize, &histRanges, uniform, accumulate);
-  // // for(int i=0;i<histSize;i++)
-  // // {
-  // //   return_val.append(_hist.at<float>(i));
-  // // }
   return return_val;
 }

@@ -13,22 +13,25 @@
 # //          mode              图像的格式(非必须,默认vision.COLOR_RGB)
 # //返回值：
 # //          返回边缘检测函数后的图像,图像格式和输入保持一致；
-# //修改记录：
+# //修改记录：2021年11月17日,删除了该函数的实现,以后需要可以考虑加上
 # //==================================================================
 
 
+import signal
 from maix import camera, display, Image
 import time
-camera.config(size=(240,240))
+camera.config(size=(240, 240))
 
-import signal
+
 def handle_signal_z(signum, frame):
-        print("APP OVER")
-        exit(0)
+    print("APP OVER")
+    exit(0)
+
+
 signal.signal(signal.SIGINT, handle_signal_z)
 
 
 while True:
-        img = camera.get_image()
-        img.cv_Canny(50,50)
-        img.show()
+    img = camera.get_image()
+    img.cv_Canny(50, 50)
+    img.show()

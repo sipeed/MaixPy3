@@ -300,6 +300,184 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         Py_DECREF(keys_outputs);
         /* load by libmaix API end */
     }
+    else if (strcmp(model_type, "normal") == 0)
+    {
+        /*load by libmaix R329 AIP */
+        PyObject *o_inputs = PyDict_GetItemString(o_opt, "inputs");
+        if(!o_inputs || !PyDict_Check(o_inputs))
+        {
+            PyErr_SetString(PyExc_ValueError, "arg opt need inputs key, value is dict");
+            return -1;
+        }
+        Py_ssize_t inputs_len = PyDict_Size(o_inputs);
+        self->inputs = o_inputs;
+        PyObject *o_outputs = PyDict_GetItemString(o_opt, "outputs");
+        if(!o_outputs || !PyDict_Check(o_outputs))
+        {
+            PyErr_SetString(PyExc_ValueError, "arg opt need outputs key, value is dict");
+            return -1;
+        }
+        Py_ssize_t outputs_len = PyDict_Size(o_outputs);
+        self->outputs = o_outputs;
+        PyObject *o_mean = PyDict_GetItemString(o_opt, "mean");
+        if(!o_mean || !(PyFloat_Check(o_mean) || (PyList_Check(o_mean) && (PyList_Size(o_mean)==3 || PyList_Size(o_mean)==1))))
+        {
+            PyErr_SetString(PyExc_ValueError, "arg opt need mean key, value is float or list");
+            return -1;
+        }
+        PyObject *o_norm = PyDict_GetItemString(o_opt, "norm");
+        if(!o_norm || !(PyFloat_Check(o_norm) || (PyList_Check(o_norm) && (PyList_Size(o_norm)==3 || PyList_Size(o_norm)==1))))
+        {
+            PyErr_SetString(PyExc_ValueError, "arg opt need norm key, value is float or list");
+            return -1;
+        }
+
+        // PyObject *o_param_path = PyDict_GetItemString(o_model_path, "param");
+        // if(!o_param_path || !PyUnicode_Check(o_param_path))
+        // {
+        //     PyErr_SetString(PyExc_ValueError, "arg model_path need param key, value is str");
+        //     return -1;
+        // }
+        PyObject *o_bin_path = PyDict_GetItemString(o_model_path, "bin");
+        if(!o_bin_path || !PyUnicode_Check(o_bin_path))
+        {
+            PyErr_SetString(PyExc_ValueError, "arg model_path need bin key, value is str");
+            return -1;
+        }
+
+        Py_INCREF(self->inputs);
+        Py_INCREF(self->outputs);
+
+        /* load by libmaix API */
+        libmaix_nn_module_init();
+        libmaix_nn_model_path_t model_path = {
+            .normal.model_path = (char*)PyUnicode_DATA(o_bin_path),
+        };
+
+
+        // encrypted model?
+        bool encrypt = false;
+        PyObject *o_encrypt = PyDict_GetItemString(o_opt, "encrypt");
+        if(o_encrypt)
+        {
+            if(PyLong_AsLong(o_encrypt))
+            {
+                encrypt = true;
+            }
+        }
+        int inputs_id[inputs_len];
+        int outputs_id[outputs_len];
+        char* inputs_names[inputs_len];
+        char* outputs_names[outputs_len];
+        PyObject* keys_inputs = PyDict_Keys(o_inputs);
+        PyObject* keys_outputs = PyDict_Keys(o_outputs);
+        PyObject* temp = NULL;
+        for(Py_ssize_t i=0; i<inputs_len; ++i)
+        {
+            temp = PyList_GetItem(keys_inputs, i);
+            if(PyLong_Check(temp))
+            {
+                encrypt = true;
+                inputs_id[i] = PyLong_AsLong(temp);
+            }
+            else
+            {
+                inputs_names[i] = (char*)PyUnicode_DATA(temp);
+            }
+        }
+        for(Py_ssize_t i=0; i<outputs_len; ++i)
+        {
+            temp = PyList_GetItem(keys_outputs, i);
+            if(PyLong_Check(temp))
+            {
+                encrypt = true;
+                outputs_id[i] = PyLong_AsLong(temp);
+            }
+            else
+            {
+                outputs_names[i] = (char*)PyUnicode_DATA(temp);
+            }
+        }
+        libmaix_nn_opt_param_t opt_param = {
+            .normal.input_names             = NULL,
+            .normal.output_names            = NULL,
+            .normal.input_num               = inputs_len,               // len(input_names)
+            .normal.output_num              = outputs_len,              // len(output_names)
+            .normal.mean                    = {127.5, 127.5, 127.5},
+            .normal.norm                    = {0.0078125, 0.0078125, 0.0078125},
+        };
+        if(!encrypt)
+        {
+            opt_param.normal.input_names             = inputs_names;
+            opt_param.normal.output_names            = outputs_names;
+            opt_param.normal.encrypt = false;
+        }
+        else
+        {
+            opt_param.normal.input_ids             = inputs_id;
+            opt_param.normal.output_ids            = outputs_id;
+            opt_param.normal.encrypt = true;
+        }
+        if(PyFloat_Check(o_mean))
+        {
+            opt_param.normal.mean[0] = (float)PyFloat_AsDouble(o_mean);
+            opt_param.normal.mean[1] = opt_param.normal.mean[0];
+            opt_param.normal.mean[2] = opt_param.normal.mean[0];
+        }
+        else
+        {
+            Py_ssize_t i=0;
+            for(; i<PyList_Size(o_mean); ++i)
+            {
+                opt_param.normal.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
+            }
+            for(Py_ssize_t j=i; j<3; ++j)
+            {
+                opt_param.normal.mean[j] = opt_param.normal.mean[i-1];
+            }
+        }
+        if(PyFloat_Check(o_norm))
+        {
+            opt_param.normal.norm[0] = (float)PyFloat_AsDouble(o_norm);
+            opt_param.normal.norm[1] = opt_param.normal.norm[0];
+            opt_param.normal.norm[2] = opt_param.normal.norm[0];
+        }
+        else
+        {
+            Py_ssize_t i=0;
+            for(; i<PyList_Size(o_norm); ++i)
+            {
+                opt_param.normal.norm[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_norm, i));
+            }
+            for(Py_ssize_t j=i; j<3; ++j)
+            {
+                opt_param.normal.norm[j] = opt_param.normal.norm[i-1];
+            }
+        }
+        self->inputs_len = inputs_len;
+        self->outputs_len = outputs_len;
+        self->nn = libmaix_nn_create();
+        if(!self->nn)
+        {
+            PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");
+            goto end;
+        }
+        err = self->nn->init(self->nn);
+        if(err != LIBMAIX_ERR_NONE)
+        {
+            PyErr_Format(PyExc_Exception, "libmaix_nn init fail: %s\n", libmaix_get_err_msg(err));
+            goto end;
+        }
+        err = self->nn->load(self->nn, &model_path, &opt_param);
+        if(err != LIBMAIX_ERR_NONE)
+        {
+            PyErr_Format(PyExc_Exception, "libmaix_nn load fail: %s\n", libmaix_get_err_msg(err));
+            goto end;
+        }
+        Py_DECREF(keys_inputs);
+        Py_DECREF(keys_outputs);
+    }
+
     else
     {
         PyErr_SetString(PyExc_ValueError, "now model_type only support awnn");
@@ -344,7 +522,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     }
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     PyObject *o_inputs = NULL;
-    const char* layout_str = "chw";
+    const char* layout_str = "hwc";
     int quantize = 1;
     int debug = 0;
     static char *kwlist[] = {"inputs", "quantize", "layout", "debug", NULL};
@@ -365,8 +543,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         PyErr_SetString(PyExc_NotImplementedError, "not support multiple input yet");
         return NULL;
     }
-    libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
-
+    libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     if(strcmp(layout_str, "hwc") == 0)
     {
         outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
@@ -425,7 +602,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         .w = input_w,
         .h = input_h,
         .c = input_c,
-        .dtype = (quantize == 0 ? LIBMAIX_NN_DTYPE_INT8 : LIBMAIX_NN_DTYPE_UINT8),
+        .dtype = (quantize == 1 ? LIBMAIX_NN_DTYPE_INT8 : LIBMAIX_NN_DTYPE_UINT8),
         .data = input_bytes,
         .need_quantization = (quantize == 0 ? false : true),
         .buff_quantization = NULL

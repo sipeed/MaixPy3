@@ -401,6 +401,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             return NULL;
         }
         o_input_bytes_need_free = true;
+        Py_DECREF(o_inputs);
     }
     else
     {
@@ -518,8 +519,10 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         interval_s  =(int64_t)(end.tv_sec - start.tv_sec)*1000000ll + end.tv_usec - start.tv_usec;
         printf("forward use time: %lld us\n", interval_s);
     }
-    PyObject* result = NULL;
-    PyObject* o_result_numpy2 = NULL;
+
+    PyObject* result = Py_None;
+    PyObject* o_result_numpy2 = Py_None;
+
     if(self->outputs_len > 1)
     {
         result = PyList_New(0);
@@ -529,10 +532,14 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
         PyObject *call_args = Py_BuildValue("(O)", result_bytes);
         PyObject *call_keywords = PyDict_New();
-        PyDict_SetItemString(call_keywords, "dtype", PyUnicode_FromString("float32"));
-        PyObject* o_result_numpy = PyObject_Call(PyObject_GetAttrString(self->m_numpy, "frombuffer"), call_args, call_keywords);
-        Py_DECREF(call_args);
+        PyObject *tmp = PyUnicode_FromString("float32");
+        PyDict_SetItemString(call_keywords, "dtype", tmp);
+        PyObject* o_frombuffer = PyObject_GetAttrString(self->m_numpy, "frombuffer");
+        PyObject* o_result_numpy = PyObject_Call(o_frombuffer, call_args, call_keywords);
+        Py_DECREF(o_frombuffer);
+        Py_DECREF(tmp);
         Py_DECREF(call_keywords);
+        Py_DECREF(call_args);
         Py_DECREF(result_bytes);
         if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
         {
@@ -543,12 +550,14 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
         }
         Py_DECREF(o_result_numpy);
-        if(!result)
+        if(result == Py_None)
         {
             result = o_result_numpy2;
+            // Py_DECREF(o_result_numpy2);
             break;
         }
         PyList_Append(result, o_result_numpy2);
+        Py_DECREF(o_result_numpy2);
     }
     if(out_fmap)
         free(out_fmap);

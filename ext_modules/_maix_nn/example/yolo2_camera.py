@@ -21,12 +21,13 @@ def draw_rectangle_with_title(draw, box, disp_str, bg_color=(255, 0, 0, 255), fo
 camera.config(size=(224, 224))
 
 model = {
-    "param": "/root/models/yolo2_face_awnn.param",
-    "bin": "/root/models/yolo2_face_awnn.bin"
+    # "param": "/root/models/yolo2_face_awnn.param",
+    # "bin": "/root/models/yolo2_face_awnn.bin"
+    "bin":"/root/dections/yolo2.bin"
 }
 
 options = {
-    "model_type":  "awnn",
+    "model_type":  "normal",
     "inputs": {
         "input0": (224, 224, 3)
     },
@@ -57,7 +58,7 @@ while 1:
         time.sleep(0.01)
         continue
     t = time.time()
-    out = m.forward(img, quantize=True, layout="hwc")
+    out = m.forward(img.tobytes(), quantize=True, layout="hwc")
     print("-- forward: ", time.time() - t )
 
     t = time.time()

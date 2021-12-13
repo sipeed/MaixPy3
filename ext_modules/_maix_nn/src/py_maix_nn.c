@@ -1,7 +1,7 @@
 
 #include "py_maix_nn.h"
-#include "py_maix_nn_classifier.h"
-#include "py_maix_nn_FaceRecognize.h"
+// #include "py_maix_nn_classifier.h"
+// #include "py_maix_nn_FaceRecognize.h"
 
 #include "string.h"
 #include "libmaix_nn.h"
@@ -48,6 +48,7 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
     PyDict_SetItemString(call_keywords, "opt", opt);
     PyObject *o_init_func = PyObject_GetAttrString(model_obj, "__init__");
     PyObject* ret = PyObject_Call(o_init_func, call_args, call_keywords);
+    // Py_DECREF(opt);
     Py_DECREF(call_args);
     Py_DECREF(call_keywords);
     Py_DECREF(o_init_func);
@@ -94,37 +95,37 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
     if (PyType_Ready(&PyMaix_NN_Model_Type) < 0) {
         return NULL;
     }
-    if (PyType_Ready(&PyMaix_NN_Decoder_Yolo2_Type) < 0) {
-        return NULL;
-    }
-    if (PyType_Ready(&PyMaix_NN_app_Classifier_Type) < 0) {
-        return NULL;
-    }
-    if (PyType_Ready(&PyMaix_NN_app_FaceRecognize_Type) < 0) {
-        return NULL;
-    }
+    // if (PyType_Ready(&PyMaix_NN_Decoder_Yolo2_Type) < 0) {
+    //     return NULL;
+    // }
+    // if (PyType_Ready(&PyMaix_NN_app_Classifier_Type) < 0) {
+    //     return NULL;
+    // }
+    // if (PyType_Ready(&PyMaix_NN_app_FaceRecognize_Type) < 0) {
+    //     return NULL;
+    // }
 
     /* Add maix.nn.F module*/
-    PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);    
+    PyObject *functional_module = PyModule_Create(&maix_nn_functional_module);
     PyModule_AddObject(module, "F", functional_module);
     Py_INCREF(functional_module);
     PyModule_AddObject(module, "functional", functional_module);
 
-    /* Add maix.nn.decoder module,
-       add maix.nn.decoder.Yolo2 class*/
-    PyObject *decoder_module = PyModule_Create(&maix_nn_decoder_module);
-    Py_INCREF(&PyMaix_NN_Decoder_Yolo2_Type);
-    PyModule_AddObject(decoder_module, "Yolo2", (PyObject*)&PyMaix_NN_Decoder_Yolo2_Type);
-    PyModule_AddObject(module, "decoder", decoder_module);
+    // /* Add maix.nn.decoder module,
+    //    add maix.nn.decoder.Yolo2 class*/
+    // PyObject *decoder_module = PyModule_Create(&maix_nn_decoder_module);
+    // Py_INCREF(&PyMaix_NN_Decoder_Yolo2_Type);
+    // PyModule_AddObject(decoder_module, "Yolo2", (PyObject*)&PyMaix_NN_Decoder_Yolo2_Type);
+    // PyModule_AddObject(module, "decoder", decoder_module);
 
-    /* Add maix.nn._app module,
-       add maix.nn._app.classifier class*/
-    PyObject *app_module = PyModule_Create(&maix_nn_app_module);
-    Py_INCREF(&PyMaix_NN_app_Classifier_Type);
-    PyModule_AddObject(app_module, "Classifier", (PyObject*)&PyMaix_NN_app_Classifier_Type);
-    Py_INCREF(&PyMaix_NN_app_FaceRecognize_Type);
-    PyModule_AddObject(app_module, "FaceRecognize", (PyObject*)&PyMaix_NN_app_FaceRecognize_Type);
-    PyModule_AddObject(module, "_app", app_module);
+    // /* Add maix.nn._app module,
+    //    add maix.nn._app.classifier class*/
+    // PyObject *app_module = PyModule_Create(&maix_nn_app_module);
+    // Py_INCREF(&PyMaix_NN_app_Classifier_Type);
+    // PyModule_AddObject(app_module, "Classifier", (PyObject*)&PyMaix_NN_app_Classifier_Type);
+    // Py_INCREF(&PyMaix_NN_app_FaceRecognize_Type);
+    // PyModule_AddObject(app_module, "FaceRecognize", (PyObject*)&PyMaix_NN_app_FaceRecognize_Type);
+    // PyModule_AddObject(module, "_app", app_module);
 
     return module;
 }

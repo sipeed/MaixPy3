@@ -71,7 +71,7 @@ static int decoder_yolo2_init(DecoderYolo2Object *self, PyObject *args, PyObject
     }
     libmaix_err_t err = LIBMAIX_ERR_NONE;
     static char *kwlist[] = {"class_num", "anchors", "net_in_size", "net_out_size", NULL};
-
+    
     PyObject *anchors        = NULL;
     PyObject *net_in_zie     = NULL;
     PyObject *net_out_zie     = NULL;
@@ -260,7 +260,10 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
                     uint32_t w  = (uint32_t)(b->w * self->config.input_width);
                     uint32_t h  = (uint32_t)(b->h * self->config.input_height);
                     PyObject* box = PyList_New(4);
-                    PyList_SetItem(box, 0, PyLong_FromLong(x1));
+                    PyObject* tmp_o = PyLong_FromLong(x1);
+                    printf("yinyong1 :%d \r\n",tmp_o->ob_refcnt);
+                    PyList_SetItem(box, 0, tmp_o);
+                    printf("yinyong2 :%d \r\n",tmp_o->ob_refcnt);
                     PyList_SetItem(box, 1, PyLong_FromLong(y1));
                     PyList_SetItem(box, 2, PyLong_FromLong(w));
                     PyList_SetItem(box, 3, PyLong_FromLong(h));
@@ -280,15 +283,15 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
                 PyObject* o_probs = PyList_New(0);
                 for(uint32_t j=0; j<self->config.classes_num; ++j)
                 {
-                  // PyList_Append(o_probs, PyFloat_FromDouble(yolo2_result.probs[i][j]));
-                  PyObject *tmp = PyFloat_FromDouble(yolo2_result.probs[i][j]);
-                  PyList_Append(o_probs, tmp);
-                  Py_DECREF(tmp);
+                    PyObject* tmp_o = PyFloat_FromDouble(yolo2_result.probs[i][j]);
+                    PyList_Append(o_probs, tmp_o);
+                    Py_DECREF(tmp_o);
                 }
                 PyObject* o_probs_item = PyList_New(2);
                 PyList_SetItem(o_probs_item, 0, PyLong_FromLong(class_id));
                 PyList_SetItem(o_probs_item, 1, o_probs);
                 PyList_Append(probs, o_probs_item);
+                // Py_DECREF(o_probs);
                 Py_DECREF(o_probs_item);
             }
         }

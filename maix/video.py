@@ -20,14 +20,19 @@ class MaixVideo():
         pass
 
     def capture(self, pillow=False):
-        from PIL import Image
-        from maix import image
         tmp = self.read()
         if tmp:
-            if pillow:
+            try:
+                if pillow == False:
+                    from maix import image
+                    return image.Image().load(tmp, (self._width, self._height), "RGB")
+            except Exception as e:
+                pass
+            try:
+                from PIL import Image
                 return Image.frombytes("RGB", (self._width, self._height), tmp)
-            else:
-                return image.Image().load(tmp, (self._width, self._height), "RGB")
+            except Exception as e:
+                pass
         return None
 
     def close(self):

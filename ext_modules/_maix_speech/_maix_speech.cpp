@@ -61,8 +61,15 @@ struct maix_asr
     // printf("_asr_digit_cb: %s\n", std::string(py::str(maix_asr::py_asr_digit_cb)).c_str());
     if (py::isinstance<py::function>(maix_asr::py_asr_digit_cb))
     {
-      // ((char *)data)[len] = '\0';
-      maix_asr::py_asr_digit_cb(string((const char *)data));
+      try
+      {
+        // ((char *)data)[len] = '\0';
+        maix_asr::py_asr_digit_cb(string((const char *)data));
+      }
+      catch(const py::error_already_set& e)
+      {
+          // py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
+      }
     }
     return;
   }
@@ -95,7 +102,14 @@ struct maix_asr
       float *nums = (float *)data;
       for (int i = 0; i < len; i++)
         tmps.append(nums[i]);
-      maix_asr::py_asr_kws_cb(tmps);
+      try
+      {
+          maix_asr::py_asr_kws_cb(tmps);
+      }
+      catch(const py::error_already_set& e)
+      {
+          // py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
+      }
     }
   }
 
@@ -160,7 +174,15 @@ struct maix_asr
   {
     if ((py::isinstance<py::function>(maix_asr::py_asr_lvcsr_cb)))
     {
-      maix_asr::py_asr_lvcsr_cb(string((const char *)((char **)data)[0]), string((const char *)((char **)data)[1]));
+
+      try
+      {
+          maix_asr::py_asr_lvcsr_cb(string((const char *)((char **)data)[0]), string((const char *)((char **)data)[1]));
+      }
+      catch(const py::error_already_set& e)
+      {
+          // py::module::import("traceback").attr("print_exception")(e.type(), e.value(), e.trace());
+      }
     }
     return;
   }

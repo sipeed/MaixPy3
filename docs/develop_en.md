@@ -73,7 +73,7 @@ your x86
 
 your v83x
 
-- source /opt/v83x/envsetup.sh
+- source /opt/v83x_linux_x86_python3.8_toolchain/envsetup.sh
 
 - python3.8 setup.py build maix_v83x
 

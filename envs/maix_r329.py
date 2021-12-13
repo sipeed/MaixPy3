@@ -11,10 +11,13 @@ libi2c_module = Extension('pylibi2c',  include_dirs=[
 
 ext_so = "./ext_modules/libmaix/components/libmaix/lib/arch/r329"
 _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ext_modules/libmaix/components/libmaix/include'],
-                        sources=get_srcs('ext_modules/_maix'),
-                        libraries=[
-                            "jpeg"
-                        ],
+    sources=get_srcs('ext_modules/_maix'),
+    libraries=[
+        "jpeg"
+    ],
+    extra_link_args=[
+        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/",
+    ],
 )
 
 # python3.8 -m pip install pybind11
@@ -105,18 +108,27 @@ _maix_display_module = Pybind11Extension(
     ],
 )
 
-# max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
-# max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
-# max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
-# _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
-#                             sources=max_nn_srcs,
-#                             libraries=[
-#     "maix_utils", "maix_nn",
-# ],
-#     library_dirs=["/lib",  "/usr/lib", ext_so, ],
-#     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
-#     extra_link_args=[-Wl,-rpath=/usr/lib/python3.8/site-packages/maix -DR329]
-# )
+max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
+max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
+max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
+max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn_app.c")
+max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn_app_classifier.c")
+max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn_app_FaceRecognize.c")
+max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn_decoder_yolo2.c")
+max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn_decoder.c")
+# max_nn_srcs.remove("ext_modules/_maix_nn/src/py_maix_nn.c")
+_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
+                            sources=max_nn_srcs,
+                            libraries=[
+    "maix_utils", "maix_nn",
+],
+    library_dirs=[ ext_so, ],
+    # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
+    extra_compile_args=['-std=c++11', '-std=gnu++11' ],
+    extra_link_args=[
+        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix"
+    ],
+)
 
 # python3.8 -m pip install pybind11
 _maix_speech_module = Pybind11Extension("_maix_speech",
@@ -155,7 +167,7 @@ _maix_modules = [
     _maix_image_module,
     _maix_camera_module,
     _maix_display_module,
-    # _maix_nn_module
+    _maix_nn_module
 ]
 
 _maix_data_files = [

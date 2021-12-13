@@ -12,3 +12,9 @@ try:
   __all__.extend(['image'])
 except ModuleNotFoundError as e:
   pass
+
+try:
+  import _maix as utils
+  __all__.extend(['utils'])
+except ModuleNotFoundError as e:
+  pass

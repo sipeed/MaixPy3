@@ -1,24 +1,4 @@
 
-from PIL import Image
-
-# remote jupyter options
-remote, _remote_show, _remote_debug = None, False, False
-
-
-def jupyter(show=False, clear=True, debug=True):
-  try:
-    from maix import mjpg
-    mjpg.clear_mjpg()
-    global remote, _remote_show, _remote_debug
-    _remote_show = show
-    _remote_debug = debug
-    if remote != None:
-      remote.clear_output = clear
-      remote._start_display()
-  except Exception as e:
-    remote = None
-
-
 __width__, __height__, __mode__ = 240, 240, "RGB"
 
 try:
@@ -28,6 +8,7 @@ try:
     __width__, __height__ = __fastview__.width, __fastview__.height
 
     def __draw__(img):
+        from PIL import Image
         global __fastview__
         if isinstance(img, bytes):
           __fastview__.draw(img, __fastview__.width, __fastview__.height)
@@ -45,6 +26,7 @@ __display__ = None
 
 
 def get_display():
+    from PIL import Image
     global __display__
     if __display__ is None:
       global __width__, __height__, __mode__
@@ -69,25 +51,29 @@ def __thumbnail__(src, dst):
 
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
-    global __display__, _remote_show, _remote_debug, __mode__
+    global __display__, __mode__, __width__, __height__
     if img is None:
         img = get_display()
     else:
         get_display()
-    if remote_show and _remote_show:
+
+    if remote_show:
         from maix import mjpg
-        if _remote_debug:
-            for i in range(9):
-                mjpg.store_mjpg(img)
-        else:
-            mjpg.store_mjpg(img)
+        mjpg.store_mjpg(img)
+
     if local_show:
-        import _maix_image
-        if isinstance(img, _maix_image.Image):
-            img = img.tobytes()
+        try:
+            from maix import image
+            if isinstance(img, image.Image):
+                if img.width != __width__ or img.height != __height__:
+                    img = img.resize(__width__, __height__)
+                img = img.tobytes()
+        except ImportError as e:
+          pass
         if __fastview__:
             __draw__(img)  # underlying optimization
         else:
+            from PIL import Image
             if isinstance(img, bytes):
                 img = Image.frombytes(__mode__, box, img)
                 __thumbnail__(img, __display__)

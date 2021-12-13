@@ -1,13 +1,42 @@
+from glob import glob
+from rpyc.core.service import SlaveService
+from rpyc.utils.server import ThreadedServer
+from abc import abstractmethod
+from threading import Thread
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 import time
 import os
 import logging
-import queue
-from glob import glob
-from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
-from threading import Thread
-from abc import abstractmethod
-from rpyc.utils.server import ThreadedServer
-from rpyc.core.service import SlaveService
+# import queue
+
+
+class Queue(object):
+
+    def __init__(self, maxsize):
+        self.__list = []
+        self.maxs = maxsize
+
+    def data(self):
+        return self.__list
+
+    def empty(self):
+        return self.__list == []
+
+    def size(self):
+        return len(self.__list)
+
+    def put(self, item):
+        self.__list.append(item)
+
+    def get(self):
+        if (self.size()):
+          return self.__list.pop(0)
+        return None
+
+    def clear(self):
+        self.__list = []
+
+
 logging.basicConfig(level=logging.WARN)
 
 boundary = '--boundarydonotcross'
@@ -104,7 +133,7 @@ class FileImageHandler(BaseHTTPRequestHandler):
             logging.debug('GET response header: %s = %s' % (k, v))
         self.end_headers()
         # Part binary
-        # logging.debug('GET response image: ' + filename)
+        logging.debug('GET response image: ' + str(Image))
         try:
             for chunk in image.get_byte_generator():
                 self.wfile.write(chunk)
@@ -124,7 +153,7 @@ class FileImageHandler(BaseHTTPRequestHandler):
         return
 
 
-def BytesImageHandlerFactory(q: queue.Queue):
+def BytesImageHandlerFactory(q: Queue):
     class BytesImageHandler(FileImageHandler):
         def __init__(self, request, client_address, server):
             self.queue = q
@@ -133,15 +162,20 @@ def BytesImageHandlerFactory(q: queue.Queue):
         def serve_images(self):
             i = 0
             t_start = time.time()
+            image = None
             try:
                 while True:
-                    image = self.queue.get()
-                    self.serve_image(image)
-                    fps = (i + 1) / (time.time() - t_start)
-                    logging.debug("served image %d, overall fps: %0.3f" %
-                                  (i + 1, fps))
-                    i += 1
+                    if self.queue.empty() == False:
+                        image = self.queue.get()
+                        self.serve_image(image)
+                        logging.debug('queue: ' + str(image))
+                        fps = (i + 1) / (time.time() - t_start)
+                        logging.debug("served image %d, overall fps: %0.3f" %
+                                      (i + 1, fps))
+                        i += 1
             except Exception as e:
+                if (image):
+                  self.queue.put(image)
                 logging.error(e)
 
         def add_image(self, image: Image):
@@ -150,22 +184,46 @@ def BytesImageHandlerFactory(q: queue.Queue):
     return BytesImageHandler
 
 
-def MaixImageHandlerFactory(q: queue.Queue):
+class MaixImage(object):
+
+    def __init__(self):
+        self.img = None
+
+    def put(self, image=None):
+        logging.info('[0]image: (%s)' % (image))
+        self.img = image
+
+    def get(self):
+        return self.img
+
+
+def MaixImageHandlerFactory(img: MaixImage):
     class MaixImageHandler(FileImageHandler):
         def __init__(self, request, client_address, server):
-            self.queue = q
+            self.image = img
+            self.tmp, self.old, self.load = None, None, 1
             super().__init__(request, client_address, server)
 
         def serve_images(self):
+            logging.debug('serve_images: ' + str(self.image))
             try:
                 while True:
-                    image = self.queue.get()
-                    self.serve_image(image)
-            except KeyboardInterrupt as e:
-                pass
-
-        def add_image(self, image: Image):
-            self.queue.put(image)
+                    self.tmp = self.image.get()
+                    # logging.info('[1]image: (%s, %s)' % (self.old, self.tmp))
+                    if (self.tmp != None):
+                        if self.load != 0:
+                            logging.info('[2]image: (%s, %s)' % (self.old, self.tmp))
+                            self.serve_image(self.tmp)
+                            self.load -= 1
+                            continue
+                        if self.old != self.tmp:
+                            logging.info('[3]image: (%s, %s)' % (self.old, self.tmp))
+                            self.serve_image(self.tmp)
+                            self.tmp, self.old = None, self.tmp
+                    time.sleep(0.01)
+            except Exception as e:
+                # [Errno 32] Broken pipe & [Errno 104] Connection reset by peer
+                logging.debug(e)
 
     return MaixImageHandler
 
@@ -191,50 +249,58 @@ class MjpgServerThread(Thread):
       self.server = None
 
 
-HostName, RpycPort, MjpgSrv, MjpgPort, MjpgQueue = '0.0.0.0', 18812, None, 18811, None
+HostName, RpycPort, MjpgSrv, MjpgPort, MjpgImage = '0.0.0.0', 18812, None, 18811, None
 
 
 def clear_mjpg():
-    global MjpgQueue
-    if MjpgQueue:
-        MjpgQueue.queue.clear()
+    global MjpgImage
+    if MjpgImage:
+        MjpgImage.put(None)
 
 
 def store_mjpg(img):
-  global MjpgQueue
-  if MjpgQueue:
-      try:
-          from PIL import Image
-          if isinstance(img, bytes):
-              MjpgQueue.put(BytesImage(img))
-          elif isinstance(img, Image.Image):
-              import _maix
-              if (img.mode == 'RGB'):
-                  frame = _maix.rgb2jpg(img.tobytes(), img.width, img.height)
-              elif (img.mode == 'RGBA'):
-                  frame = _maix.rgb2jpg(img.convert(
-                      "RGB").tobytes(), img.width, img.height)
-              MjpgQueue.put(BytesImage(frame))
-      except KeyboardInterrupt as e:
-          print(e)
+  global MjpgImage
+  if MjpgImage:
+    from maix import utils
+    if isinstance(img, bytes):
+        MjpgImage.put(BytesImage(img))
+        return
+    from maix import image, utils
+    if isinstance(img, image.Image):
+        MjpgImage.put(BytesImage(utils.rgb2jpg(
+            img.tobytes(), img.width, img.height)))
+        return
+    from PIL import Image
+    if isinstance(img, Image.Image):
+        if (img.mode == 'RGB'):
+            frame = utils.rgb2jpg(img.tobytes(), img.width, img.height)
+        elif (img.mode == 'RGBA'):
+            frame = utils.rgb2jpg(img.convert(
+                "RGB").tobytes(), img.width, img.height)
+        MjpgImage.put(BytesImage(frame))
+        return
 
-
-def start_mjpg(size=8):
-  global MjpgSrv, MjpgQueue
+def start_mjpg():
+  global MjpgSrv, MjpgImage
   if MjpgSrv == None or MjpgSrv.is_alive() == False:
-    MjpgQueue = queue.Queue(maxsize=size)
+    # MjpgQueue = Queue(maxsize=size)
+    MjpgImage = MaixImage()
     MjpgSrv = MjpgServerThread(
-        HostName, MjpgPort, BytesImageHandlerFactory(q=MjpgQueue))
+        HostName, MjpgPort, MaixImageHandlerFactory(img=MjpgImage))
     MjpgSrv.start()
-    from maix import display
-    if display.__display__:
-        store_mjpg(display.__display__)
   return MjpgSrv.is_alive()
 
 
-def start(host='0.0.0.0', mjpg=18811, rpyc=18812, debug=False):
-  if debug:
-    logging.getLogger().setLevel(level=logging.DEBUG)
+def start(host='0.0.0.0', mjpg=18811, rpyc=18812, level=0):
+  if level:
+    log = logging.getLogger()
+    console = logging.StreamHandler()
+    formatter = logging.Formatter(
+        '%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+    console.setFormatter(formatter)
+    log.handlers = []
+    log.addHandler(console)
+    log.setLevel(level=level) # logging.DEBUG == 10 INFO 20
 
   global HostName, MjpgPort, RpycPort
   logging.info('start %s %s %s %s' % (__file__, host, mjpg, rpyc))
@@ -327,7 +393,7 @@ if __name__ == '__main__':
           server.start()
       else:
           # from bytes; which could be coming from a bytestream or generated using e.g., opencv
-          image_queue = queue.Queue(maxsize=100)
+          image_queue = Queue(maxsize=100)
           handler_class = BytesImageHandlerFactory(q=image_queue)
           server = MjpgServerThread(HostName, MjpgPort, handler_class)
           server.start()
@@ -362,12 +428,12 @@ if __name__ == '__main__':
     # unit_test_c()
     # test_mjpg html <img src="http://localhost:18811" />
     from maix import camera, mjpg
-    import queue
+    # import queue
     import _maix
 
-    Queue = queue.Queue(maxsize=8)
+    queue = Queue(maxsize=8)
     mjpg.MjpgServerThread(
-        "0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=Queue)).start()
+        "0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=queue)).start()
 
     while True:
         img = camera.capture()

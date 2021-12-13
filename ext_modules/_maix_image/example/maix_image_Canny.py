@@ -30,8 +30,7 @@ def handle_signal_z(signum, frame):
 
 signal.signal(signal.SIGINT, handle_signal_z)
 
-
 while True:
-    img = camera.get_image()
+    img = camera.capture()
     img.cv_Canny(50, 50)
     img.show()

@@ -147,14 +147,6 @@ height = camera.height
 width = camera.width
 close = camera.close
 
-
-import _maix_image
-def get_image():
-    __img_data_ = camera.read()
-    return _maix_image.load(__img_data_,(camera.width(),camera.height()),"RGB")
-
-# get_image
-
 if __name__ == '__main__':
     camera.config((224, 224))
     from maix import display

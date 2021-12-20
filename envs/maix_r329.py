@@ -20,32 +20,6 @@ _maix_module = Extension('_maix', include_dirs=['ext_modules/_maix/include', 'ex
     ],
 )
 
-# python3.8 -m pip install pybind11
-_maix_opencv_module = Pybind11Extension(
-    name = "_maix_opencv",
-    include_dirs=[
-        get_incs(
-            'ext_modules/libmaix/components/libmaix/include'),
-        get_incs(
-            'ext_modules/libmaix/components/libmaix/lib/arch/r329/include/opencv4/'),
-        get_incs(
-            'ext_modules/libmaix/components/maix_cv_image/include')
-    ],
-    sources=get_srcs('ext_modules/_maix_opencv') + get_srcs('ext_modules/libmaix/components/maix_cv_image/src'),
-    libraries=[
-        "maix_image","maix_disp", "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
-    ],
-    library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4",
-        ext_so
-    ],
-    extra_link_args=[
-        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/_maix_opencv",
-        "-Wl,-rpath=/usr/local/lib/python3.9/dist-packages/maix/",
-    ],
-    extra_compile_args=['-std=c++11', '-std=gnu++11' ],
-)
-
-
 _maix_image_module = Pybind11Extension(
     name = "_maix_image",
     include_dirs=[
@@ -162,7 +136,6 @@ _maix_modules = [
     libi2c_module,
     _maix_module,
     # _maix_vivo_module,
-    # _maix_opencv_module,
     _maix_speech_module,
     _maix_image_module,
     _maix_camera_module,

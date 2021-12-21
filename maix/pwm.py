@@ -53,8 +53,6 @@ class PWM(object):
         self.enable = False
         self.inversed = False
         self.unexport()
-        with open("/sys/class/sunxi_dump/write","wb") as f:
-            f.write(self.gpio)
         return
 
     def export(self) -> None:

@@ -1,51 +1,47 @@
 
+# https://python-evdev.readthedocs.io/
+
 try:
   class LazyImport:
     def __init__(self, module_name):
-        self.module_name = module_name
-        self.module = None
-
+      self.module_name = module_name
+      self.module = None
     def __getattr__(self, name):
-        if self.module is None:
-            self.module = __import__(self.module_name)
-        return getattr(self.module, name)
-
+      if self.module is None:
+        self.module = __import__(self.module_name)
+      return getattr(self.module, name)
   # import asyncio
-  asyncio = LazyImport("asyncio") # evdev will normal load asyncio > 5M
-
-  import evdev as LowEvent
-  class Event:
-    def __init__(self) -> None:
-      pass
+  asyncio = LazyImport("asyncio")  # evdev will normal load asyncio > 5M
+  from evdev import InputDevice
 except ModuleNotFoundError as e:
   pass
 
-# class LazyImport:
-#   def __init__(self, module_name):
-#       self.module_name = module_name
-#       self.module = None
+if __name__ == '__main__':
+  # from maix import event
+  # event.InputDevice
+  def detectInputKey(count):
+    from select import select
+    dev = InputDevice('/dev/input/event13')
+    while True:
+      select([dev], [], [])
+      for event in dev.read():
+        if event.value == 1 and event.code != 0:
+          count += 1
+          print(count)
+  from selectors import DefaultSelector, EVENT_READ
+  selector = DefaultSelector()
+  mouse = InputDevice('/dev/input/event7')
+  keybd = InputDevice('/dev/input/event13')
+  # This works because InputDevice has a `fileno()` method.
+  selector.register(mouse, EVENT_READ)
+  selector.register(keybd, EVENT_READ)
+  try:
+    while True:
+      for key, mask in selector.select():
+        device = key.fileobj
+        for event in device.read():
+          print(event)
+  except Exception as e:
+    mouse.close()
+    keybd.close()
 
-#   def __getattr__(self, name):
-#       if self.module is None:
-#           self.module = __import__(self.module_name)
-#       return getattr(self.module, name)
-
-# asyncio = LazyImport("asyncio") # evdev will load asyncio
-
-# from evdev import InputDevice
-# from selectors import DefaultSelector, EVENT_READ
-
-# selector = DefaultSelector()
-
-# mouse = InputDevice('/dev/input/event0')
-# # keybd = InputDevice('/dev/input/event1')
-
-# # This works because InputDevice has a `fileno()` method.
-# selector.register(mouse, EVENT_READ)
-# # selector.register(keybd, EVENT_READ)
-
-# while True:
-#     for key, mask in selector.select():
-#         device = key.fileobj
-#         for event in device.read():
-#             print(event)

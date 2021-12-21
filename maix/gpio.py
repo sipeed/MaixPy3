@@ -1,3 +1,4 @@
+# https://pypi.org/project/gpiod/
 
 try:
   from gpiod import chip, line, line_request

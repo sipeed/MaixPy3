@@ -143,7 +143,7 @@ ssize_t i2c_ioctl_read(const I2CDevice *device, unsigned int iaddr, void *buf, s
     /* Using ioctl interface operation i2c device */
     if (ioctl(device->bus, I2C_RDWR, (unsigned long)&ioctl_data) == -1) {
 
-        perror("Ioctl read i2c error:");
+        // perror("Ioctl read i2c error:");
         return -1;
     }
 

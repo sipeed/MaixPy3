@@ -76,8 +76,11 @@ try:
                 self.source = source
                 self.cam = None
 
-            def config(self, size=(240, 240)):
+            def config(self, size=None):
                 if self.cam == None:
+                    if size == None:
+                        from maix import display
+                        size = (display.__width__, display.__height__)
                     super(SpMaixVideo, self).__init__(size)
                     self.cam = Camera(self.width(), self.height(), 0)
                     import time

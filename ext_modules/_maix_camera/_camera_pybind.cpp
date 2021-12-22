@@ -49,12 +49,8 @@ void v_close(_camera *tp)
 #ifdef VirtualCamera
     cout << "virtual_camera close!" << endl;
 #else //  VirtualCamera
-
-    if (NULL != tp->cam)
+    if (NULL != tp->cam) {
         libmaix_cam_destroy(&tp->cam);
-    if (NULL != tp->rgb_img)
-    {
-        libmaix_image_destroy(&tp->rgb_img);
     }
     libmaix_image_module_deinit();
     libmaix_camera_module_deinit();
@@ -128,7 +124,7 @@ pybind11::list _camera::read()
         break;
     }
     /* Copy data to bytearray and return */
-    
+
     if (NULL != this->rgb_img)
     {
         return_val.append(true);

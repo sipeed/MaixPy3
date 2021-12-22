@@ -28,6 +28,10 @@ such as libjpeg
 
 - sudo apt-get install libjpeg-dev
 
+such as libopencv-*-dev
+
+- sudo apt-get install libopencv-*-dev
+
 see ext_modules/_maix
 
 ## C module usage

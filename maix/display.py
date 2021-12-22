@@ -75,7 +75,7 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
         else:
             from PIL import Image
             if isinstance(img, bytes):
-                img = Image.frombytes(__mode__, box, img)
+                img = Image.frombytes(__mode__, (__width__, __height__), img)
                 __thumbnail__(img, __display__)
                 __display__.paste(img, (0, 0))
             elif isinstance(img, Image.Image):

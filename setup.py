@@ -24,7 +24,7 @@ elif (sysstr == "Linux"):
     from envs.maix_r329 import _maix_modules, _maix_data_files, _maix_py_modules
     sys.argv.remove('maix_r329')
   else:
-    from envs.linux import _maix_modules, _maix_data_files, _maix_py_modules
+    from envs.linux_desktop import _maix_modules, _maix_data_files, _maix_py_modules
 
 ext_modules.extend(_maix_modules)
 data_files.extend(_maix_data_files)

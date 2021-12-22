@@ -16,17 +16,17 @@ Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter
 
 ## Progress
 
-| **Platform**         | **Status** |   **Example**    | **Config** | **Progress** |
-| --------------   | ---------- | ---------------- | --------- | --------- |
-| linux      | working    | [linux](./examples/linux/) | [linux](./envs/linux.py) | 40% |
-| maix_v83x        | working    | [maix_v83x](./examples/maix_v83x/) | [maix_v83x](./envs/maix_v83x.py)     | 70%
-| maix_r329      | working    | [maix_r329](./examples/maix_r329/) |   [maix_r329](./envs/maix_r329.py)    |  40%
-| RPi_XXXX         | plan      |                  |      | 0% 
-| RV11XX         | plan      |                  |       | 0%
+| **Platform**      | **Status** |  **Config** | **Progress** |
+| --------------    | ---------- | ----------- | ------------ |
+| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 50%
+| maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%
+| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  70%
 
 > The development progress is in no particular order.
 
 ## Develop
+
+> sudo apt-get install libjpeg-dev libopencv-*-dev
 
 Under `linux x86_64`, use `python3 setup.py build` to complete the linux package construction. If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
 

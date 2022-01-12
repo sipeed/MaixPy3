@@ -3,6 +3,7 @@
 #include "py_maix_nn.h"
 #include "py_maix_nn_classifier.h"
 #include "libmaix_nn_classifier.h"
+#include "libmaix_nn_face.h"
 #include <math.h>
 #include <string.h>
 

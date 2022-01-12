@@ -76,15 +76,13 @@ try:
                 self.source = source
                 self.cam = None
 
-            def config(self, size=None):
+            def config(self, size=None, video=0, horizontal=1, vertical=1):
                 if self.cam == None:
                     if size == None:
                         from maix import display
                         size = (display.__width__, display.__height__)
                     super(SpMaixVideo, self).__init__(size)
-                    self.cam = Camera(self.width(), self.height(), 0)
-                    import time
-                    time.sleep(0.2) # wait init
+                    self.cam = Camera(self.width(), self.height(), video, horizontal, vertical)
                     print('[camera] config input size(%d, %d)' %
                         (self.width(), self.height()))
 

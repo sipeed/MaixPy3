@@ -96,7 +96,8 @@ public:
   maix_image &_load(py::object data, std::vector<int> size, std::string mode);
   maix_image &_open_file(std::string path);
   py::object _to_py(std::string im);
-  void _clear();
+  void _delete();
+  maix_image &_clear();
   void _load_freetype(std::string path);
   py::tuple _get_string_size(std::string str, double scale, int thickness);
   maix_image &_resize(int w, int h, int func);

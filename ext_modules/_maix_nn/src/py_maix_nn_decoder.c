@@ -7,6 +7,7 @@
 
 
 static PyMethodDef _maix_nn_decoder_methods[] = {
+    
     {NULL, NULL, 0, NULL}
 };
 

@@ -1,22 +1,24 @@
 
 __width__, __height__, __mode__ = 240, 240, "RGB"
 
+def config(size=(240, 240)):
+    global __width__, __height__
+    if size[0] > 0 and size[1] > 0:
+        __width__, __height__ = size[0], size[1]
+
 try:
     __fastview__ = None
     from _maix_display import Display
     __fastview__ = Display()
-    __width__, __height__ = __fastview__.width, __fastview__.height
-
+    config(size=(__fastview__.width, __fastview__.height))
     def __draw__(img):
         from PIL import Image
-        global __fastview__
+        global __fastview__, __width__, __height__
         if isinstance(img, bytes):
-          __fastview__.draw(img, __fastview__.width, __fastview__.height)
+          __fastview__.draw(img, __width__, __height__)
         elif isinstance(img, Image.Image):
-          img = img.resize(
-              (__fastview__.width, __fastview__.height), Image.ANTIALIAS)
-          __fastview__.draw(img.tobytes(), __fastview__.width,
-                            __fastview__.height)
+          img = img.resize((__width__, __height__), Image.ANTIALIAS)
+          __fastview__.draw(img.tobytes(), __width__, __height__)
 except ModuleNotFoundError as e:
     pass
 except Exception as e:

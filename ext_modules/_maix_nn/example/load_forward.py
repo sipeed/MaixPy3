@@ -30,8 +30,9 @@ camera.config((224, 224))
 while True:
     img = camera.capture()
     out = m.forward(img.tobytes(), quantize=True)
+    
+    print(out.shape)
     out2 = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])
-    print(msg)
     img.draw_string(0,0,msg,scale = 0.5 , color = (183,127,221))
     display.show(img)

@@ -33,12 +33,8 @@ class _camera
 {
 private:
 public:
-    int width, height, dev_id;
-    // width operator=(const int num)       //如果使用的话,可能需要重载赋值运算符
-    // {
-    // 	if(num < 640 || num > 480)
-    // }
-    _camera(int w, int h, int dev_id);
+    int width, height, dev_id, m, f;
+    _camera(int w, int h, int dev_id, int m, int f);
     ~_camera();
     pybind11::list read();
     void close();
@@ -46,25 +42,7 @@ public:
     void __exit__();
 
     libmaix_cam_t *cam;
-    libmaix_cam_t *cam1;
     libmaix_image_t *rgb_img;
-
-
-// #ifdef R329Camera
-// public:
-//     libmaix_cam_t *cam;
-//     uint8_t *img_buff;
-
-// #endif
-
-// #ifdef V83xCamera
-// public:
-//     libmaix_cam_t *cam;
-//     libmaix_image_t *yuv_img;
-//     libmaix_image_t *rgb_img;
-
-// #endif
-
 };
 
 

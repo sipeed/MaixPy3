@@ -34,7 +34,7 @@ PYBIND11_MODULE(_maix_camera, m)
         .doc() = "_maix_Camera";
 
     pybind11::class_<_camera>(m, "Camera")
-        .def(py::init<int, int, int>(), py::arg("w") = 240, py::arg("h") = 240, py::arg("dev_id") = 0)
+        .def(py::init<int, int, int, int, int>(), py::arg("w") = 240, py::arg("h") = 240, py::arg("dev_id") = 0, py::arg("m") = 0, py::arg("f") = 0)
         .def_readwrite("width", &_camera::width)
         .def_readwrite("height", &_camera::height)
         .def("read", &_camera::read)
@@ -67,7 +67,7 @@ void v_init(_camera *tp)
     libmaix_camera_module_init();
     libmaix_image_module_init();
     tp->rgb_img = NULL;
-    tp->cam = libmaix_cam_create(tp->dev_id, tp->width, tp->height, 0, 0);
+    tp->cam = libmaix_cam_create(tp->dev_id, tp->width, tp->height, tp->m, tp->f);
     if (NULL != tp->cam)
     {
         int ret = tp->cam->start_capture(tp->cam);
@@ -91,11 +91,13 @@ void v_init(_camera *tp)
 #endif // VirtualCamera
 }
 
-_camera::_camera(int w, int h, int dev_id)
+_camera::_camera(int w, int h, int dev_id, int m, int f)
 {
     this->width = w;
     this->height = h;
     this->dev_id = dev_id;
+    this->m = m;
+    this->f = f;
     v_init(this);
 }
 

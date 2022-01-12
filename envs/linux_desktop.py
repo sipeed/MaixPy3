@@ -21,7 +21,7 @@ _maix_module = Extension('_maix',
 
 _maix_image_module = Pybind11Extension(
     name = "_maix_image",
-    include_dirs=[ '/usr/include/opencv4/',
+    include_dirs=[ '/usr/include/opencv4/', '/usr/local/include/opencv4/',
         get_incs(
             'ext_modules/libmaix/components/libmaix/include'),
         get_incs(
@@ -44,7 +44,8 @@ _maix_image_module = Pybind11Extension(
     ],
     library_dirs=[
         "/usr/lib/",
-        "/usr/lib/x86_64-linux-gnu/"
+        "/usr/lib/x86_64-linux-gnu/",
+        "/usr/local/lib64/",
     ],
     extra_link_args=[
     ],
@@ -53,7 +54,7 @@ _maix_image_module = Pybind11Extension(
 
 _maix_camera_module = Pybind11Extension(
     name = '_maix_camera',
-    include_dirs=[ '/usr/include/opencv4/',
+    include_dirs=[ '/usr/include/opencv4/', '/usr/local/include/opencv4/',
         get_incs(
             'ext_modules/libmaix/components/libmaix/include'),
         get_incs(
@@ -79,7 +80,8 @@ _maix_camera_module = Pybind11Extension(
     ],
     library_dirs=[
         "/usr/lib/",
-        "/usr/lib/x86_64-linux-gnu/"
+        "/usr/lib/x86_64-linux-gnu/",
+        "/usr/local/lib64/",
     ],
     extra_link_args=[
     ],
@@ -88,7 +90,7 @@ _maix_camera_module = Pybind11Extension(
 
 _maix_display_module = Pybind11Extension(
     name = "_maix_display",
-    include_dirs=[ '/usr/include/opencv4/',
+    include_dirs=[ '/usr/include/opencv4/', '/usr/local/include/opencv4/',
         get_incs(
             'ext_modules/libmaix/components/libmaix/include'),
         get_incs(
@@ -114,7 +116,8 @@ _maix_display_module = Pybind11Extension(
     ],
     library_dirs=[
         "/usr/lib/",
-        "/usr/lib/x86_64-linux-gnu/"
+        "/usr/lib/x86_64-linux-gnu/",
+        "/usr/local/lib64/",
     ],
     extra_link_args=[
     ],

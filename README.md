@@ -18,9 +18,19 @@ Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter
 
 | **Platform**      | **Status** |  **Config** | **Progress** |
 | --------------    | ---------- | ----------- | ------------ |
-| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 50%
+| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 70%
 | maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%
-| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  70%
+| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  80%
+
+Estimated Workload
+
+- 30% Python3.7↑ & toolchain environment adaptation Pillow spidev evdev gpiod pyserial zbarlight numpy
+
+- 20% base library adaptation camera display image nn speech
+
+- 10% Peripheral library adapted to gpio spi i2c zbar pwm event
+
+- 40% AI application adaptation resnet yolo classifier FaceRecognize
 
 > The development progress is in no particular order.
 

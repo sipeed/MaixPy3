@@ -32,7 +32,7 @@ py_modules.extend(_maix_py_modules)
 
 setup(
   name='maixpy3',
-  version='0.3.5',
+  version='0.4.0',
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",
@@ -55,6 +55,7 @@ setup(
   include_package_data=True,
   package_data = {
       '': ['*.so'],
+      '': ['*.h'],
   },
   data_files=data_files,
 )

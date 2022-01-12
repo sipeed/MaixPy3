@@ -184,6 +184,7 @@ _maix_data_files = [
 ]
 
 _maix_py_modules = [
+    "numpy",
     "Pillow",
     "rpyc",
     "gpiod",

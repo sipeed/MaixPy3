@@ -122,7 +122,7 @@ std::string maix_image::str__()
 {
   std::string info_str;
   std::stringstream ss;
-  ss << "<_maix_image.Image \"width\":" << this->_maix_image_width
+  ss << "<_maix_image.Image " << this->_img << " \" width\":" << this->_maix_image_width
      << ", \"height\":" << this->_maix_image_height
      << ", \"type\"=" << this->_maix_image_type
      << ", \"size\":" << this->_maix_image_size
@@ -345,13 +345,19 @@ py::object maix_image::_to_py(std::string im)
     }
   }
 #endif
+  return py::none();
 }
 
-void maix_image::_clear()
+void maix_image::_delete()
 {
   this->v_close();
 }
-
+maix_image &maix_image::_clear()
+{
+  uint8_t* img_p_t = (uint8_t*)this->_img->data;
+  memset(img_p_t, 0, this->_maix_image_size);
+  return *this;
+}
 void maix_image::_load_freetype(std::string path)
 {
   libmaix_cv_image_load_freetype(path.c_str());

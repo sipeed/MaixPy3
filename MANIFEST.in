@@ -1,0 +1,5 @@
+prune .git
+
+recursive-include ext_modules/libmaix/components/libmaix/include *.h
+recursive-include ext_modules/libmaix/components/maix_cv_image/include *.h
+recursive-include ext_modules/libmaix/components/libmaix/lib/arch/desktop/ *

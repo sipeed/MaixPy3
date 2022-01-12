@@ -25,22 +25,26 @@ try:
     addrs = []
     for addr in range(0x00, 0x7F):
       try:
-        i2c = I2C(path, addr)
-        i2c.ioctl_read(0, 1)
+        tmp = None
+        tmp = I2C(path, addr)
+        tmp.ioctl_read(0, 1)
         addrs.append(addr)
       except OSError as e:
         pass
       finally:
-        i2c.close()
+        if tmp:
+          tmp.close()
     for addr in range(0x7F, 0xFF):
       try:
-        i2c = I2C(path, addr, tenbit=True)
-        i2c.ioctl_read(0, 1)
+        tmp = None
+        tmp = I2C(path, addr, tenbit=True)
+        tmp.ioctl_read(0, 1)
         addrs.append(addr)
       except OSError as e:
         pass
       finally:
-        i2c.close()
+        if tmp:
+          tmp.close()
     return addrs
 except ModuleNotFoundError as e:
   pass
@@ -48,8 +52,8 @@ except ModuleNotFoundError as e:
 if __name__ == '__main__':
   print(scan())
   bus, addr = '/dev/i2c-2', 0x26
-  i2c = I2C(bus, addr)
-  i2c.close()
+  tmp = I2C(bus, addr)
+  tmp.close()
   # i2c = I2CDevice(bus, addr, tenbit=False, iaddr_bytes=1, page_bytes=8, delay=1, flags=0)
   # iaddr_bytes(defualt 1 byte internal address)  I2C device internal(word) address bytes, such as: 24C04 1 byte, 24C64 2 bytes
   # page_bytes(default 8 bytes per page)          I2C max number of bytes per page, 1K/2K 8, 4K/8K/16K 16, 32K/64K 32 etc

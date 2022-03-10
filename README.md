@@ -14,13 +14,19 @@ MaixPy3 is a Python3 toolkit based on [cpython](https://github.com/python/cpytho
 
 Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter notebook & lab to get an IDE that can remotely call Python code, videos, and image streaming.
 
-## Progress
+## Develop
 
-| **Platform**      | **Status** |  **Config** | **Progress** |
-| --------------    | ---------- | ----------- | ------------ |
-| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 70%
-| maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%
-| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  80%
+Under `linux x86_64`, use `python3 setup.py build` to complete the linux package construction. 
+If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
+For other platforms, take the version of `maix_v83x` as an example, match the Python3 + cross-compilation chain of the corresponding platform, and run `python3.8 setup.py build maix_v83x` to complete the construction of the target platform package.
+
+Welcome to provide configurations of different platforms to [MaixPy3/envs/](./envs/) to adapt to the MaixPy3 environment.
+
+| **Platform**      | **Status** |  **Config** | **Progress** | **Toolchain** |
+| --------------    | ---------- | ----------- | ------------ | ------------ |
+| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 50%  | `sudo apt install libjpeg-dev libopencv-*-dev gcc`
+| maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%  | [v83x_linux_x86_python3.8_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20210613)
+| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  80%  | [r329_linux_x86_python3.9_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20211101)
 
 Estimated Workload
 
@@ -33,16 +39,6 @@ Estimated Workload
 - 40% AI application adaptation resnet yolo classifier FaceRecognize
 
 > The development progress is in no particular order.
-
-## Develop
-
-> sudo apt-get install libjpeg-dev libopencv-*-dev
-
-Under `linux x86_64`, use `python3 setup.py build` to complete the linux package construction. If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
-
-For other platforms, take the version of `maix_v83x` as an example, match the Python3 + cross-compilation chain of the corresponding platform([toolchain_v83x_linux_x86](https://github.com/sipeed/MaixPy3/releases/tag/20210613)), and run `python3.8 setup.py build maix_v83x` to complete the construction of the target platform package.
-
-Welcome to provide configurations of different platforms to [MaixPy3/envs/](./envs/) to adapt to the MaixPy3 environment.
 
 ## License
 

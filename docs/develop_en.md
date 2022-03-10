@@ -91,9 +91,9 @@ your r329
 
 - python3.8 setup.py bdist_wheel maix_r329
 
-- python3.9 setup.py clean --all bdist_wheel maix_r329 && scp ./dist/maixpy3-0.3.6-cp39*.whl root@192.168.0.17:~/
+- python3.9 setup.py clean --all bdist_wheel maix_r329 && scp ./dist/maixpy3-0.4.0-cp39*.whl root@192.168.0.17:~/
 
-- pip uninstall maixpy3 -y && pip install ~/maixpy3-0.3.6-cp39*.whl
+- pip uninstall maixpy3 -y && pip install ~/maixpy3-0.4.0-cp39*.whl
 
 > pypi upload manylinux2014_aarch64
 

@@ -7,8 +7,6 @@
 
 PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
 
-
-
 static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 {
     ModelObject* self = (ModelObject*)type->tp_alloc(type, 0);
@@ -99,6 +97,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     }
     else if(PyObject_TypeCheck(o_model_path, &PyDict_Type))
     {
+        // 需要Dict类型
     }
     else if(PyObject_TypeCheck(o_model_path, &PyUnicode_Type))
     {
@@ -114,11 +113,14 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         PyErr_SetString(PyExc_ValueError, "arg model_path error, need str or dict");
         return -1;
     }
+
     if(!o_opt || !PyObject_TypeCheck(o_opt, &PyDict_Type))
     {
         PyErr_SetString(PyExc_ValueError, "arg opt is needed");
         return -1;
     }
+
+    // model type
     PyObject *o_model_type = PyDict_GetItemString(o_opt, "model_type");
     if(!o_model_type)
     {
@@ -136,6 +138,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         Py_ssize_t inputs_len = PyDict_Size(o_inputs);
         self->inputs = o_inputs;
+
         PyObject *o_outputs = PyDict_GetItemString(o_opt, "outputs");
         if(!o_outputs || !PyDict_Check(o_outputs))
         {
@@ -278,6 +281,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         self->inputs_len = inputs_len;
         self->outputs_len = outputs_len;
+        // printf("py output len is %d \n",self->outputs_len);
         self->nn = libmaix_nn_create();
         if(!self->nn)
         {
@@ -300,9 +304,12 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         Py_DECREF(keys_outputs);
         /* load by libmaix API end */
     }
-    else if (strcmp(model_type, "normal") == 0)
+    else if (strcmp(model_type, "aipu") == 0)
     {
         /*load by libmaix R329 AIP */
+        // printf("py  model type is aipu \n");
+
+        // 解析input
         PyObject *o_inputs = PyDict_GetItemString(o_opt, "inputs");
         if(!o_inputs || !PyDict_Check(o_inputs))
         {
@@ -311,6 +318,9 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         Py_ssize_t inputs_len = PyDict_Size(o_inputs);
         self->inputs = o_inputs;
+        // printf("py input len %d \n",inputs_len);
+
+        //解析outputs 相关信息
         PyObject *o_outputs = PyDict_GetItemString(o_opt, "outputs");
         if(!o_outputs || !PyDict_Check(o_outputs))
         {
@@ -319,12 +329,18 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         Py_ssize_t outputs_len = PyDict_Size(o_outputs);
         self->outputs = o_outputs;
+        // printf("py  output len %d \n",outputs_len);
+
+
+        //mean
         PyObject *o_mean = PyDict_GetItemString(o_opt, "mean");
         if(!o_mean || !(PyFloat_Check(o_mean) || (PyList_Check(o_mean) && (PyList_Size(o_mean)==3 || PyList_Size(o_mean)==1))))
         {
             PyErr_SetString(PyExc_ValueError, "arg opt need mean key, value is float or list");
             return -1;
         }
+
+        //norm
         PyObject *o_norm = PyDict_GetItemString(o_opt, "norm");
         if(!o_norm || !(PyFloat_Check(o_norm) || (PyList_Check(o_norm) && (PyList_Size(o_norm)==3 || PyList_Size(o_norm)==1))))
         {
@@ -332,12 +348,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             return -1;
         }
 
-        // PyObject *o_param_path = PyDict_GetItemString(o_model_path, "param");
-        // if(!o_param_path || !PyUnicode_Check(o_param_path))
-        // {
-        //     PyErr_SetString(PyExc_ValueError, "arg model_path need param key, value is str");
-        //     return -1;
-        // }
+        //model path .bin
         PyObject *o_bin_path = PyDict_GetItemString(o_model_path, "bin");
         if(!o_bin_path || !PyUnicode_Check(o_bin_path))
         {
@@ -345,17 +356,18 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             return -1;
         }
 
+
+        //引用计数
         Py_INCREF(self->inputs);
         Py_INCREF(self->outputs);
 
         /* load by libmaix API */
         libmaix_nn_module_init();
         libmaix_nn_model_path_t model_path = {
-            .normal.model_path = (char*)PyUnicode_DATA(o_bin_path),
+            .aipu.model_path = (char*)PyUnicode_DATA(o_bin_path),
         };
 
-
-        // encrypted model?
+        //是否为加密模型
         bool encrypt = false;
         PyObject *o_encrypt = PyDict_GetItemString(o_opt, "encrypt");
         if(o_encrypt)
@@ -365,26 +377,30 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
                 encrypt = true;
             }
         }
+
         int inputs_id[inputs_len];
         int outputs_id[outputs_len];
+
         char* inputs_names[inputs_len];
         char* outputs_names[outputs_len];
-        PyObject* keys_inputs = PyDict_Keys(o_inputs);
-        PyObject* keys_outputs = PyDict_Keys(o_outputs);
+        PyObject* keys_inputs = PyDict_Keys(o_inputs);          // list
+        PyObject* keys_outputs = PyDict_Keys(o_outputs);   // list
         PyObject* temp = NULL;
         for(Py_ssize_t i=0; i<inputs_len; ++i)
         {
             temp = PyList_GetItem(keys_inputs, i);
-            if(PyLong_Check(temp))
+             if(PyLong_Check(temp))
             {
                 encrypt = true;
                 inputs_id[i] = PyLong_AsLong(temp);
             }
             else
             {
-                inputs_names[i] = (char*)PyUnicode_DATA(temp);
+                // printf("py input without encrypt\n");
+                inputs_names[i] = (char*)PyUnicode_DATA(temp); // 获取名字
             }
         }
+
         for(Py_ssize_t i=0; i<outputs_len; ++i)
         {
             temp = PyList_GetItem(keys_outputs, i);
@@ -395,68 +411,103 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             }
             else
             {
-                outputs_names[i] = (char*)PyUnicode_DATA(temp);
+                // printf("py output without encrypt\n");
+                outputs_names[i] = (char*)PyUnicode_DATA(temp);  // 获取名字
             }
         }
+
         libmaix_nn_opt_param_t opt_param = {
-            .normal.input_names             = NULL,
-            .normal.output_names            = NULL,
-            .normal.input_num               = inputs_len,               // len(input_names)
-            .normal.output_num              = outputs_len,              // len(output_names)
-            .normal.mean                    = {127.5, 127.5, 127.5},
-            .normal.norm                    = {0.0078125, 0.0078125, 0.0078125},
+            .aipu.input_names             = NULL,
+            .aipu.output_names            = NULL,
+            .aipu.input_num               = (uint8_t) inputs_len,               // len(input_names)
+            .aipu.output_num              = (uint8_t)outputs_len,              // len(output_names)
+            .aipu.mean                    = {127.5, 127.5, 127.5},
+            .aipu.norm                    = {0.0078125, 0.0078125, 0.0078125},
         };
         if(!encrypt)
         {
-            opt_param.normal.input_names             = inputs_names;
-            opt_param.normal.output_names            = outputs_names;
-            opt_param.normal.encrypt = false;
+            opt_param.aipu.input_names        = inputs_names;
+            opt_param.aipu.output_names    = outputs_names;
+            opt_param.aipu.encrypt = false;
         }
         else
         {
-            opt_param.normal.input_ids             = inputs_id;
-            opt_param.normal.output_ids            = outputs_id;
-            opt_param.normal.encrypt = true;
+            opt_param.aipu.input_ids      = inputs_id;
+            opt_param.aipu.output_ids   = outputs_id;
+            opt_param.aipu.encrypt = true;
         }
+
+        //check  0_mean
         if(PyFloat_Check(o_mean))
         {
-            opt_param.normal.mean[0] = (float)PyFloat_AsDouble(o_mean);
-            opt_param.normal.mean[1] = opt_param.normal.mean[0];
-            opt_param.normal.mean[2] = opt_param.normal.mean[0];
+            // printf("py mean value is a single number \n");
+            opt_param.aipu.mean[0] = (float)PyFloat_AsDouble(o_mean);
+            opt_param.aipu.mean[1] = opt_param.aipu.mean[0];
+            opt_param.aipu.mean[2] = opt_param.aipu.mean[0];
         }
         else
         {
+            // printf("py mean value is a list \n");
             Py_ssize_t i=0;
             for(; i<PyList_Size(o_mean); ++i)
             {
-                opt_param.normal.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
-            }
-            for(Py_ssize_t j=i; j<3; ++j)
-            {
-                opt_param.normal.mean[j] = opt_param.normal.mean[i-1];
+                opt_param.aipu.mean[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_mean, i));
+                // printf("py  mean %d  is  %f  \n",i,opt_param.aipu.mean[i]);
             }
         }
+
+        //check  norm
         if(PyFloat_Check(o_norm))
         {
-            opt_param.normal.norm[0] = (float)PyFloat_AsDouble(o_norm);
-            opt_param.normal.norm[1] = opt_param.normal.norm[0];
-            opt_param.normal.norm[2] = opt_param.normal.norm[0];
+            // printf("py norm value is a single number\n");
+            opt_param.aipu.norm[0] = (float)PyFloat_AsDouble(o_norm);
+            opt_param.aipu.norm[1] = opt_param.aipu.norm[0];
+            opt_param.aipu.norm[2] = opt_param.aipu.norm[0];
         }
         else
         {
+            // printf("py norm value is a list\n");
             Py_ssize_t i=0;
             for(; i<PyList_Size(o_norm); ++i)
             {
-                opt_param.normal.norm[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_norm, i));
-            }
-            for(Py_ssize_t j=i; j<3; ++j)
-            {
-                opt_param.normal.norm[j] = opt_param.normal.norm[i-1];
+                opt_param.aipu.norm[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_norm, i));
+                // printf("py  norm %d  is  %f  \n",i,opt_param.aipu.norm[i]);
             }
         }
-        self->inputs_len = inputs_len;
-        self->outputs_len = outputs_len;
+
+        //scale
+        PyObject * o_scale = PyDict_GetItemString(o_opt, "scale");
+        Py_ssize_t scale_length  = PyList_Size(o_scale);
+
+        if(scale_length != outputs_len)
+        {
+            // printf("py scale lenght(%d)  not the same with output length(%d)  \n",scale_length,outputs_len);
+            PyErr_SetString(PyExc_ValueError, "scale value lenght and outputs  number is not the same ");
+            return -1;
+        }
+        if(PyFloat_Check(o_scale))
+        {
+            opt_param.aipu.scale[0] = (float)PyFloat_AsDouble(o_scale);
+            for (Py_ssize_t  i =1 ; i < outputs_len ; i++)
+            {
+                opt_param.aipu.scale[i] = opt_param.aipu.scale[0];
+            }
+        }
+        else
+        {
+            // printf("py scale value is a list\n");
+            for(Py_ssize_t i=0; i<outputs_len; ++i)
+            {
+                opt_param.aipu.scale[i] = (float)PyFloat_AsDouble(PyList_GetItem(o_scale, i));
+                // printf("py  scale %d  is  %f  \n",i,opt_param.aipu.scale[i] );
+            }
+
+        }
+
+        self->inputs_len = (int)inputs_len;
+        self->outputs_len = (int)outputs_len;
         self->nn = libmaix_nn_create();
+
         if(!self->nn)
         {
             PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");
@@ -476,8 +527,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         }
         Py_DECREF(keys_inputs);
         Py_DECREF(keys_outputs);
-    }
 
+    }
     else
     {
         PyErr_SetString(PyExc_ValueError, "now model_type only support awnn");
@@ -525,29 +576,47 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     const char* layout_str = "hwc";
     int quantize = 1;
     int debug = 0;
-    static char *kwlist[] = {"inputs", "quantize", "layout", "debug", NULL};
+    const char* output_fmt = "numpy";
+    static char *kwlist[] = {"inputs", "quantize", "layout", "debug","output_fmt", NULL};
+
     /* Get the buffer's memory */
-    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$psp:forward", kwlist,
-                                     &o_inputs, &quantize, &layout_str, &debug))
+    // TODO:add a option to choise output format
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$psps:forward", kwlist,
+                                     &o_inputs, &quantize, &layout_str, &debug,&output_fmt ))        //修改 format str
     {
         return NULL;
     }
     if(!o_inputs)
     {
+        printf("py  forward inputs is emputy \n");
         PyErr_SetString(PyExc_ValueError, "input error");
         return NULL;
     }
     if(PyList_Check(o_inputs))
     {
-        //TODO: multipul input
+        // printf("py  forward inputs is a list \n");
         PyErr_SetString(PyExc_NotImplementedError, "not support multiple input yet");
         return NULL;
     }
+
+
     libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     if(strcmp(layout_str, "hwc") == 0)
     {
+        // printf("py layout is hwc \n");
         outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     }
+    else if (strcmp(layout_str, "chw") == 0)
+    {
+        // printf("py  layout is chw  \n");
+        outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
+    }
+    else
+    {
+          PyErr_SetString(PyExc_NotImplementedError, "not support recurrent output layout yet");
+          return NULL;
+    }
+
     PyObject* o_inputs_shape = PyDict_Values(self->inputs);
     PyObject* o_input_shape = PyList_GetItem(o_inputs_shape, 0);
     long input_w=0, input_h=0, input_c=0;
@@ -567,6 +636,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
 
     if(PyBytes_Check(o_inputs))
     {
+        // printf("py  input is bytes\n");
         o_input_bytes = o_inputs;
     }
     else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)
@@ -578,19 +648,20 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             return NULL;
         }
         o_input_bytes_need_free = true;
-        Py_DECREF(o_inputs);
     }
     else
     {
         PyErr_SetString(PyExc_ValueError, "not supported input object, only support bytes and PIL.Image object");
         return NULL;
     }
+
     if((Py_ssize_t)(input_w * input_h * input_c) != PyBytes_Size(o_input_bytes))
     {
         PyErr_Format(PyExc_ValueError, "input shape error, need: %d (%d, %d, %d), but: %d", input_w * input_h * input_c, input_h, input_w, input_c, PyBytes_Size(o_input_bytes));
         goto err0;
     }
     char* input_bytes = PyBytes_AsString(o_input_bytes);
+    // printf("py  input bytes as string \n");
     if(input_bytes == NULL)
     {
         PyErr_SetString(PyExc_ValueError, "get bytes data error");
@@ -610,6 +681,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     Py_ssize_t _size = input.w * input.h * input.c;
     if(input.need_quantization)
     {
+        // printf("py  input need quantization\n");
         if(!self->quantize_buffer)
         {
             int8_t* quantize_buffer = (int8_t*)malloc(_size);
@@ -620,21 +692,25 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             }
             self->quantize_buffer = quantize_buffer;
         }
+        // printf("py   input quantize buffer has allocate\n");
         input.buff_quantization = self->quantize_buffer;
     }
-    // outputs
+    // outputs as a list ,use a index to find a position and
     out_fmap = (libmaix_nn_layer_t*)malloc(self->outputs_len * sizeof(libmaix_nn_layer_t));
     if(!out_fmap)
     {
         PyErr_NoMemory();
         goto err0;
     }
+
+    // printf("py  out_fmap location has done\n");
     PyObject* o_outputs_shape = PyDict_Values(self->outputs);
+    // printf("py  output len is %d \n",self->outputs_len);
     for(int i=0; i<self->outputs_len; ++i)
     {
         PyObject* o_output_shape = PyList_GetItem(o_outputs_shape, i);
         long output_w=0, output_h=0, output_c=0;
-        if(PyTuple_Check(o_output_shape))
+        if(PyTuple_Check(o_output_shape))  // tuple , list both OK
         {
             output_h = PyLong_AsLong(PyTuple_GetItem(o_output_shape, 0));
             output_w = PyLong_AsLong(PyTuple_GetItem(o_output_shape, 1));
@@ -652,9 +728,11 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         out_fmap[i].dtype = LIBMAIX_NN_DTYPE_FLOAT;
         out_fmap[i].layout = outputs_layout;
         out_fmap[i].data = NULL;
+        // printf("py output %d   w:%d   h:%d   c:%d  \n", i, output_w,output_h,output_c);
     }
     Py_DECREF(o_outputs_shape);
 
+    //  output buffer alloction
     if(!self->out_buffer)
     {
         self->out_buffer = (float**)malloc(self->outputs_len * sizeof(float*));
@@ -663,7 +741,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             PyErr_Format(PyExc_MemoryError, "no memory for out buffer, need size:%d", self->outputs_len * sizeof(float*));
             goto err1;
         }
-        memset(self->out_buffer, 0, self->outputs_len * sizeof(float*));
+        memset(self->out_buffer, 0, self->outputs_len * sizeof(float*));    // init new memory area
         for(int i=0; i<self->outputs_len; ++i)
         {
             _size = out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float);
@@ -676,17 +754,25 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             }
         }
     }
+
     for(int i=0; i < self->outputs_len; ++i)
     {
         out_fmap[i].data = self->out_buffer[i];
     }
+
+
     if(debug)
     {
         gettimeofday(&start, NULL);
     }
+    // forward
+    // printf("py  forward\n");
     err = self->nn->forward(self->nn, &input, out_fmap);
+    // printf("py  forward has done\n");
+
     if(err != LIBMAIX_ERR_NONE)
     {
+        printf("py  forward is faild\n");
         PyErr_Format(PyExc_Exception, "libmaix_nn forward fail: %s\n", libmaix_get_err_msg(err));
         goto err1;
     }
@@ -700,42 +786,57 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     PyObject* result = Py_None;
     PyObject* o_result_numpy2 = Py_None;
 
-    if(self->outputs_len > 1)
-    {
-        result = PyList_New(0);
-    }
+
+    result = PyList_New(0);
     for(int i=0; i < self->outputs_len; ++i)
     {
-        PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
-        PyObject *call_args = Py_BuildValue("(O)", result_bytes);
-        PyObject *call_keywords = PyDict_New();
-        PyObject *tmp = PyUnicode_FromString("float32");
-        PyDict_SetItemString(call_keywords, "dtype", tmp);
-        PyObject* o_frombuffer = PyObject_GetAttrString(self->m_numpy, "frombuffer");
-        PyObject* o_result_numpy = PyObject_Call(o_frombuffer, call_args, call_keywords);
-        Py_DECREF(o_frombuffer);
-        Py_DECREF(tmp);
-        Py_DECREF(call_keywords);
-        Py_DECREF(call_args);
-        Py_DECREF(result_bytes);
-        if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
+        if(strcmp(output_fmt , "numpy") == 0)
         {
-            o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
+            // printf("py  output fmt is numpy \n");
+            PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float)); // get bytes result
+            PyObject *call_args = Py_BuildValue("(O)", result_bytes);
+            PyObject *call_keywords = PyDict_New();
+            PyObject *tmp = PyUnicode_FromString("float32");
+            PyDict_SetItemString(call_keywords, "dtype", tmp);
+            PyObject* o_frombuffer = PyObject_GetAttrString(self->m_numpy, "frombuffer");
+            PyObject* o_result_numpy = PyObject_Call(o_frombuffer, call_args, call_keywords); //  trainform  to  numpy type
+            Py_DECREF(o_frombuffer);
+            Py_DECREF(tmp);
+            Py_DECREF(call_keywords);
+            Py_DECREF(call_args);
+            Py_DECREF(result_bytes);
+
+            if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
+            {
+                // printf("py  output layout is CHW\n");
+                o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
+            }
+            else
+            {
+                // printf("py output layout is HWC\n");
+                o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
+            }
+            Py_DECREF(o_result_numpy);
+
+            if(result == Py_None)
+            {
+                result = o_result_numpy2;
+                break;
+            }
+
+
+            PyList_Append(result, o_result_numpy2);
+            Py_DECREF(o_result_numpy2);
         }
         else
         {
-            o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
+                // printf("py output  fmt is Bytes \n");
+                PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
+                PyList_Append(result,  result_bytes);
+                Py_DECREF(result_bytes);
         }
-        Py_DECREF(o_result_numpy);
-        if(result == Py_None)
-        {
-            result = o_result_numpy2;
-            // Py_DECREF(o_result_numpy2);
-            break;
-        }
-        PyList_Append(result, o_result_numpy2);
-        Py_DECREF(o_result_numpy2);
     }
+
     if(out_fmap)
         free(out_fmap);
     if(o_input_bytes_need_free)
@@ -753,7 +854,6 @@ static PyMethodDef Model_methods[] = {
     {"forward", (PyCFunction)Model_forward, METH_VARARGS | METH_KEYWORDS, Model_forward_doc},
     {NULL, NULL, 0, NULL},
 };
-
 
 PyTypeObject PyMaix_NN_Model_Type = {
     PyVarObject_HEAD_INIT(NULL, 0)

@@ -9,6 +9,7 @@ def cal_fps(start , end):
     fps = one_second / one_flash
     return  fps
 
+
 def draw_rectangle_with_title(img, box, disp_str , fps ):
     img.draw_rectangle(box[0], box[1], box[0] + box[2], box[1] + box[3],color=(255, 0, 0), thickness=1)
     img.draw_string(box[0], box[1]+ box[3] ,disp_str, scale=0.5,color=(0, 0, 255), thickness=1)
@@ -16,7 +17,7 @@ def draw_rectangle_with_title(img, box, disp_str , fps ):
 
 
 model = {
-     "bin": "/root/models/aipu_yolo_VOC2007.bin"
+    "bin":"/root/models/aipu_onnx_cards_224_35.bin"
 }
 
 options = {
@@ -25,11 +26,11 @@ options = {
         "input0": (224, 224, 3)
     },
     "outputs": {
-        "output0": (7, 7, (1+4+20)*5)
+        "output0": (7, 7, (1+4+35)*5)
     },
     "mean": [127.5, 127.5, 127.5],
     "norm": [0.0078125, 0.0078125, 0.0078125],
-    "scale":[8.031941],
+    "scale":[10.872787] ,
 }
 
 #加载模型
@@ -40,8 +41,8 @@ w = options["inputs"]["input0"][1]
 h = options["inputs"]["input0"][0]
 
 # 设置标签和anchor大小
-labels = ["aeroplane","bicycle","bird","boat","bottle","bus","car","cat","chair","cow","diningtable","dog","horse","motorbike","person","pottedplant","sheep","sofa","train","tvmonitor"]
-anchors = [0.4165, 0.693 , 0.9765, 1.6065, 1.5855, 3.122 , 2.821 , 1.8515 , 3.612 , 3.7275]
+labels = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "mouse", "microbit", "ruler", "cat", "peer", "ship", "apple", "car", "pan", "dog", "umbrella", "airplane", "clock", "grape", "cup", "left", "right", "front", "stop", "back"]
+anchors = [2.44, 2.25, 5.03, 4.91, 3.5, 3.53, 4.16, 3.94, 2.97, 2.84]
 
 # 声明解码器并初始化
 yolo2_decoder = decoder.Yolo2(len(labels), anchors, net_in_size=(w, h), net_out_size=(7, 7))
@@ -69,3 +70,5 @@ while 1:
 
     #图像端侧显示
     display.show(img)
+
+

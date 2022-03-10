@@ -28,7 +28,7 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
     }
     if(!model_path || !opt)
     {
-        PyErr_SetString(PyExc_ValueError, "nee mode_path and opt args");
+        PyErr_SetString(PyExc_ValueError, "need mode_path and opt args");
         return NULL;
     }
     /* new object */
@@ -116,7 +116,7 @@ PyMODINIT_FUNC PyInit__maix_nn(void)
     PyObject *decoder_module = PyModule_Create(&maix_nn_decoder_module);
     Py_INCREF(&PyMaix_NN_Decoder_Yolo2_Type);
     PyModule_AddObject(decoder_module, "Yolo2", (PyObject*)&PyMaix_NN_Decoder_Yolo2_Type);
-    PyModule_AddObject(module, "decoder", decoder_module);
+    PyModule_AddObject(module, "_decoder", decoder_module);
 
     /* Add maix.nn._app module,
        add maix.nn._app.classifier class*/

@@ -83,8 +83,8 @@ try:
                         size = (display.__width__, display.__height__)
                     super(SpMaixVideo, self).__init__(size)
                     self.cam = Camera(self.width(), self.height(), video, horizontal, vertical)
-                    print('[camera] config input size(%d, %d)' %
-                        (self.width(), self.height()))
+                    print('[camera] config input size(%d, %d, %d)' %
+                        (self.width(), self.height(), video))
 
             def read(self):
                 if self.cam == None:

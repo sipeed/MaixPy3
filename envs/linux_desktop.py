@@ -143,5 +143,6 @@ _maix_py_modules = [
     "gpiod",
     "evdev",
     "spidev",
+    "pybind11",
     "pyserial"
 ]

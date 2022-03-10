@@ -27,7 +27,7 @@
 #define enable_PIL
 #define enable_numpy
 
-#define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
+#define debug_line // printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
 namespace py = pybind11;
 typedef enum

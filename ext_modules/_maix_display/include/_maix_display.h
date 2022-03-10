@@ -10,7 +10,7 @@ extern "C" {
 // #include <stdio.h>
 #include "libmaix_disp.h"
 #include "libmaix_cam.h"
-#define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
+#define debug_line // printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 #ifdef  __cplusplus
 }
 #endif

@@ -12,7 +12,7 @@ model = {
     "bin": "./resnet.bin"
 }
 options = {
-    "model_type":  "normal",
+    "model_type":  "aipu",
     "inputs": {
         "input0": (224, 224, 3)
     },

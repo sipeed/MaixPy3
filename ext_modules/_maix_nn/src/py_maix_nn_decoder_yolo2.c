@@ -4,7 +4,7 @@
 #include "stdlib.h"
 #include "libmaix_nn_decoder_yolo2.h"
 
-
+#define debug_line // printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 typedef struct
 {
     PyObject_HEAD;
@@ -166,6 +166,7 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
 {
     if(!self->init)
     {
+        debug_line;
         PyErr_SetString(PyExc_Exception, "not initialize");
         return NULL;
     }
@@ -203,6 +204,7 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
         .layout = LIBMAIX_NN_LAYOUT_HWC,
         .data = NULL
     };
+    // debug_line;
     PyObject* o_out_fmap = NULL;
     if(strstr(fmap->ob_type->tp_name, "ndarray") > 0)
     {
@@ -235,6 +237,8 @@ static PyObject* decoder_yolo2_method_run(DecoderYolo2Object *self, PyObject *ar
 
     libmaix_nn_decoder_yolo2_result_t yolo2_result;
     err = self->decoder->decode(self->decoder, &out_fmap, (void*)&yolo2_result);
+
+
     if(fmap_need_decref)
         Py_DECREF(o_out_fmap);
     if(err != LIBMAIX_ERR_NONE)

@@ -431,7 +431,7 @@ int maix_image::_save(std::string file_path, std::string format)
 {
   if (NULL == this->_img)
     return -1;
-  libmaix_cv_image_draw_image_save(this->_img, file_path.c_str());
+  libmaix_cv_image_save_file(this->_img, file_path.c_str());
   return 0;
 }
 

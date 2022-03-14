@@ -118,6 +118,9 @@ pybind11::object _Display::draw(pybind11::object py_img, int img_w, int img_h, i
 
     if (NULL != this->disp)
     {
+        if (!this->disp->width) this->disp->width = img_w;
+        if (!this->disp->height) this->disp->height = img_h;
+        // desktop will set (0, 0).
         if (this->disp->width >= img_w && this->disp->height >= img_h)
         {
             if (this->display_image->data != NULL)

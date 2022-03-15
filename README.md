@@ -16,7 +16,7 @@ Install [rpyc_ikernel](https://github.com/sipeed/rpyc_ikernel) kernel in jupyter
 
 ## Develop
 
-Under `linux x86_64`, use `python3 setup.py build` to complete the linux package construction. 
+Under `linux x86_64`, use `python3 setup.py build` to complete the linux package construction.
 If you need `.whl` pre-compiled package, please change `build` to `bdist_wheel`.
 For other platforms, take the version of `maix_v83x` as an example, match the Python3 + cross-compilation chain of the corresponding platform, and run `python3.8 setup.py build maix_v83x` to complete the construction of the target platform package.
 
@@ -24,19 +24,19 @@ Welcome to provide configurations of different platforms to [MaixPy3/envs/](./en
 
 | **Platform**      | **Status** |  **Config** | **Progress** | **Toolchain** |
 | --------------    | ---------- | ----------- | ------------ | ------------ |
-| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 50%  | `sudo apt install libjpeg-dev libopencv-*-dev gcc`
+| linux_pc & RPi_2B | working    | [linux_desktop](./envs/linux_desktop.py)  | 60%  | [develop.md](./docs/develop.md) & [maixpy3_build.yml](.github/workflows/maixpy3_build.yml)
 | maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%  | [v83x_linux_x86_python3.8_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20210613)
-| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  80%  | [r329_linux_x86_python3.9_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20211101)
+| maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  90%  | [r329_linux_x86_python3.9_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20211101)
 
 Estimated Workload
 
-- 30% Python3.7↑ & toolchain environment adaptation Pillow spidev evdev gpiod pyserial zbarlight numpy
+- 30% Python3.7↑ & toolchain environment adaptation Pillow spidev evdev gpiod pyserial zbarlight numpy pyaudio pyav *pybind11
 
-- 20% base library adaptation camera display image nn speech
+- 30% base library adaptation camera display image nn speech imlib
 
-- 10% Peripheral library adapted to gpio spi i2c zbar pwm event
+- 30% AI application adaptation resnet yolo classifier FaceRecognize
 
-- 40% AI application adaptation resnet yolo classifier FaceRecognize
+- 10% Peripheral library adapted to gpio spi i2c pwm event for special hardware
 
 > The development progress is in no particular order.
 

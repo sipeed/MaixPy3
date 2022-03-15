@@ -1,0 +1,51 @@
+name: maixpy3_pypi
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8, 3.9]
+    steps:
+    - uses: actions/checkout@master
+    - name: Get submodules
+      run: |
+        git submodule update --init --recursive
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install libjpeg-dev gcc libopencv-dev -qq -y
+        wget http://mirrors.kernel.org/ubuntu/pool/main/libf/libffi/libffi6_3.2.1-8_amd64.deb
+        sudo apt install ./libffi6_3.2.1-8_amd64.deb -qq -y
+        python3 -m pip install --upgrade pip
+        python3 -m pip install pybind11
+        wget https://github.com/sipeed/MaixPy3/releases/download/20211101/r329_linux_x86_python3.9_toolchain.zip
+        unzip -q -o r329_linux_x86_python3.9_toolchain.zip -d /opt/
+        wget https://github.com/sipeed/MaixPy3/releases/download/20210613/v83x_linux_x86_python3.8_toolchain.zip
+        unzip -q -o v83x_linux_x86_python3.8_toolchain.zip -d /opt/
+    - name: Test desktop build
+      run: |
+        python3 setup.py sdist build
+    - name: Test maix_v83x build
+      run: |
+        source /opt/v83x_linux_x86_python3.8_toolchain/envsetup.sh
+        python3.8 setup.py bdist_wheel maix_v83x
+    - name: Test maix_r329 build
+      run: |
+        source /opt/r329_linux_x86_python3.9_toolchain/envsetup.sh
+        python3.9 setup.py bdist_wheel maix_r329
+    - name: Publish distribution 📦 to PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}

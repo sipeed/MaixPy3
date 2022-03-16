@@ -1,5 +1,25 @@
+
+graft docs
+graft envs
+graft tests
+
+graft ext_modules
+prune ext_modules/_maix_speech/Maix-Speech/.git
+prune ext_modules/_maix_speech/Maix-Speech/assets
+prune ext_modules/_maix_speech/Maix-Speech/projects
+prune ext_modules/_maix_speech/Maix-Speech/tools
+
 prune .git
+prune tests
+
+prune ext_modules/libmaix/assets
+prune ext_modules/libmaix/examples
+prune ext_modules/libmaix/tools
 
 recursive-include ext_modules/libmaix/components/libmaix/include *.h
 recursive-include ext_modules/libmaix/components/maix_cv_image/include *.h
 recursive-include ext_modules/libmaix/components/libmaix/lib/arch/desktop/ *
+
+global-exclude __pycache__ *.log *.pyc
+
+global-exclude *.py[cod]

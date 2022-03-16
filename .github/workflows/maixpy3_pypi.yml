@@ -10,17 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
-      matrix:
-        python-version: [3.8, 3.9]
     steps:
     - uses: actions/checkout@master
     - name: Get submodules
       run: |
         git submodule update --init --recursive
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+    - uses: actions/setup-python@v2
       with:
-        version: ${{ matrix.python-version }}
+        python-version: 3.8.5
     - name: Install dependencies
       run: |
         sudo apt update
@@ -35,7 +32,8 @@ jobs:
         unzip -q -o v83x_linux_x86_python3.8_toolchain.zip -d /opt/
     - name: Test desktop build
       run: |
-        python3 setup.py sdist build
+        python3 -m pip install .
+        python3 setup.py sdist
     - name: Test maix_v83x build
       run: |
         source /opt/v83x_linux_x86_python3.8_toolchain/envsetup.sh
@@ -49,3 +47,4 @@ jobs:
       with:
         user: __token__
         password: ${{ secrets.PYPI_API_TOKEN }}
+        skip_existing: true

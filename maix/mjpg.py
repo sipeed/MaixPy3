@@ -383,7 +383,7 @@ class MjpgReader():
 
 if __name__ == '__main__':
 
-    start()  # test rpyc & mjpg
+    # start()  # test rpyc & mjpg
 
     def unit_test_s():
       from_files = False
@@ -426,18 +426,18 @@ if __name__ == '__main__':
         except ValueError as e:
           print(e)
     # unit_test_c()
-    # test_mjpg html <img src="http://localhost:18811" />
-    from maix import camera, mjpg
-    # import queue
-    import _maix
 
-    queue = Queue(maxsize=8)
+    # run this test mjpg html <img src="http://localhost:18811" />
+    from maix import camera, mjpg, utils, display
+
+    queue = mjpg.Queue(maxsize=8)
     mjpg.MjpgServerThread(
         "0.0.0.0", 18811, mjpg.BytesImageHandlerFactory(q=queue)).start()
 
     while True:
         img = camera.capture()
-        jpg = _maix.rgb2jpg(img.convert("RGB").tobytes(),
+        jpg = utils.rgb2jpg(img.convert("RGB").tobytes(),
                             img.width, img.height)
-        queue.put(mjpg.BytesImage(jpg))
         print(len(jpg))
+        queue.put(mjpg.BytesImage(jpg))
+        display.show(img)

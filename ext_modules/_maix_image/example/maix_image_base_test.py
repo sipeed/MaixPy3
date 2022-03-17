@@ -120,14 +120,14 @@ test_convert()
 
 def test_font_draw():
     img = image.Image().new(color=(255, 0, 0))
-    img.load_freetype("./smart/assets/fonts/Alibaba-PuHuiTi-Regular.ttf")
+    image.load_freetype("./smart/assets/fonts/Alibaba-PuHuiTi-Regular.ttf")
     s = "二进制例程"
-    x, y = img.get_string_size(s, 3)
+    x, y = image.get_string_size(s, 3)
     print(x, y)
     img.draw_string(0, 240 - (y + 5), s, 3, (255, 255, 255)) # show left-button
 
     s = "二进制可执行文件示例"
-    x, y = img.get_string_size(s, 2)
+    x, y = image.get_string_size(s, 2)
     print(x, y)
     img.draw_string(240 - x, 0, s, 2, (255, 255, 255)) # show right-up # wait fix
 
@@ -136,14 +136,14 @@ def test_font_draw():
 
     img = image.Image().new(color=(255, 0, 0))
 
-    img.load_freetype("./smart/assets/fonts/JosefinSans-Regular.ttf")
+    image.load_freetype("./smart/assets/fonts/JosefinSans-Regular.ttf")
     s = "bin example"
-    x, y = img.get_string_size(s, 3)
+    x, y = image.get_string_size(s, 3)
     print(x, y)
     img.draw_string(0, 240 - (y + 5), s, 3, (255, 255, 255)) # show left-button
 
     s = "run bin demo test"
-    x, y = img.get_string_size(s, 2)
+    x, y = image.get_string_size(s, 2)
     print(x, y)
     img.draw_string(240 - x, 0, s, 2, (255, 255, 255)) # show right-up # wait fix
 

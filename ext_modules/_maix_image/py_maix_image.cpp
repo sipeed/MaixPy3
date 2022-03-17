@@ -23,10 +23,30 @@
 //   nanolog::set_log_level(nanolog::LogLevel::INFO);
 // }
 
+void _load_freetype(std::string path, int fontHeight)
+{
+  libmaix_cv_image_load_freetype(path.c_str(), fontHeight);
+}
+
+void _free_freetype()
+{
+  libmaix_cv_image_free_freetype();
+}
+
+py::tuple _get_string_size(std::string str, double scale, int thickness)
+{
+  int w = 0, h = 0;
+  libmaix_cv_image_get_string_size(&w, &h, str.c_str(), scale, thickness);
+  return py::make_tuple(w, h);
+}
+
 PYBIND11_MODULE(_maix_image, mo)
 {
     // mode_init();         //模块的初始化函数
-    // mo.def("s_log",&s_log);
+    mo.def("load_freetype", _load_freetype, py::arg("path"), py::arg("fontHeight") = 14)
+      .def("_free_freetype", _free_freetype)
+      .def("get_string_size", _get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1);
+
     pybind11::class_<maix_image>(mo, "Image")
         .def(pybind11::init<>())
         //image属性
@@ -47,8 +67,6 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("copy", &maix_image::_to_py, py::arg("img") = "maix_image")
         .def("clear", &maix_image::_clear)
         .def("delete", &maix_image::_delete)
-        .def("load_freetype", &maix_image::_load_freetype, py::arg("path"))
-        .def("get_string_size", &maix_image::_get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1)
         .def("save", &maix_image::_save, py::arg("path"), py::arg("format") = "jpeg")
         .def("tobytes", &maix_image::_tobytes)
         .def("resize", &maix_image::_resize, py::arg("w"), py::arg("h"), py::arg("func") = 1)

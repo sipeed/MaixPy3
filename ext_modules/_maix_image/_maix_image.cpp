@@ -358,18 +358,6 @@ maix_image &maix_image::_clear()
   memset(img_p_t, 0, this->_maix_image_size);
   return *this;
 }
-void maix_image::_load_freetype(std::string path)
-{
-  libmaix_cv_image_load_freetype(path.c_str());
-}
-
-py::tuple maix_image::_get_string_size(std::string str, double scale, int thickness)
-{
-  int w = 0, h = 0;
-  libmaix_cv_image_get_string_size(&w, &h, str.c_str(), scale, thickness);
-  return py::make_tuple(w, h);
-}
-
 void maix_image::_show()
 {
   if (NULL == this->_img)

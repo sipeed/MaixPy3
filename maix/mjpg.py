@@ -270,15 +270,15 @@ def store_mjpg(img):
         MjpgImage.put(BytesImage(utils.rgb2jpg(
             img.tobytes(), img.width, img.height)))
         return
-    from PIL import Image
-    if isinstance(img, Image.Image):
-        if (img.mode == 'RGB'):
-            frame = utils.rgb2jpg(img.tobytes(), img.width, img.height)
-        elif (img.mode == 'RGBA'):
-            frame = utils.rgb2jpg(img.convert(
-                "RGB").tobytes(), img.width, img.height)
-        MjpgImage.put(BytesImage(frame))
-        return
+    # from PIL import Image
+    # if isinstance(img, Image.Image):
+    #     if (img.mode == 'RGB'):
+    #         frame = utils.rgb2jpg(img.tobytes(), img.width, img.height)
+    #     elif (img.mode == 'RGBA'):
+    #         frame = utils.rgb2jpg(img.convert(
+    #             "RGB").tobytes(), img.width, img.height)
+    #     MjpgImage.put(BytesImage(frame))
+    #     return
 
 def start_mjpg():
   global MjpgSrv, MjpgImage

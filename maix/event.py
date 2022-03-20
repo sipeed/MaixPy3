@@ -19,9 +19,19 @@ except ModuleNotFoundError as e:
 if __name__ == '__main__':
   # from maix import event
   # event.InputDevice
+
+  def check_key(default="/dev/input/event0"):
+    import os
+    tmp = "/dev/input/by-path/"
+    if os.path.exists(tmp):
+      for i in os.listdir(tmp):
+        if i.find("kbd") != -1:
+          return tmp + i
+    return default
+
   def detectInputKey(count):
     from select import select
-    dev = InputDevice('/dev/input/event13')
+    dev = InputDevice(check_key())
     while True:
       select([dev], [], [])
       for event in dev.read():

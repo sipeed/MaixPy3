@@ -1,4 +1,5 @@
 
+
 __width__, __height__, __mode__ = 240, 240, "RGB"
 
 def config(size=(240, 240)):
@@ -12,13 +13,13 @@ try:
     __fastview__ = Display()
     config(size=(__fastview__.width, __fastview__.height))
     def __draw__(img):
-        from PIL import Image
+        # from PIL import Image
         global __fastview__, __width__, __height__
         if isinstance(img, bytes):
           __fastview__.draw(img, __width__, __height__)
-        elif isinstance(img, Image.Image):
-          img = img.resize((__width__, __height__), Image.ANTIALIAS)
-          __fastview__.draw(img.tobytes(), __width__, __height__)
+        # elif isinstance(img, Image.Image):
+        #   img = img.resize((__width__, __height__), Image.ANTIALIAS)
+        #   __fastview__.draw(img.tobytes(), __width__, __height__)
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
@@ -28,28 +29,28 @@ __display__ = None
 
 
 def get_display():
-    from PIL import Image
+    from maix import image
     global __display__
     if __display__ is None:
       global __width__, __height__, __mode__
-      __display__ = Image.new(__mode__, (__width__, __height__))
+      __display__ = image.Image().new(mode=__mode__, size=(__width__, __height__))
     return __display__
 
+# def get_draw():
+#     from PIL import ImageDraw
+#     disp = get_display()
+#     if disp:
+#         tmp = ImageDraw.Draw(disp)
+#         tmp.paste = disp.paste
+#         return tmp
+#     return None
 
-def get_draw():
-    from PIL import ImageDraw
-    disp = get_display()
-    if disp:
-        tmp = ImageDraw.Draw(disp)
-        tmp.paste = disp.paste
-        return tmp
-    return None
 
+# def __thumbnail__(src, dst):
+#     w, h = src.size
+#     if w > dst.width or h > dst.height:
+#         src.thumbnail((dst.width, dst.height))
 
-def __thumbnail__(src, dst):
-    w, h = src.size
-    if w > dst.width or h > dst.height:
-        src.thumbnail((dst.width, dst.height))
 
 
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
@@ -74,37 +75,37 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
           pass
         if __fastview__:
             __draw__(img)  # underlying optimization
-        else:
-            from PIL import Image
-            if isinstance(img, bytes):
-                img = Image.frombytes(__mode__, (__width__, __height__), img)
-                __thumbnail__(img, __display__)
-                __display__.paste(img, (0, 0))
-            elif isinstance(img, Image.Image):
-                __thumbnail__(img, __display__)
-                __display__.paste(img, box)
-            __display__.show()
+        # else:
+        #     from PIL import Image
+        #     if isinstance(img, bytes):
+        #         img = Image.frombytes(__mode__, (__width__, __height__), img)
+        #         __thumbnail__(img, __display__)
+        #         __display__.paste(img, (0, 0))
+        #     elif isinstance(img, Image.Image):
+        #         __thumbnail__(img, __display__)
+        #         __display__.paste(img, box)
+        #     __display__.show()
 
 
-def fill(color=(0, 0, 0, 0), box=None):
-    if box is None:
-        global __width__, __height__
-        box = (0, 0, __width__, __height__)
-    if len(box) == 2:
-        box = (0, 0) + box
-    get_draw().paste(color, box)
-    show(__display__)
+# def fill(color=(0, 0, 0, 0), box=None):
+#     if box is None:
+#         global __width__, __height__
+#         box = (0, 0, __width__, __height__)
+#     if len(box) == 2:
+#         box = (0, 0) + box
+#     get_draw().paste(color, box)
+#     show(__display__)
 
 
-def clear(c=(0, 0, 0, 0)):
-    fill(color=c)
+# def clear(c=(0, 0, 0, 0)):
+#     fill(color=c)
 
 
 if __name__ == '__main__':
-    clear((255, 0, 0))
-    fill((255, 0, 0))
-    fill((0, 255, 0), (100, 100))
-    fill((0, 0, 255), (20, 20, 220, 220))
+    # clear((255, 0, 0))
+    # fill((255, 0, 0))
+    # fill((0, 255, 0), (100, 100))
+    # fill((0, 0, 255), (20, 20, 220, 220))
     # show()
 
     from PIL import Image, ImageDraw

@@ -16,20 +16,19 @@ try:
                 if self.cam == None:
                     super(V831VivoMaixVideo, self).__init__(size)
                     try:
-                        from PIL import Image
-                        from maix import display
+                        # from PIL import Image
+                        from maix import display, image
                         self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = _vo_dir, ai_dir = _ai_dir)
-
-                        display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
-
+                        # display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
+                        display.__display__ = image.Image().new(mode="RGBA", size=(display.__width__, display.__height__), color=(0, 0, 0, 0))
                         display.__fastview__ = self.cam
                         def __new_draw__(img):
                             if isinstance(img, bytes):
                                 display.__fastview__.set(img)
-                            elif isinstance(img, Image.Image):
-                                display.get_draw().paste(img)
-                                display.__fastview__.set(display.__display__.tobytes())
-                                display.get_draw().paste((0, 0, 0, 0), (0, 0) + img.size) # clear
+                            # elif isinstance(img, Image.Image):
+                            #     display.get_draw().paste(img)
+                            #     display.__fastview__.set(display.__display__.tobytes())
+                            #     display.get_draw().paste((0, 0, 0, 0), (0, 0) + img.size) # clear
                         display.__draw__ = __new_draw__
 
                     except ModuleNotFoundError as e:

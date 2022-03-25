@@ -1,4 +1,7 @@
 #include "maix_image.h"
+
+static class maix_version::imlib_env imlib;
+
 // Mat img
 // img.cols 宽
 // img.rows 高

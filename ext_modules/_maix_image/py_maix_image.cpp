@@ -44,7 +44,7 @@ PYBIND11_MODULE(_maix_image, mo)
 {
     // mode_init();         //模块的初始化函数
     mo.def("load_freetype", _load_freetype, py::arg("path"), py::arg("fontHeight") = 14)
-      .def("_free_freetype", _free_freetype)
+      .def("free_freetype", _free_freetype)
       .def("get_string_size", _get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1);
 
     pybind11::class_<maix_image>(mo, "Image")

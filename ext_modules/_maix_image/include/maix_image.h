@@ -64,10 +64,27 @@ public:
   py::list _find_ball_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int h_min, int w_min, int co);
 };
 
+#include "imlib.h"
+
 class maix_version : virtual public any_image
 {
 private:
 public:
+  static struct imlib_env
+  {
+      imlib_env()
+      {
+          // init
+          printf("imlib_env init\r\n");
+	        imlib_init_all();
+      }
+      ~imlib_env()
+      {
+          // exit
+          printf("imlib_env exit\r\n");
+	        imlib_deinit_all();
+      }
+  } imlib;
   maix_version();
   py::list get_blob_color_max(std::vector<int> &roi, int critical, int co);
   py::list _maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co);

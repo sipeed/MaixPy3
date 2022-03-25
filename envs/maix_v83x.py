@@ -140,9 +140,14 @@ _maix_image_module = Pybind11Extension("_maix_image",
         get_incs(
             'ext_modules/libmaix/components/maix_cv_image/include'),
         get_incs(
+            'ext_modules/libmaix/components/third_party/imlib/include'),
+        get_incs(
             'ext_modules/_maix_image/include')
     ],
-    sources = get_srcs('ext_modules/_maix_image') + get_srcs('ext_modules/libmaix/components/maix_cv_image/src'),
+    sources =
+            get_srcs('ext_modules/_maix_image') +
+            get_srcs('ext_modules/libmaix/components/maix_cv_image/src') +
+            get_srcs('ext_modules/libmaix/components/third_party/imlib/src'),
     libraries=[
         "maix_utils", "maix_cam", "maix_disp", "maix_image",
         "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"

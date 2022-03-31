@@ -33,6 +33,8 @@ _maix_image_module = Pybind11Extension(
         get_incs(
             'ext_modules/libmaix/components/maix_cv_image/include'),
         get_incs(
+            'ext_modules/libmaix/components/third_party/include'),
+        get_incs(
             'ext_modules/libmaix/components/third_party/imlib/include'),
         get_incs(
             'ext_modules/_maix_image/include')
@@ -52,7 +54,7 @@ _maix_image_module = Pybind11Extension(
     ],
     extra_link_args=[
     ],
-    extra_compile_args=['-std=c++11', '-std=gnu++11' ],
+    extra_compile_args=['-std=c++11', '-std=gnu++11', '-DIMLIB_CONFIG_H_FILE="costom_imlib_config.h"' ],
 )
 
 _maix_camera_module = Pybind11Extension(

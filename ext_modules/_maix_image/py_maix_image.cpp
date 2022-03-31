@@ -90,5 +90,10 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("find_circles_blob", &maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
         .def("find_line", &maix_image::find_line, py::arg("func") = 0)
         .def("find_blobs", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
-        .def("custom_find_ball_blob", &maix_image::_find_ball_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("h_min") = 1, py::arg("w_min") = 1, py::arg("co") = 1);
+        .def("custom_find_ball_blob", &maix_image::_find_ball_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("h_min") = 1, py::arg("w_min") = 1, py::arg("co") = 1)
+        // maix_image &_imlib_rotation_corr(float x_rotation, float y_rotation, float z_rotation, float x_translation, float y_translation, float zoom, float fov, std::vector<std::vector<float>> corners);
+        .def("imlib_rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,
+          py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,
+          py::arg("zoom") = 1.0, py::arg("fov") = 60.0, py::arg("corners")=std::vector<std::vector<float>>{std::vector<float>{0, 0}, std::vector<float>{0, 0}})
+        ; // module end
 }

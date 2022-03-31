@@ -129,5 +129,37 @@ public:
   maix_image &_draw_image(py::object data, int x, int y, double alpha);
   std::vector<int> _get_pixel(int x, int y);
   maix_image &_set_pixel(int x, int y, std::vector<int> color);
+
+  // void imlib_rotation_corr(image_t *img, float x_rotation, float y_rotation,
+  //                  float z_rotation, float x_translation, float y_translation,
+  //                  float zoom, float fov, float *corners);
+  // https://docs.openmv.io/library/omv.image.html?highlight=rotation_corr#image.image.Image.img.rotation_corr
+  maix_image &_imlib_rotation_corr(float x_rotation, float y_rotation, float z_rotation, float x_translation, float y_translation, float zoom, float fov, std::vector<std::vector<float>> corners)
+  {
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+
+    // image_t *imlib_img = imlib_image_create(img->width, img->height, PIXFORMAT_RGB888, img->width * img->height * PIXFORMAT_BPP_RGB888, img->data, false);
+
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+
+    fb_alloc_mark();
+
+    imlib_rotation_corr(&img, x_rotation, y_rotation, z_rotation, x_translation, y_translation, zoom, fov, NULL);
+
+	  fb_alloc_free_till_mark();
+
+    // imlib_image_destroy(&resize_img);
+
+    return *this;
+  }
+
 };
 #endif

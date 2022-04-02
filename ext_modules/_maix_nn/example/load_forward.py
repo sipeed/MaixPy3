@@ -7,12 +7,12 @@ from classes_label import labels
 import time
 
 model = {
-    # "param": "/root/models/resnet18_1000_awnn.param",
-    # "bin": "/root/models/resnet18_1000_awnn.bin"
-    "bin": "./resnet.bin"
+    "param": "/home/model/resnet18_1000_awnn.param",
+    "bin": "/home/model/resnet18_1000_awnn.bin"
+    # "bin": "./resnet.bin"
 }
 options = {
-    "model_type":  "aipu",
+    "model_type":  "awnn",
     "inputs": {
         "input0": (224, 224, 3)
     },
@@ -30,7 +30,7 @@ camera.config((224, 224))
 while True:
     img = camera.capture()
     out = m.forward(img.tobytes(), quantize=True)
-    
+    print(type(out))
     print(out.shape)
     out2 = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])

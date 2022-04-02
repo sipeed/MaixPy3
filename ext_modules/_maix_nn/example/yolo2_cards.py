@@ -55,7 +55,7 @@ while 1:
     img = camera.capture()
 
     #模型前向推理
-    out = m.forward(img.tobytes(), quantize  =1 ,layout = "chw")[0]  #返回对象是一个List对象，实际输出的内容是需要进行解包
+    out = m.forward(img.tobytes(), quantize  =1 ,layout = "chw")  #返回对象是一个List对象，实际输出的内容是需要进行解包
 
     #解码器解码（后处理）
     boxes, probs = yolo2_decoder.run(out, nms=0.5, threshold=0.5, img_size=(224,224))

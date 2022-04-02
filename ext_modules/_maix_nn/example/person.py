@@ -1,3 +1,4 @@
+from lzma import MODE_NORMAL
 from maix import nn, display, camera , image
 import time
 from maix.nn import decoder
@@ -16,7 +17,8 @@ def draw_rectangle_with_title(img, box, disp_str , fps ):
 
 
 model = {
-     "bin": "/root/models/aipu_yolo_VOC2007.bin"
+     "bin": "/root/models/aipu_yolo_person.bin",
+    #  "param":"/root/models/VOC2012_awnn.param"
 }
 
 options = {
@@ -25,23 +27,24 @@ options = {
         "input0": (224, 224, 3)
     },
     "outputs": {
-        "output0": (7, 7, (1+4+20)*5)
+        "output0": (7, 7, (1+4+1)*5)
     },
     "mean": [127.5, 127.5, 127.5],
-    "norm": [0.0078125, 0.0078125, 0.0078125],
-    "scale":[8.031941],
+    "norm": [0.01448183, 0.01463443, 0.01391933],
+    "scale":[0.502853],
 }
 
 #加载模型
+print("load  model")
 m = nn.load(model, opt=options)
-
+print("load model faild")
 #获取处理图像大小
 w = options["inputs"]["input0"][1]
 h = options["inputs"]["input0"][0]
 
 # 设置标签和anchor大小
-labels = ["aeroplane","bicycle","bird","boat","bottle","bus","car","cat","chair","cow","diningtable","dog","horse","motorbike","person","pottedplant","sheep","sofa","train","tvmonitor"]
-anchors = [0.4165, 0.693 , 0.9765, 1.6065, 1.5855, 3.122 , 2.821 , 1.8515 , 3.612 , 3.7275]
+labels = ["person"]
+anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
 
 # 声明解码器并初始化
 yolo2_decoder = decoder.Yolo2(len(labels), anchors, net_in_size=(w, h), net_out_size=(7, 7))
@@ -55,11 +58,9 @@ while 1:
 
     #模型前向推理
     out = m.forward(img.tobytes(), quantize  =1 ,layout = "chw")  #返回对象是一个List对象，实际输出的内容是需要进行解包
-    print(len(out))
-    print(type(out))
 
     #解码器解码（后处理）
-    boxes, probs = yolo2_decoder.run(out, nms=0.5, threshold=0.5, img_size=(224,224))
+    boxes, probs = yolo2_decoder.run(out, nms=0.2, threshold=0.3, img_size=(224,224))
 
     #图像渲染
     for i, box in enumerate(boxes):

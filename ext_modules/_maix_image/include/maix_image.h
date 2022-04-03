@@ -161,5 +161,47 @@ public:
     return *this;
   }
 
+  maix_image &_gaussian(int size,bool unsharp,float mul, float add,bool invert)  
+  {
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+    
+    fb_alloc_mark();
+    printf("not implemented");
+    fb_alloc_free_till_mark();
+    return *this;
+  }
+  maix_image &_hist_eq(bool adaptive,float clip_limit,image_t * mask)
+  {
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+    
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+
+    fb_alloc_mark();
+    if (adaptive)
+      imlib_clahe_histeq(&img, clip_limit, mask);
+    else
+      imlib_histeq(&img,mask);
+	  fb_alloc_free_till_mark();
+
+    return * this;
+  }
 };
 #endif

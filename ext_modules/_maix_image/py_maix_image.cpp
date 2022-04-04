@@ -96,6 +96,6 @@ PYBIND11_MODULE(_maix_image, mo)
           py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,
           py::arg("zoom") = 1.0, py::arg("fov") = 60.0, py::arg("corners")=std::vector<std::vector<float>>{std::vector<float>{0, 0}, std::vector<float>{0, 0}})
         .def("gaussian",&maix_image::_gaussian,py::arg("size")=1,py::arg("unsharp")=0,py::arg("mul")=1.0,py::arg("add")=0.0,py::arg("invert")=0)
-        .def("histeq",&maix_image::_hist_eq,py::arg("adaptive"=0,py::arg("clip_limit")=-1.0)
+        .def("histeq",&maix_image::_hist_eq,py::arg("adaptive")=0,py::arg("clip_limit")=-1.0,py::arg("mask") = maix_image())
         ; // module end
 }

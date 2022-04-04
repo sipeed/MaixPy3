@@ -180,27 +180,40 @@ public:
     fb_alloc_free_till_mark();
     return *this;
   }
-  maix_image &_hist_eq(bool adaptive,float clip_limit,image_t * mask)
+  maix_image &_hist_eq(bool adaptive,float clip_limit,maix_image & mask)
   {
     if (NULL == this->_img)
     {
       py::print("no img");
       return *this;
     }
-    
+
     image_t img = {};
     img.w = this->_img->width;
     img.h = this->_img->height;
     img.pixels = (uint8_t*)this->_img->data;
     img.pixfmt = PIXFORMAT_RGB888;
 
+    image_t *img_mask;
+    if (NULL == mask._img) {
+      void * pixels;
+      img_mask = imlib_image_create(this->_img->width,this->_img->height, PIXFORMAT_RGB888, this->_img->width * this->_img->height * PIXFORMAT_BPP_RGB888, (uint8_t *)pixels, true);
+      memset((uint8_t *)pixels,255,img_mask->size);
+    }
+    else{
+      img_mask = imlib_image_create(mask._img->width,mask._img->height,PIXFORMAT_RGB888,mask._img->width * mask._img->height * PIXFORMAT_BPP_RGB888,mask._img->data,false);
+    }
+
     fb_alloc_mark();
     if (adaptive)
-      imlib_clahe_histeq(&img, clip_limit, mask);
+      imlib_clahe_histeq(&img, clip_limit, &img_mask);
     else
-      imlib_histeq(&img,mask);
+      imlib_histeq(&img,&img_mask);
+
 	  fb_alloc_free_till_mark();
 
+    imlib_image_destroy(&img_mask);
+    
     return * this;
   }
 };

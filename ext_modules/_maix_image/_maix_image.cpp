@@ -502,14 +502,22 @@ maix_image &maix_image::_draw_line(int x1, int y1, int x2, int y2, std::vector<i
   return *this;
 }
 
-maix_image &maix_image::_draw_rectangle(int x, int y, int w, int h, std::vector<int> color, int thickness)
+maix_image &maix_image::_draw_rectangle(int x_x1, int y_y1, int w_x2, int h_y2, std::vector<int> color, int thickness, bool cv_imlib)
 {
   if (NULL == this->_img)
   {
     py::print("no img");
     return *this;
   }
-  libmaix_cv_image_draw_rectangle(this->_img, x, y, w, h, MaixColor(color[0], color[1], color[2]), thickness);
+  if(cv_imlib)
+  {
+    image_t *imlib_img = MAIX_2_IMLIB(this->_img);
+    imlib_draw_rectangle(imlib_img, x_x1, y_y1, w_x2, h_y2,COLOR_R8_G8_B8_TO_RGB888(color[0],color[1],color[2]),thickness,false);
+  }
+  else
+  {
+    libmaix_cv_image_draw_rectangle(this->_img, x_x1, y_y1, w_x2, h_y2, MaixColor(color[0], color[1], color[2]), thickness);
+  }
   return *this;
 }
 

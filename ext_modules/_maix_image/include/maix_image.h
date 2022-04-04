@@ -194,26 +194,29 @@ public:
     img.pixels = (uint8_t*)this->_img->data;
     img.pixfmt = PIXFORMAT_RGB888;
 
-    image_t *img_mask;
-    if (NULL == mask._img) {
-      void * pixels;
-      img_mask = imlib_image_create(this->_img->width,this->_img->height, PIXFORMAT_RGB888, this->_img->width * this->_img->height * PIXFORMAT_BPP_RGB888, (uint8_t *)pixels, true);
-      memset((uint8_t *)pixels,255,img_mask->size);
+    image_t *mask_img = NULL;
+    if (NULL!=mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height )
+    {
+      mask_img = (image_t *)malloc(sizeof(image_t));
+      if(mask_img)
+      {
+        mask_img->w = mask._img->width;
+        mask_img->h = mask._img->height;
+        mask_img->pixels = (uint8_t*)mask._img->data;
+        mask_img->pixfmt = PIXFORMAT_RGB888;
+      }
     }
-    else{
-      img_mask = imlib_image_create(mask._img->width,mask._img->height,PIXFORMAT_RGB888,mask._img->width * mask._img->height * PIXFORMAT_BPP_RGB888,mask._img->data,false);
-    }
-
+    
     fb_alloc_mark();
     if (adaptive)
-      imlib_clahe_histeq(&img, clip_limit, &img_mask);
+      imlib_clahe_histeq(&img, clip_limit, mask_img);
     else
-      imlib_histeq(&img,&img_mask);
-
+      imlib_histeq(&img, mask_img);
 	  fb_alloc_free_till_mark();
 
-    imlib_image_destroy(&img_mask);
-    
+    if (NULL!=mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height ) 
+      free(mask_img), mask_img = NULL;
+
     return * this;
   }
 };

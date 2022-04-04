@@ -294,9 +294,9 @@ public:
 
     _v83x_vivo(int vi_w, int vi_h, int ai_w, int ai_h, int vo_dir, int ai_dir) : inited(false), ui(NULL), vi({NULL}), vo(NULL), y2r({NULL}), yuv2rgb(NULL), fm({NULL})
     {
-        // save buffer used
-        extern uint8_t libmaix_cam_vovi_bufmax, libmaix_cam_voui_bufmax;
-        libmaix_cam_vovi_bufmax = 3, libmaix_cam_voui_bufmax = 1;
+        // // save buffer used default 3 3
+        // extern uint8_t libmaix_cam_vovi_bufmax, libmaix_cam_voui_bufmax;
+        // libmaix_cam_vovi_bufmax = 3, libmaix_cam_voui_bufmax = 3;
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 

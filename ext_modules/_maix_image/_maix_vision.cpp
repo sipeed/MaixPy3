@@ -607,3 +607,70 @@ py::dict maix_version::find_line(int func)
   return_val["rotation"] = k;
   return return_val;
 }
+
+
+/*
+函数原型：
+_imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh = 0)
+roi：图像ROI区域，默认为整个图像
+threshold：阈值
+is_xywh：返回值类型选择
+is_xywh = 0：返回值为：(x1,y1,x2,y2,magnitude)
+is_xywh = 1:返回值为：（x,y,w,h,magnitude)
+*/
+py::list maix_version::_imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_rects(&out, &img, &_roi, threshold);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_rects_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    if(is_xywh)
+    {
+      tmps.append(lnk_data.rect.x);
+      tmps.append(lnk_data.rect.y);
+      tmps.append(lnk_data.rect.w);
+      tmps.append(lnk_data.rect.h);
+      tmps.append(lnk_data.magnitude);
+    }
+    else
+    {
+      tmps.append(lnk_data.corners[0].x);
+      tmps.append(lnk_data.corners[0].y);
+      tmps.append(lnk_data.corners[2].x);
+      tmps.append(lnk_data.corners[2].y);
+      tmps.append(lnk_data.magnitude);
+    }
+    return_val.append(tmps);
+  }
+  return return_val;
+}

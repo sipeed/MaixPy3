@@ -95,5 +95,6 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("imlib_rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,
           py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,
           py::arg("zoom") = 1.0, py::arg("fov") = 60.0, py::arg("corners")=std::vector<std::vector<float>>{std::vector<float>{0, 0}, std::vector<float>{0, 0}})
+        .def("find_rects",&maix_image::_imlib_find_rects,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("threshold"), py::arg("is_xywh") = 0)
         ; // module end
 }

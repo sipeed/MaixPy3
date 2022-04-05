@@ -91,6 +91,7 @@ public:
   py::list _maix_vision_find_ball_blob(std::vector<int> &thresholds, int co);
   py::dict find_line(int func);
   void version_test();
+  py::list _imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh);
 };
 
 class maix_image : virtual public any_image, public maix_version, public maix_custom

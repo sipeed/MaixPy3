@@ -47,6 +47,9 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("free_freetype", _free_freetype)
       .def("get_string_size", _get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1);
 
+    pybind11::class_<maix_image::maix_histogram>(mo, "histogram")
+        .def(pybind11::init<>());
+
     pybind11::class_<maix_image>(mo, "Image")
         .def(pybind11::init<>())
         //image属性
@@ -91,6 +94,9 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("find_line", &maix_image::find_line, py::arg("func") = 0)
         .def("find_blobs", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
         .def("custom_find_ball_blob", &maix_image::_find_ball_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("h_min") = 1, py::arg("w_min") = 1, py::arg("co") = 1)
+        // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
+        .def("imlib_get_histogram", &maix_image::_imlib_get_histogram, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, 
+          py::arg("thresholds") = std::vector<std::vector<int>>{}, py::arg("invert") = false, py::arg("other") = maix_image())
         // maix_image &_imlib_rotation_corr(float x_rotation, float y_rotation, float z_rotation, float x_translation, float y_translation, float zoom, float fov, std::vector<std::vector<float>> corners);
         .def("imlib_rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,
           py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,

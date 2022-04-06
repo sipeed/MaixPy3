@@ -674,3 +674,60 @@ py::list maix_version::_imlib_find_rects(std::vector<int> &roi,uint32_t threshol
   }
   return return_val;
 }
+
+/*
+函数原型：
+_imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+roi：图像ROI区域，默认为整个图像
+x_stride:霍夫变换时要跳过的 x 像素数
+y_stride:霍夫变换时要跳过的 y 像素数
+threshold阈值
+theta_margin:控制检测到的行的合并
+rho_margin:控制检测到的行的合并
+*/
+py::list maix_version::_imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_lines(&out, &img, &_roi, x_stride, y_stride, threshold, theta_margin, rho_margin);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_lines_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.line.x1);
+    tmps.append(lnk_data.line.y1);
+    tmps.append(lnk_data.line.x2);
+    tmps.append(lnk_data.line.y2);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}

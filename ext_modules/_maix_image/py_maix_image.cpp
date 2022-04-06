@@ -97,5 +97,6 @@ PYBIND11_MODULE(_maix_image, mo)
           py::arg("zoom") = 1.0, py::arg("fov") = 60.0, py::arg("corners")=std::vector<std::vector<float>>{std::vector<float>{0, 0}, std::vector<float>{0, 0}})
         .def("find_rects",&maix_image::_imlib_find_rects,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("threshold"), py::arg("is_xywh") = 0)
         .def("find_lines",&maix_image::_imlib_find_lines,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("x_stride") = 2,py::arg("y_stride") = 1,py::arg("threshold") = 1000,py::arg("theta_margin") = 25,py::arg("rho_margin") = 25)
+        .def("find_circles",&maix_image::_imlib_find_circles,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("x_stride") = 2,py::arg("y_stride") = 1,py::arg("threshold") = 2000,py::arg("x_margin") = 10,py::arg("y_margin") = 10,py::arg("r_margin") = 10,py::arg("r_min") = 2,py::arg("r_max") = 0,py::arg("r_step") = 2)
         ; // module end
 }

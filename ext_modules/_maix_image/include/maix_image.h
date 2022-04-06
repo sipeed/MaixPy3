@@ -93,6 +93,7 @@ public:
   void version_test();
   py::list _imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh);
   py::list _imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin);
+  py::list _imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step);
 };
 
 class maix_image : virtual public any_image, public maix_version, public maix_custom

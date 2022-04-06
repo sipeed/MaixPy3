@@ -731,3 +731,72 @@ py::list maix_version::_imlib_find_lines(std::vector<int> &roi,unsigned int x_st
   }
   return return_val;
 }
+
+/*
+函数原型：
+_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+roi：图像ROI区域，默认为整个图像
+x_stride:霍夫变换时要跳过的 x 像素数
+y_stride:霍夫变换时要跳过的 y 像素数
+threshold阈值
+x_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+y_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+r_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+r_min:控制检测到的最小圆半径.增加它以加速算​​法.默认为 2
+r_max:控制检测到的最大圆半径.减少它以加快算法速度.默认为 min(roi.w/2, roi.h/2)
+r_step:控制如何步进半径检测.默认为 2
+返回值：
+x:圆心x
+y:圆心y
+r:圆半径
+magnitude:检测圆的强度
+*/
+py::list maix_version::_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, 
+unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+  //默认为min(roi.w/2, roi.h/2)
+  if(r_max == 0) r_max = MIN(_roi.w/2,_roi.h/2);
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_circles(&out, &img, &_roi, x_stride, y_stride, threshold, x_margin, y_margin, r_margin, r_min, r_max, r_step);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_circles_list_lnk_data lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.p.x);
+    tmps.append(lnk_data.p.y);
+    tmps.append(lnk_data.r);
+    tmps.append(lnk_data.magnitude);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}

@@ -734,7 +734,8 @@ py::list maix_version::_imlib_find_lines(std::vector<int> &roi,unsigned int x_st
 
 /*
 函数原型：
-_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, 
+unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
 roi：图像ROI区域，默认为整个图像
 x_stride:霍夫变换时要跳过的 x 像素数
 y_stride:霍夫变换时要跳过的 y 像素数
@@ -795,6 +796,72 @@ unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned in
     tmps.append(lnk_data.p.y);
     tmps.append(lnk_data.r);
     tmps.append(lnk_data.magnitude);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}
+
+/*
+函数原型：
+_imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
+roi：图像ROI区域，默认为整个图像
+merge_distance: 要合并的两条线段（在一条线上的任意点）可以相互分隔的最大像素数
+max_theta_diff: merge_distance分开的要合并的两条线段的最大 theta 差异度
+
+返回值：
+x1:线段坐标x1
+y1:线段坐标y1
+x2:线段坐标x2
+y2:线段坐标y2
+magnitude:从霍夫变换返回线的大小
+theta：从霍夫变换返回直线的角度(0-179)度
+rho：从霍夫变换返回直线的rho值
+*/
+py::list maix_version::_imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+  
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_lsd_find_line_segments(&out, &img, &_roi, merge_distance, max_theta_diff);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_lines_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.line.x1);
+    tmps.append(lnk_data.line.y1);
+    tmps.append(lnk_data.line.x2);
+    tmps.append(lnk_data.line.y2);
+    tmps.append(lnk_data.magnitude);
+    tmps.append(lnk_data.theta);
+    tmps.append(lnk_data.rho);
     
     return_val.append(tmps);
   }

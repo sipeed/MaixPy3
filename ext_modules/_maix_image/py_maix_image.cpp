@@ -95,7 +95,6 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("imlib_rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,
           py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,
           py::arg("zoom") = 1.0, py::arg("fov") = 60.0, py::arg("corners")=std::vector<std::vector<float>>{std::vector<float>{0, 0}, std::vector<float>{0, 0}})
-        .def("gaussian",&maix_image::_gaussian,py::arg("size")=1,py::arg("unsharp")=0,py::arg("mul")=1.0,py::arg("add")=0.0,py::arg("invert")=0)
         .def("histeq",&maix_image::_hist_eq,py::arg("adaptive")=0,py::arg("clip_limit")=-1.0,py::arg("mask") = maix_image())
         .def("gamma_corr",&maix_image::_gamma_corr,py::arg("gamma")=1.0,py::arg("contrast")=1.0,py::arg("brightness")=0.0)
         ; // module end

@@ -164,5 +164,7 @@ public:
   maix_image &_hist_eq(bool adaptive,float clip_limit,maix_image & mask);
 
   maix_image &_gamma_corr(float gamma,float contrast,float brightness);
+
+  maix_image &_lens_corr(float strength, float zoom,float x_corr, float y_corr);
 };
 #endif

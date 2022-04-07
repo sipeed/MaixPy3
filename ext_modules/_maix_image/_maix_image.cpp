@@ -711,8 +711,9 @@ maix_image &maix_image::_set_pixel(int x, int y, std::vector<int> color)
   libmaix_cv_image_set_pixel(this->_img, x, y, colot_tmp);
   return *this;
 }
+
 maix_image &maix_image::_hist_eq(bool adaptive,float clip_limit,maix_image & mask)
-  {
+{
     if (NULL == this->_img)
     {
       py::print("no img");
@@ -749,8 +750,8 @@ maix_image &maix_image::_hist_eq(bool adaptive,float clip_limit,maix_image & mas
       free(mask_img), mask_img = NULL;
 
     return * this;
-  }
-  
+}
+
 maix_image &maix_image::_gamma_corr(float gamma,float contrast,float brightness)
 {
     if (NULL == this->_img)
@@ -766,5 +767,26 @@ maix_image &maix_image::_gamma_corr(float gamma,float contrast,float brightness)
     fb_alloc_mark();
     imlib_gamma_corr(&img,gamma,contrast,contrast);
     fb_alloc_free_till_mark();
+    return * this;
+}
+
+maix_image &maix_image::_lens_corr(float strength, float zoom, float x_corr, float y_corr)
+{
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+
+    fb_alloc_mark();
+    imlib_lens_corr(&img,strength,zoom,x_corr,y_corr);
+    fb_alloc_free_till_mark();
+    
     return * this;
 }

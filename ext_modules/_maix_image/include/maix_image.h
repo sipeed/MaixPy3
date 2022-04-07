@@ -181,6 +181,7 @@ public:
     return *this;
   }
   maix_image &_hist_eq(bool adaptive,float clip_limit,maix_image & mask)
+
   {
     if (NULL == this->_img)
     {
@@ -206,7 +207,7 @@ public:
         mask_img->pixfmt = PIXFORMAT_RGB888;
       }
     }
-    
+
     fb_alloc_mark();
     if (adaptive)
       imlib_clahe_histeq(&img, clip_limit, mask_img);
@@ -219,5 +220,6 @@ public:
 
     return * this;
   }
+  maix_image &_gamma_corr(float gamma,float contrast,float brightness);
 };
 #endif

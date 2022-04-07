@@ -711,3 +711,21 @@ maix_image &maix_image::_set_pixel(int x, int y, std::vector<int> color)
   libmaix_cv_image_set_pixel(this->_img, x, y, colot_tmp);
   return *this;
 }
+
+maix_image &maix_image::_gamma_corr(float gamma,float contrast,float brightness)
+{
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+    fb_alloc_mark();
+    imlib_gamma_corr(&img,gamma,contrast,contrast);
+    fb_alloc_free_till_mark();
+    return * this;
+}

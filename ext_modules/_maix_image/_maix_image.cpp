@@ -790,3 +790,43 @@ maix_image &maix_image::_lens_corr(float strength, float zoom, float x_corr, flo
     
     return * this;
 }
+
+maix_image &maix_image::_mean(const int ksize, bool threshold, int offset,bool invert,maix_image & mask)
+{
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return *this;
+    }
+
+    image_t img = {};
+    img.w = this->_img->width;
+    img.h = this->_img->height;
+    img.pixels = (uint8_t*)this->_img->data;
+    img.pixfmt = PIXFORMAT_RGB888;
+
+    image_t *mask_img = NULL;
+    if (NULL!=mask._img ) //check if mask is NULL
+    {
+      if (this->_img->width == mask._img->width && this->_img->height == mask._img->height ) //check if mask has same size with image
+      {
+      mask_img = (image_t *)malloc(sizeof(image_t));
+      if(mask_img)
+      {
+        mask_img->w = mask._img->width;
+        mask_img->h = mask._img->height;
+        mask_img->pixels = (uint8_t*)mask._img->data;
+        mask_img->pixfmt = PIXFORMAT_RGB888;
+      }
+      }
+      else printf("The size of mask is different with input image,use default mask!");
+    }
+
+    fb_alloc_mark();
+    imlib_mean_filter(&img,ksize,offset,threshold,invert,mask_img);
+    fb_alloc_free_till_mark();
+
+    if (mask_img!=NULL) free(mask_img), mask_img = NULL;
+
+    return * this;
+}

@@ -31,13 +31,13 @@ options = {
     },
     "mean": [127.5, 127.5, 127.5],
     "norm": [0.01448183, 0.01463443, 0.01391933],
-    "scale":[0.502853],
+    "scale":[0.32879806],
 }
 
 #加载模型
 print("load  model")
 m = nn.load(model, opt=options)
-print("load model faild")
+print("load ok")
 #获取处理图像大小
 w = options["inputs"]["input0"][1]
 h = options["inputs"]["input0"][0]
@@ -60,7 +60,7 @@ while 1:
     out = m.forward(img.tobytes(), quantize  =1 ,layout = "chw")  #返回对象是一个List对象，实际输出的内容是需要进行解包
 
     #解码器解码（后处理）
-    boxes, probs = yolo2_decoder.run(out, nms=0.2, threshold=0.3, img_size=(224,224))
+    boxes, probs = yolo2_decoder.run(out, nms=0.2, threshold=0.5, img_size=(224,224))
 
     #图像渲染
     for i, box in enumerate(boxes):

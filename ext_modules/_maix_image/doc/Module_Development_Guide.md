@@ -1,15 +1,15 @@
 # 该指南可用于个人开发者开发自己想要的maix_version功能
 
-_maix_image模块采用c++语言进行开发,通过pybind11模块进行C++与python的函数绑定.  
-模块采用轻耦合设计,对于图像的不同功能采用不同的C++类对象进行封装.软件实现上为菱形继承方法,请不要破坏整个软件实现结构.  
-class any_image类是整个_maix_image模块的基础图像容器,请尽量保持该类的不变.该类应由所有图像处理类`虚继承`.  
-class maix_image类是对应的python接口类,主要给pybind11提供统一的类绑定函数,你实现的图像方法类应由该类进行继承.  
+_maix_image模块采用c++语言进行开发,通过pybind11模块进行C++与python的函数绑定.
+模块采用轻耦合设计,对于图像的不同功能采用不同的C++类对象进行封装.软件实现上为菱形继承方法,请不要破坏整个软件实现结构.
+class any_image类是整个_maix_image模块的基础图像容器,请尽量保持该类的不变.该类应由所有图像处理类`虚继承`.
+class maix_image类是对应的python接口类,主要给pybind11提供统一的类绑定函数,你实现的图像方法类应由该类进行继承.
 
 ~~~ bash
             any_image
          |              |
          V              V
-    maix_version      other
+    maix_vision      other
                 | |
                  T
                  V
@@ -33,11 +33,11 @@ public:
 };
 
 ~~~
-当 class other类虚拟继承any_image类后,在other类内部可以使用this指针访问any_image类内容.请开发者注意内存安全性.  
-当编写完自己的other类后可以在maix_image类中进行public继承,然后在py_maix_image.cpp文件中进行函数绑定,之后就可以在pyhton的image类对象中使用作者自己的方法了.  
+当 class other类虚拟继承any_image类后,在other类内部可以使用this指针访问any_image类内容.请开发者注意内存安全性.
+当编写完自己的other类后可以在maix_image类中进行public继承,然后在py_maix_image.cpp文件中进行函数绑定,之后就可以在pyhton的image类对象中使用作者自己的方法了.
 
-相关编程请参考maix_version的实现.  
-欢迎个人开发者参与_maix_image模块的开发,为开源社区贡献自己的力量.  
+相关编程请参考maix_version的实现.
+欢迎个人开发者参与_maix_image模块的开发,为开源社区贡献自己的力量.
 
 
 

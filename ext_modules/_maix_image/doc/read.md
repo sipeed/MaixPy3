@@ -21,7 +21,7 @@ Image类 – 图像对象
 - Image.new([size = (240, 240), [color = (0, 0, 0) , [mode = "RGB"]]])
   创建一张新的图片,size为图像尺寸,color为图像填充颜色,mode为图像格式.目前支持"RGB", "RGBA", "L", "RGB16"(RGB565)
   返回图像对象，以便您可以使用 . 表示法调用另一个方法。
-  
+
 - Image.open(path)
   从二进制文件中打开一张图片,path为路径名,会统一转换成RGB模式.Image.open("./tmp.jpg")
 
@@ -121,10 +121,10 @@ maix_version类 – 图像对象视觉操作
 
 图像对象视觉操作类是对于图像的一系列操作方法的集合
 
-`class image.Image().maix_version()`
+`class image.Image().maix_vision()`
 实例化一个新的图像对象,该对象内目前没有任何内容,仅作为创建一个方法类集合.该对象被image.Image()所继承,可由image.Image()对象直接操作
 
-- maix_version.get_blob_color(roi = (0, 0, 0, 0), critical = 0, co = 0)
+- maix_vision.get_blob_color(roi = (0, 0, 0, 0), critical = 0, co = 0)
   统计函数,得到图像感兴趣区域的最大颜色值.
   roi 是感兴趣区域的矩形元组(x，y，w，h)。如果未指定，ROI即整个图像的图像矩形。 操作范围仅限于 roi 区域内的像素。尽量选取较小的区域,区域较大时统计效果比较差.
   critical为返回值区域范围,简单将统计到的最大颜色值和critical相加或相减,当为0时,返回原来的色值.
@@ -137,7 +137,7 @@ maix_version类 – 图像对象视觉操作
   当co为1时返回[L - critical, A - critical, B - critical, L + critical, A + critical, B + critical]
   当co为2时同1
 
-- maix_version.find_blobs(thresholds, roi = (0,0,0,0), x_stride = 2, y_stride = 2, invert = 0, area_threshold = 10, pixels_threshold = 10, merge = 0, margin = 0, tilt = 0, co = 1)
+- maix_vision.find_blobs(thresholds, roi = (0,0,0,0), x_stride = 2, y_stride = 2, invert = 0, area_threshold = 10, pixels_threshold = 10, merge = 0, margin = 0, tilt = 0, co = 1)
   查找图像中所有色块，并返回一个包括每个色块的色块对象的列表。
   thresholds 必须是元组列表. [(minL, minA, minB, maxL, maxA, maxB)]
   roi 是感兴趣区域的矩形元组(x，y，w，h)。如果未指定，ROI即整个图像的图像矩形。 操作范围仅限于 roi 区域内的像素。
@@ -157,7 +157,7 @@ maix_version类 – 图像对象视觉操作
   返回值:[{'x': 140, 'y': 88, 'w': 15, 'h': 7, 'pixels': 43, 'cx': 147, 'cy': 91}]
   (x, y, w, h)色块的外框,pixels,色块的像素大小,(cx, cy)色块的中心点.
 
-- maix_version.find_ball_color(thresholds, co = 1)
+- maix_vision.find_ball_color(thresholds, co = 1)
   该函数是在maix_version.find_blobs的基础上通过基尔霍夫圆拟合,并返回拟合的圆.
   thresholds 必须是元组列表. [(minL, minA, minB, maxL, maxA, maxB)]
   co为返回的颜色空间模型.可选为,如果不是特殊需要,请保持默认
@@ -166,7 +166,7 @@ maix_version类 – 图像对象视觉操作
   2       hsv
   返回值:
 
-- maix_version.find_line()
+- maix_vision.find_line()
   该函数是内置的寻线函数.通过自适应的图像操作,将图像中的黑线选出来,然后返回黑线的矩形区域,可以作为小车的寻线函数.
   返回值:
   {'rect': [9, 229, 9, 9, 145, 9, 145, 229], 'pixels': 12959, 'cx': 77, 'cy': 119, 'rotation': -1.570796251296997}
@@ -486,27 +486,27 @@ maix_version类 – 图像对象视觉操作
 
   #include "maix_image.h"
 
-maix_version::maix_version()
+maix_vision::maix_vision()
 {
-  // LOG_INFO << "Load the maix_Version module success!";
+  // LOG_INFO << "Load the maix_vision module success!";
 }
 
-void maix_version::version_test()
+void maix_vision::version_test()
 {
 }
 
-int maix_version::Distance(int x1, int y1, int x2, int y2)
+int maix_vision::Distance(int x1, int y1, int x2, int y2)
 {
   int x = abs(x1 - x2);
   int y = abs(y1 - y2);
   return int(round(sqrt(x * x + y * y)));
 }
 
-void maix_version::_maix_vision_medianBlur(int m_size)
+void maix_vision::_maix_vision_medianBlur(int m_size)
 {
 }
 
-void maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
+void maix_vision::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigmaX, double sigmaY, int borderType, std::vector<int> size, int mode)
 {
   //     cv::Mat in_img;
   //     py_img_to_in_img(py_img, in_img, size, mode); //获取图像
@@ -516,7 +516,7 @@ void maix_version::_maix_vision_GaussianBlur(std::vector<int> ksize, double sigm
   //     return tmp;
 }
 
-void maix_version::_maix_vision_Canny(int thr_h, int thr_l)
+void maix_vision::_maix_vision_Canny(int thr_h, int thr_l)
 {
   if (this->_img)
   {
@@ -533,7 +533,7 @@ void maix_version::_maix_vision_Canny(int thr_h, int thr_l)
   }
 }
 
-void maix_version::_maix_vision_HoughCircles(int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, std::vector<int> size, int mode)
+void maix_vision::_maix_vision_HoughCircles(int method, double dp, double minDist, double param1, double param2, int minRadius, int maxRadius, std::vector<int> size, int mode)
 {
   // cv::Mat in_img;
   // this->py_img_to_in_img(py_img, in_img, size, mode); //获取图像
@@ -552,7 +552,7 @@ void maix_version::_maix_vision_HoughCircles(int method, double dp, double minDi
   // return return_val;
 }
 
-py::object maix_version::_maix_vision_opencv_calcHist(int channels, std::vector<int> &roi, int histSize, std::vector<int> ranges, bool uniform, bool accumulate, std::vector<int> size, int mode)
+py::object maix_vision::_maix_vision_opencv_calcHist(int channels, std::vector<int> &roi, int histSize, std::vector<int> ranges, bool uniform, bool accumulate, std::vector<int> size, int mode)
 {
   py::list return_val;
   // cv::Mat in_img;
@@ -585,7 +585,7 @@ py::object maix_version::_maix_vision_opencv_calcHist(int channels, std::vector<
   return return_val;
 }
 
-py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, int co)
+py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, int co)
 {
   py::list return_val;
   cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
@@ -716,7 +716,7 @@ py::list maix_version::get_blob_color_max(std::vector<int> &roi, int critical, i
   return return_val;
 }
 
-py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi,
+py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi,
                                               int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin,
                                               int tilt, int co)
 {
@@ -890,7 +890,7 @@ py::list maix_version::_maix_vision_find_blob(std::vector<std::vector<int>> &thr
   return return_val;
 }
 
-py::list maix_version::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
+py::list maix_vision::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
 {
   py::list out;
   cv::Mat src(this->_img->width, this->_img->height, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
@@ -1017,7 +1017,7 @@ void AdaptiveThreshold(cv::Mat &src, cv::Mat &dst, double Maxval, int Subsize, d
   }
 }
 #define heigh_t 10
-py::dict maix_version::find_line()
+py::dict maix_vision::find_line()
 {
   py::dict return_val;
   cv::Mat src_gray, dst;
@@ -1114,7 +1114,7 @@ py::dict maix_version::find_line()
   return return_val;
 }
 
-py::object maix_version::_maix_vision_get_histogram(std::vector<std::vector<int>> &thresholds, bool invert, std::vector<int> &roi, int bins, std::vector<int> size, int mode)
+py::object maix_vision::_maix_vision_get_histogram(std::vector<std::vector<int>> &thresholds, bool invert, std::vector<int> &roi, int bins, std::vector<int> size, int mode)
 {
   py::list return_val;
   // cv::Mat in_img;

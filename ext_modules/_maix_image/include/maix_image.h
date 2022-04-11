@@ -66,7 +66,7 @@ public:
 
 #include "imlib.h"
 
-class maix_version : virtual public any_image
+class maix_vision : virtual public any_image
 {
 private:
 public:
@@ -76,9 +76,7 @@ public:
       {
           // init
           // printf("imlib_env init\r\n");
-          // imlib_init_all();
-          fb_alloc_init(2 * 1024 * 1024);
-          fmath_init();
+          imlib_init_all();
       }
       ~imlib_env()
       {
@@ -87,7 +85,7 @@ public:
           imlib_deinit_all();
       }
   } imlib;
-  maix_version();
+  maix_vision();
   py::list get_blob_color_max(std::vector<int> &roi, int critical, int co);
   py::list _maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co);
   py::list _maix_vision_find_ball_blob(std::vector<int> &thresholds, int co);
@@ -100,7 +98,7 @@ public:
   py::list _imlib_find_apriltags(std::vector<int> &roi, int families, float fx, float fy, float cx, float cy);
 };
 
-class maix_image : virtual public any_image, public maix_version, public maix_custom
+class maix_image : virtual public any_image, public maix_vision, public maix_custom
 {
 private:
 public:
@@ -139,33 +137,22 @@ public:
   maix_image &_set_pixel(int x, int y, std::vector<int> color);
 
   // https://docs.openmv.io/library/omv.image.html#image.image.histogram
-  struct maix_histogram : public py::object
+  struct maix_histogram
   {
     std::vector<float> lab_bins[3];
     maix_histogram() { ; }
-    maix_histogram(histogram_t &src) {
-
-      // o->LBins = mp_obj_new_list(hist.LBinCount, NULL);
-      // o->ABins = mp_obj_new_list(hist.ABinCount, NULL);
-      // o->BBins = mp_obj_new_list(hist.BBinCount, NULL);
-
-      // for (int i = 0; i < hist.LBinCount; i++) {
-      //     ((mp_obj_list_t *) o->LBins)->items[i] = mp_obj_new_float(hist.LBins[i]);
-      // }
-
-      // for (int i = 0; i < hist.ABinCount; i++) {
-      //     ((mp_obj_list_t *) o->ABins)->items[i] = mp_obj_new_float(hist.ABins[i]);
-      // }
-
-      // for (int i = 0; i < hist.BBinCount; i++) {
-      //     ((mp_obj_list_t *) o->BBins)->items[i] = mp_obj_new_float(hist.BBins[i]);
-      // }
-
+    maix_histogram(histogram_t &hist) {
+      lab_bins[0].resize(hist.LBinCount);
+      for (int i = 0; i < hist.LBinCount; i++) lab_bins[0][i] = hist.LBins[i];
+      lab_bins[1].resize(hist.ABinCount);
+      for (int i = 0; i < hist.ABinCount; i++) lab_bins[1][i] = hist.ABins[i];
+      lab_bins[2].resize(hist.BBinCount);
+      for (int i = 0; i < hist.BBinCount; i++) lab_bins[2][i] = hist.BBins[i];
     }
 
-    std::vector<float> &operator[](size_t pos) {
-      return lab_bins[pos];
-    };
+    // std::vector<float> &operator[](size_t pos) {
+    //   return lab_bins[pos];
+    // };
 
     std::vector<float> bins() {
       return lab_bins[0];
@@ -184,34 +171,118 @@ public:
     }
 
     void get_threshold() {
+      // histogram_t hist;
+      // hist.LBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->len;
+      // hist.ABinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->len;
+      // hist.BBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->len;
+      // fb_alloc_mark();
+      // hist.LBins = fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.ABins = fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.BBins = fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
 
+      // for (int i = 0; i < hist.LBinCount; i++) {
+      //     hist.LBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.ABinCount; i++) {
+      //     hist.ABins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.BBinCount; i++) {
+      //     hist.BBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->items[i]);
+      // }
+
+      // threshold_t t;
+      // imlib_get_threshold(&t, ((py_histogram_obj_t *) self_in)->pixfmt, &hist);
+      // fb_alloc_free_till_mark();
+
+      // py_threshold_obj_t *o = m_new_obj(py_threshold_obj_t);
+      // o->base.type = &py_threshold_type;
+      // o->pixfmt = ((py_threshold_obj_t *) self_in)->pixfmt;
+
+      // o->LValue = mp_obj_new_int(t.LValue);
+      // o->AValue = mp_obj_new_int(t.AValue);
+      // o->BValue = mp_obj_new_int(t.BValue);
     }
 
     void get_statistics() {
+      // histogram_t hist;
+      // hist.LBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->len;
+      // hist.ABinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->len;
+      // hist.BBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->len;
+      // fb_alloc_mark();
+      // hist.LBins = fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.ABins = fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.BBins = fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+
+      // for (int i = 0; i < hist.LBinCount; i++) {
+      //     hist.LBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.ABinCount; i++) {
+      //     hist.ABins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.BBinCount; i++) {
+      //     hist.BBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->items[i]);
+      // }
+
+      // statistics_t stats;
+      // imlib_get_statistics(&stats, ((py_histogram_obj_t *) self_in)->pixfmt, &hist);
+      // fb_alloc_free_till_mark();
+
+      // py_statistics_obj_t *o = m_new_obj(py_statistics_obj_t);
+      // o->base.type = &py_statistics_type;
+      // o->pixfmt = ((py_histogram_obj_t *) self_in)->pixfmt;
+
+      // o->LMean = mp_obj_new_int(stats.LMean);
+      // o->LMedian = mp_obj_new_int(stats.LMedian);
+      // o->LMode= mp_obj_new_int(stats.LMode);
+      // o->LSTDev = mp_obj_new_int(stats.LSTDev);
+      // o->LMin = mp_obj_new_int(stats.LMin);
+      // o->LMax = mp_obj_new_int(stats.LMax);
+      // o->LLQ = mp_obj_new_int(stats.LLQ);
+      // o->LUQ = mp_obj_new_int(stats.LUQ);
+      // o->AMean = mp_obj_new_int(stats.AMean);
+      // o->AMedian = mp_obj_new_int(stats.AMedian);
+      // o->AMode= mp_obj_new_int(stats.AMode);
+      // o->ASTDev = mp_obj_new_int(stats.ASTDev);
+      // o->AMin = mp_obj_new_int(stats.AMin);
+      // o->AMax = mp_obj_new_int(stats.AMax);
+      // o->ALQ = mp_obj_new_int(stats.ALQ);
+      // o->AUQ = mp_obj_new_int(stats.AUQ);
+      // o->BMean = mp_obj_new_int(stats.BMean);
+      // o->BMedian = mp_obj_new_int(stats.BMedian);
+      // o->BMode= mp_obj_new_int(stats.BMode);
+      // o->BSTDev = mp_obj_new_int(stats.BSTDev);
+      // o->BMin = mp_obj_new_int(stats.BMin);
+      // o->BMax = mp_obj_new_int(stats.BMax);
+      // o->BLQ = mp_obj_new_int(stats.BLQ);
+      // o->BUQ = mp_obj_new_int(stats.BUQ);
 
     }
 
   };
 
   // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
-  py::object _imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src)
+  maix_histogram _imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins)
   {
     if (NULL == this->_img)
     {
       py::print("no img");
-      return py::none();
+      return maix_histogram();
     }
 
     // image_t *imlib_img = imlib_image_create(img->width, img->height, PIXFORMAT_RGB888, img->width * img->height * PIXFORMAT_BPP_RGB888, img->data, false);
 
-    image_t img_tmp = {}, *arg_img = &img_tmp;
+    image_t img_tmp = { }, *arg_img = &img_tmp;
     arg_img->w = this->_img->width;
     arg_img->h = this->_img->height;
     arg_img->pixels = (uint8_t*)this->_img->data;
     arg_img->pixfmt = PIXFORMAT_RGB888;
 
     image_t other_img = {}, *other = NULL;
-    if (NULL == other_src._img)
+    if (NULL != other_src._img)
     {
         other->w = other_src._img->width;
         other->h = other_src._img->height;
@@ -240,6 +311,9 @@ public:
     histogram_t hist;
     switch (arg_img->pixfmt) {
         case PIXFORMAT_GRAYSCALE: {
+          if (bins >= 2) {
+            hist.LBinCount = bins;
+          }
           if (hist.LBinCount >= 2) {
             hist.ABinCount = 0;
             hist.BBinCount = 0;
@@ -251,18 +325,26 @@ public:
           }
           break;
         }
-        case PIXFORMAT_RGB888:
-        case PIXFORMAT_RGB565: {
+        case PIXFORMAT_RGB565:
+        case PIXFORMAT_RGB888: {
+          if (l_bins < 2) l_bins = bins;
+          hist.LBinCount = l_bins;
+          if (a_bins < 2) a_bins = bins;
+          hist.ABinCount = a_bins;
+          if (b_bins < 2) b_bins = bins;
+          hist.BBinCount = b_bins;
           if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
             hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
             hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
             hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
             imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+            py::print("imlib_get_histogram");
             list_free(&thresholds);
           }
           break;
         }
     }
+
     auto result = maix_histogram(hist);
     fb_alloc_free_till_mark();
     return result;

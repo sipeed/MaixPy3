@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # //==================================================================
-#   maix_version.find_blobs(thresholds, roi = (0,0,0,0), x_stride = 2, y_stride = 2, invert = 0, area_threshold = 10, pixels_threshold = 10, merge = 0, margin = 0, tilt = 0, co = 1)
+#   maix_vision.find_blobs(thresholds, roi = (0,0,0,0), x_stride = 2, y_stride = 2, invert = 0, area_threshold = 10, pixels_threshold = 10, merge = 0, margin = 0, tilt = 0, co = 1)
 #   查找图像中所有色块，并返回一个包括每个色块的色块对象的列表。
 #   thresholds 必须是元组列表. [(minL, minA, minB, maxL, maxA, maxB)]
 #   roi 是感兴趣区域的矩形元组(x，y，w，h)。如果未指定，ROI即整个图像的图像矩形。 操作范围仅限于 roi 区域内的像素。
@@ -38,7 +38,7 @@ class funation:
         self.event = self.run
 
     def __del__(self):
-      print("maix_version.find_blobs will exit!")
+      print("maix_vision.find_blobs will exit!")
 
     def run(self):
         tmp = camera.capture()

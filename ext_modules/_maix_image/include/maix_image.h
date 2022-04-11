@@ -170,6 +170,43 @@ public:
       return lab_bins[2];
     }
 
+    void get_percentile() {
+      // histogram_t hist;
+      // hist.LBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->len;
+      // hist.ABinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->len;
+      // hist.BBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->len;
+      // fb_alloc_mark();
+      // hist.LBins = fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.ABins = fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      // hist.BBins = fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+
+      // for (int i = 0; i < hist.LBinCount; i++) {
+      //     hist.LBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.ABinCount; i++) {
+      //     hist.ABins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->ABins)->items[i]);
+      // }
+
+      // for (int i = 0; i < hist.BBinCount; i++) {
+      //     hist.BBins[i] = mp_obj_get_float(((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->BBins)->items[i]);
+      // }
+
+      // percentile_t p;
+      // imlib_get_percentile(&p, ((py_histogram_obj_t *) self_in)->pixfmt, &hist, mp_obj_get_float(percentile));
+      // fb_alloc_free_till_mark();
+
+      // py_percentile_obj_t *o = m_new_obj(py_percentile_obj_t);
+      // o->base.type = &py_percentile_type;
+      // o->pixfmt = ((py_histogram_obj_t *) self_in)->pixfmt;
+
+      // o->LValue = mp_obj_new_int(p.LValue);
+      // o->AValue = mp_obj_new_int(p.AValue);
+      // o->BValue = mp_obj_new_int(p.BValue);
+
+      // return o;
+    }
+
     void get_threshold() {
       // histogram_t hist;
       // hist.LBinCount = ((mp_obj_list_t *) ((py_histogram_obj_t *) self_in)->LBins)->len;
@@ -307,12 +344,17 @@ public:
       list_push_back(&thresholds, &tmp_ct);
     }
 
+    if (roi_src[2] == 0) roi_src[2] = arg_img->w;
+    if (roi_src[3] == 0) roi_src[3] = arg_img->h;
+
     rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
     histogram_t hist;
     switch (arg_img->pixfmt) {
         case PIXFORMAT_GRAYSCALE: {
-          if (bins >= 2) {
+          if (bins >= 2 && bins <= 255) {
             hist.LBinCount = bins;
+          } else {
+            hist.LBinCount = bins = 255;
           }
           if (hist.LBinCount >= 2) {
             hist.ABinCount = 0;
@@ -327,18 +369,26 @@ public:
         }
         case PIXFORMAT_RGB565:
         case PIXFORMAT_RGB888: {
+          if (bins >= 2 && bins <= 255) {
+            hist.LBinCount = bins;
+          } else {
+            hist.LBinCount = bins = 255;
+          }
           if (l_bins < 2) l_bins = bins;
           hist.LBinCount = l_bins;
           if (a_bins < 2) a_bins = bins;
           hist.ABinCount = a_bins;
           if (b_bins < 2) b_bins = bins;
           hist.BBinCount = b_bins;
+
           if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
+
+            printf("%d %d %d\r\n", hist.LBinCount, hist.ABinCount, hist.BBinCount);
+
             hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
             hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
             hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
             imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
-            py::print("imlib_get_histogram");
             list_free(&thresholds);
           }
           break;

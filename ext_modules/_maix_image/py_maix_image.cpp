@@ -70,6 +70,7 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("b_bins", &maix_image::maix_histogram::b_bins)
         .def("get_threshold", &maix_image::maix_histogram::get_threshold)
         .def("get_statistics", &maix_image::maix_histogram::get_statistics)
+        .def("get_percentile", &maix_image::maix_histogram::get_percentile)
         ;
 
     pybind11::class_<maix_image>(mo, "Image")
@@ -120,7 +121,7 @@ PYBIND11_MODULE(_maix_image, mo)
         // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
         .def("get_histogram", &maix_image::_imlib_get_histogram, py::arg("roi") = std::vector<int>{0, 0, 0, 0},
           py::arg("thresholds") = std::vector<std::vector<int>>{}, py::arg("invert") = false, py::arg("other") = maix_image(),
-          py::arg("bins") = 255, py::arg("l_bins") = 255, py::arg("a_bins") = 255, py::arg("b_bins") = 255)
+          py::arg("bins") = -1, py::arg("l_bins") = -1, py::arg("a_bins") = -1, py::arg("b_bins") = -1)
         // maix_image &_imlib_rotation_corr(float x_rotation, float y_rotation, float z_rotation, float x_translation, float y_translation, float zoom, float fov, std::vector<std::vector<float>> corners);
         .def("rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,
           py::arg("x_translation") = 0.0, py::arg("y_translation") = 0.0,

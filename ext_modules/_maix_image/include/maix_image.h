@@ -130,6 +130,136 @@ public:
   std::vector<int> _get_pixel(int x, int y);
   maix_image &_set_pixel(int x, int y, std::vector<int> color);
 
+  // https://docs.openmv.io/library/omv.image.html#image.image.histogram
+  struct maix_histogram : public py::object
+  {
+    std::vector<float> lab_bins[3];
+    maix_histogram() { ; }
+    maix_histogram(histogram_t &src) {
+
+      // o->LBins = mp_obj_new_list(hist.LBinCount, NULL);
+      // o->ABins = mp_obj_new_list(hist.ABinCount, NULL);
+      // o->BBins = mp_obj_new_list(hist.BBinCount, NULL);
+
+      // for (int i = 0; i < hist.LBinCount; i++) {
+      //     ((mp_obj_list_t *) o->LBins)->items[i] = mp_obj_new_float(hist.LBins[i]);
+      // }
+
+      // for (int i = 0; i < hist.ABinCount; i++) {
+      //     ((mp_obj_list_t *) o->ABins)->items[i] = mp_obj_new_float(hist.ABins[i]);
+      // }
+
+      // for (int i = 0; i < hist.BBinCount; i++) {
+      //     ((mp_obj_list_t *) o->BBins)->items[i] = mp_obj_new_float(hist.BBins[i]);
+      // }
+
+    }
+
+    std::vector<float> &operator[](size_t pos) {
+      return lab_bins[pos];
+    };
+
+    std::vector<float> bins() {
+      return lab_bins[0];
+    }
+
+    std::vector<float> l_bins() {
+      return lab_bins[0];
+    }
+
+    std::vector<float> a_bins() {
+      return lab_bins[1];
+    }
+
+    std::vector<float> b_bins() {
+      return lab_bins[2];
+    }
+
+    void get_threshold() {
+
+    }
+    
+    void get_statistics() {
+
+    }
+
+  };
+
+  // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
+  py::object _imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src)
+  {
+    if (NULL == this->_img)
+    {
+      py::print("no img");
+      return py::none();
+    }
+
+    // image_t *imlib_img = imlib_image_create(img->width, img->height, PIXFORMAT_RGB888, img->width * img->height * PIXFORMAT_BPP_RGB888, img->data, false);
+
+    image_t img_tmp = {}, *arg_img = &img_tmp;
+    arg_img->w = this->_img->width;
+    arg_img->h = this->_img->height;
+    arg_img->pixels = (uint8_t*)this->_img->data;
+    arg_img->pixfmt = PIXFORMAT_RGB888;
+
+    image_t other_img = {}, *other = NULL;
+    if (NULL == other_src._img)
+    {
+        other->w = other_src._img->width;
+        other->h = other_src._img->height;
+        other->pixels = (uint8_t*)other_src._img->data;
+        other->pixfmt = PIXFORMAT_RGB888;
+        other = &other_img;
+    }
+
+    fb_alloc_mark();
+    
+    list_t thresholds;
+    list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
+    for (auto src : thresholds_src)
+    {
+      color_thresholds_list_lnk_data_t tmp_ct;
+      tmp_ct.LMin = src[0];
+      tmp_ct.LMax = src[1];
+      tmp_ct.AMin = src[2];
+      tmp_ct.AMax = src[3];
+      tmp_ct.BMin = src[4];
+      tmp_ct.BMax = src[5];
+      list_push_back(&thresholds, &tmp_ct);
+    }
+    
+    rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
+    histogram_t hist;
+    switch (arg_img->pixfmt) {
+        case PIXFORMAT_GRAYSCALE: {
+          if (hist.LBinCount >= 2) {
+            hist.ABinCount = 0;
+            hist.BBinCount = 0;
+            hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+            hist.ABins = NULL;
+            hist.BBins = NULL;
+            imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+            list_free(&thresholds);
+          }
+          break;
+        }
+        case PIXFORMAT_RGB888:
+        case PIXFORMAT_RGB565: {
+          if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
+            hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+            hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+            hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+            imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+            list_free(&thresholds);
+          }
+          break;
+        }
+    }
+    auto result = maix_histogram(hist);
+    fb_alloc_free_till_mark();
+    return result;
+  }
+
   // void imlib_rotation_corr(image_t *img, float x_rotation, float y_rotation,
   //                  float z_rotation, float x_translation, float y_translation,
   //                  float zoom, float fov, float *corners);
@@ -144,15 +274,15 @@ public:
 
     // image_t *imlib_img = imlib_image_create(img->width, img->height, PIXFORMAT_RGB888, img->width * img->height * PIXFORMAT_BPP_RGB888, img->data, false);
 
-    image_t img = {};
-    img.w = this->_img->width;
-    img.h = this->_img->height;
-    img.pixels = (uint8_t*)this->_img->data;
-    img.pixfmt = PIXFORMAT_RGB888;
+    image_t img_tmp = {}, *img = &img_tmp;
+    img->w = this->_img->width;
+    img->h = this->_img->height;
+    img->pixels = (uint8_t*)this->_img->data;
+    img->pixfmt = PIXFORMAT_RGB888;
 
     fb_alloc_mark();
 
-    imlib_rotation_corr(&img, x_rotation, y_rotation, z_rotation, x_translation, y_translation, zoom, fov, NULL);
+    imlib_rotation_corr(img, x_rotation, y_rotation, z_rotation, x_translation, y_translation, zoom, fov, NULL);
 
 	  fb_alloc_free_till_mark();
 

@@ -6,4 +6,5 @@ camera.config((320, 240), 0)
 while True:
   t = camera.capture()
   print(t)
+  print(type(t))
   display.show(t)

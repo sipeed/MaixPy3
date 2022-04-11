@@ -790,7 +790,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     result = PyList_New(0);
     for(int i=0; i < self->outputs_len; ++i)
     {
-        if(strcmp(output_fmt , "numpy") == 0)
+        if(strcmp(output_fmt , "numpy") == 0)  // -->numpy
         {
             // printf("py  output fmt is numpy \n");
             PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float)); // get bytes result
@@ -828,7 +828,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             PyList_Append(result, o_result_numpy2);
             Py_DECREF(o_result_numpy2);
         }
-        else
+        else  //buffer
         {
                 // printf("py output  fmt is Bytes \n");
                 PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
@@ -836,12 +836,22 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
                 Py_DECREF(result_bytes);
         }
     }
-
     if(out_fmap)
         free(out_fmap);
     if(o_input_bytes_need_free)
         Py_DECREF(o_input_bytes);
-    return result;
+
+    // return result;
+    if( self->outputs_len > 1)
+    {
+        return result;
+    }
+    else
+    {
+        return PyList_GetItem(result,0);
+    }
+
+
 err1:
     if(out_fmap)
         free(out_fmap);

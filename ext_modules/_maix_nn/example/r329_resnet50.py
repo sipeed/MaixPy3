@@ -1,16 +1,22 @@
 
-class Edge:
+class MobileNetv2:
     path = {
-        # "param": "/root/models/sobel_int8.param",
-        # "bin": "/root/models/sobel_int8.bin"
-        "bin": "/root/models/aipu_sobel.bin"
-    }
+        #R329
+        "bin": "./models/aipu_resnet50.bin"
 
+        # V831
+        # "bin": "./models/awnn_resnet50.bin"
+        # "param": "./models/awnn_resnet50.param"
+    }
     input_size = (224,224,3)
-    output_size = (224,224,3)
+    output_size = (1, 1, 1000)
 
     options = {
+        # R329
         "model_type":  "aipu",
+        #V831
+        # "model_type":  "awnn"
+
         "inputs": {
             "input0": input_size
         },
@@ -19,7 +25,7 @@ class Edge:
         },
         "mean": [127.5, 127.5, 127.5],
         "norm": [0.0078125, 0.0078125, 0.0078125],
-        "scale":[0.15196067],
+        "scale":[7.539542],   # R329 有此选项，V831没有这个选项
     }
 
     def __init__(self) -> None:
@@ -31,19 +37,18 @@ class Edge:
     def __del__(self):
         del self.model
 
-
 #main
+from classes_label import labels
 from maix import  display, camera
 import numpy as np
-global m
-m =Edge()
+from maix import nn
+m = MobileNetv2()
 camera.config((224,224))
 #loop
 while True:
     img = camera.capture()
     out = m.model.forward(img, quantize=True, layout="hwc")
-    out = out.astype(np.float32).reshape(m.output_size)
-    out = (np.ndarray.__abs__(out) * 255 / out.max()).astype(np.uint8)
-    data = out.tobytes()
-    img2 = img.load(data,(222, 222), mode="RGB")
-    display.show(img2)
+    out2 = nn.F.softmax(out)
+    msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])
+    img.draw_string(0,0,msg,scale = 0.5 , color = (183,127,221))
+    display.show(img)

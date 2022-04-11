@@ -75,14 +75,16 @@ public:
       imlib_env()
       {
           // init
-          printf("imlib_env init\r\n");
-	        imlib_init_all();
+          // printf("imlib_env init\r\n");
+          // imlib_init_all();
+          fb_alloc_init(2 * 1024 * 1024);
+          fmath_init();
       }
       ~imlib_env()
       {
           // exit
-          printf("imlib_env exit\r\n");
-	        imlib_deinit_all();
+          // printf("imlib_env exit\r\n");
+          imlib_deinit_all();
       }
   } imlib;
   maix_version();
@@ -178,7 +180,7 @@ public:
     void get_threshold() {
 
     }
-    
+
     void get_statistics() {
 
     }
@@ -213,7 +215,7 @@ public:
     }
 
     fb_alloc_mark();
-    
+
     list_t thresholds;
     list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
     for (auto src : thresholds_src)
@@ -227,7 +229,7 @@ public:
       tmp_ct.BMax = src[5];
       list_push_back(&thresholds, &tmp_ct);
     }
-    
+
     rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
     histogram_t hist;
     switch (arg_img->pixfmt) {

@@ -502,6 +502,22 @@ maix_image &maix_image::_draw_line(int x1, int y1, int x2, int y2, std::vector<i
   return *this;
 }
 
+maix_image &maix_image::_draw_cross(int x, int y, int c, int size, int thickness)
+{
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+  imlib_draw_cross(&img, x, y, c, size, thickness);
+  return *this;
+}
+
 maix_image &maix_image::_draw_rectangle(int x1_x, int y1_y, int x2_w, int y2_h, std::vector<int> color, int thickness, int is_xywh)
 {
   if (NULL == this->_img)

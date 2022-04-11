@@ -607,3 +607,362 @@ py::dict maix_version::find_line(int func)
   return_val["rotation"] = k;
   return return_val;
 }
+
+
+/*
+函数原型：
+_imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh = 0)
+roi：图像ROI区域，默认为整个图像
+threshold：阈值
+is_xywh：返回值类型选择
+is_xywh = 0：返回值为：(x1,y1,x2,y2,magnitude)
+is_xywh = 1:返回值为：（x,y,w,h,magnitude)
+*/
+py::list maix_version::_imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_rects(&out, &img, &_roi, threshold);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_rects_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    if(is_xywh)
+    {
+      tmps.append(lnk_data.rect.x);
+      tmps.append(lnk_data.rect.y);
+      tmps.append(lnk_data.rect.w);
+      tmps.append(lnk_data.rect.h);
+      tmps.append(lnk_data.magnitude);
+    }
+    else
+    {
+      tmps.append(lnk_data.corners[0].x);
+      tmps.append(lnk_data.corners[0].y);
+      tmps.append(lnk_data.corners[2].x);
+      tmps.append(lnk_data.corners[2].y);
+      tmps.append(lnk_data.magnitude);
+    }
+    return_val.append(tmps);
+  }
+  return return_val;
+}
+
+/*
+函数原型：
+_imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+roi：图像ROI区域，默认为整个图像
+x_stride:霍夫变换时要跳过的 x 像素数
+y_stride:霍夫变换时要跳过的 y 像素数
+threshold阈值
+theta_margin:控制检测到的行的合并
+rho_margin:控制检测到的行的合并
+*/
+py::list maix_version::_imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_lines(&out, &img, &_roi, x_stride, y_stride, threshold, theta_margin, rho_margin);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_lines_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.line.x1);
+    tmps.append(lnk_data.line.y1);
+    tmps.append(lnk_data.line.x2);
+    tmps.append(lnk_data.line.y2);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}
+
+/*
+函数原型：
+_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, 
+unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
+roi：图像ROI区域，默认为整个图像
+x_stride:霍夫变换时要跳过的 x 像素数
+y_stride:霍夫变换时要跳过的 y 像素数
+threshold阈值
+x_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+y_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+r_margin:控制检测到的圆圈的合并.x_margin相隔、y_margin和r_margin像素的圆被合并
+r_min:控制检测到的最小圆半径.增加它以加速算​​法.默认为 2
+r_max:控制检测到的最大圆半径.减少它以加快算法速度.默认为 min(roi.w/2, roi.h/2)
+r_step:控制如何步进半径检测.默认为 2
+返回值：
+x:圆心x
+y:圆心y
+r:圆半径
+magnitude:检测圆的强度
+*/
+py::list maix_version::_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, 
+unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+  //默认为min(roi.w/2, roi.h/2)
+  if(r_max == 0) r_max = MIN(_roi.w/2,_roi.h/2);
+
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_circles(&out, &img, &_roi, x_stride, y_stride, threshold, x_margin, y_margin, r_margin, r_min, r_max, r_step);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_circles_list_lnk_data lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.p.x);
+    tmps.append(lnk_data.p.y);
+    tmps.append(lnk_data.r);
+    tmps.append(lnk_data.magnitude);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}
+
+/*
+函数原型：
+_imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
+roi：图像ROI区域，默认为整个图像
+merge_distance: 要合并的两条线段（在一条线上的任意点）可以相互分隔的最大像素数
+max_theta_diff: merge_distance分开的要合并的两条线段的最大 theta 差异度
+
+返回值：
+x1:线段坐标x1
+y1:线段坐标y1
+x2:线段坐标x2
+y2:线段坐标y2
+magnitude:从霍夫变换返回线的大小
+theta：从霍夫变换返回直线的角度(0-179)度
+rho：从霍夫变换返回直线的rho值
+*/
+py::list maix_version::_imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+  
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_lsd_find_line_segments(&out, &img, &_roi, merge_distance, max_theta_diff);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_lines_list_lnk_data_t lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.line.x1);
+    tmps.append(lnk_data.line.y1);
+    tmps.append(lnk_data.line.x2);
+    tmps.append(lnk_data.line.y2);
+    tmps.append(lnk_data.magnitude);
+    tmps.append(lnk_data.theta);
+    tmps.append(lnk_data.rho);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}
+
+
+/*
+函数原型：
+_imlib_find_apriltags(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
+roi：图像ROI区域，默认为整个图像
+families: 解码的标签系列的位掩码，
+  image.TAG16H5   1，
+  image.TAG25H7   2，
+  image.TAG25H9   4，
+  image.TAG36H10  8，
+  image.TAG36H11  16，
+  image.ARTOOLKIT 32
+fx: 以像素为单位的相机 X 焦距
+fy: 以像素为单位的相机 Y 焦距
+cx: 图像中心image.width()/2
+cy: 图像中心image.height()/2
+
+返回值：
+x:边界框 坐标x
+y:边界框 坐标y
+w:边界框 w
+h:边界框 h
+id:apriltag ID
+family: apriltag family
+cx: 质心 x 位置
+cy: 质心 y 位置
+//rotation: 旋转弧度（未实现）
+decision_margin：匹配质量 (0.0 - 1.0)
+hamming： 接受错误数
+goodness： priltag 图像的质量 (0.0 - 1.0)
+x_translation： X 方向返回未知单位的平移
+y_translation： Y 方向返回未知单位的平移
+z_translation： Z 方向返回未知单位的平移
+x_rotation： X 平面中 apriltag 的弧度旋转
+y_rotation： Y 平面中 apriltag 的弧度旋转
+z_rotation： Z 平面中 apriltag 的弧度旋转
+*/
+py::list maix_version::_imlib_find_apriltags(std::vector<int> &roi, int families,
+                          float fx, float fy, float cx, float cy)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+  
+  list_t out;
+
+  fb_alloc_mark();
+  imlib_find_apriltags(&out, &img, &_roi, apriltag_families_t(families), fx, fy, cx, cy);
+	fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_apriltags_list_lnk_data lnk_data;
+    list_pop_front(&out,&lnk_data);
+    
+    tmps.append(lnk_data.rect.x);
+    tmps.append(lnk_data.rect.y);
+    tmps.append(lnk_data.rect.w);
+    tmps.append(lnk_data.rect.h);
+    tmps.append(lnk_data.id);
+    tmps.append(lnk_data.family);
+    tmps.append(lnk_data.centroid.x);
+    tmps.append(lnk_data.centroid.y);
+    //tmps.append(lnk_data.rotation);
+    tmps.append(lnk_data.decision_margin);
+    tmps.append(lnk_data.hamming);
+    tmps.append(lnk_data.goodness);
+    tmps.append(lnk_data.x_translation);
+    tmps.append(lnk_data.y_translation);
+    tmps.append(lnk_data.z_translation);
+    tmps.append(lnk_data.x_rotation);
+    tmps.append(lnk_data.y_rotation);
+    tmps.append(lnk_data.z_rotation);
+    
+    return_val.append(tmps);
+  }
+  return return_val;
+}

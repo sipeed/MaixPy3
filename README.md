@@ -28,16 +28,6 @@ Welcome to provide configurations of different platforms to [MaixPy3/envs/](./en
 | maix_v83x         | working    | [maix_v83x](./envs/maix_v83x.py)    | 90%  | [v83x_linux_x86_python3.8_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20210613)
 | maix_r329         | working    | [maix_r329](./envs/maix_r329.py)    |  90%  | [r329_linux_x86_python3.9_toolchain](https://github.com/sipeed/MaixPy3/releases/tag/20211101)
 
-Estimated Workload
-
-- 30% Python3.7↑ & toolchain environment adaptation Pillow spidev evdev gpiod pyserial zbarlight numpy pyaudio pyav *pybind11
-
-- 30% base library adaptation camera display image nn speech imlib
-
-- 30% AI application adaptation resnet yolo classifier FaceRecognize
-
-- 10% Peripheral library adapted to gpio spi i2c pwm event for special hardware
-
 > The development progress is in no particular order.
 
 ## License

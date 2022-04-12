@@ -120,7 +120,10 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("custom_find_ball_blob", &maix_image::_find_ball_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("h_min") = 1, py::arg("w_min") = 1, py::arg("co") = 1)
         // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
         .def("get_histogram", &maix_image::_imlib_get_histogram, py::arg("roi") = std::vector<int>{0, 0, 0, 0},
-          py::arg("thresholds") = std::vector<std::vector<int>>{}, py::arg("invert") = false, py::arg("other") = maix_image(),
+          py::arg("thresholds") = std::vector<std::vector<int>>{}, py::arg("invert") = false, py::arg("difference") = maix_image(),
+          py::arg("bins") = -1, py::arg("l_bins") = -1, py::arg("a_bins") = -1, py::arg("b_bins") = -1)
+        .def("get_statistics", &maix_image::_imlib_get_statistics, py::arg("roi") = std::vector<int>{0, 0, 0, 0},
+          py::arg("thresholds") = std::vector<std::vector<int>>{}, py::arg("invert") = false, py::arg("difference") = maix_image(),
           py::arg("bins") = -1, py::arg("l_bins") = -1, py::arg("a_bins") = -1, py::arg("b_bins") = -1)
         // maix_image &_imlib_rotation_corr(float x_rotation, float y_rotation, float z_rotation, float x_translation, float y_translation, float zoom, float fov, std::vector<std::vector<float>> corners);
         .def("rotation_corr", &maix_image::_imlib_rotation_corr, py::arg("x_rotation") = 0.0, py::arg("y_rotation") = 0.0, py::arg("z_rotation") = 0.0,

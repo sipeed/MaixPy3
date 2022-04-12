@@ -37,9 +37,9 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
 _maix_speech_module = Pybind11Extension("_maix_speech",
     include_dirs=[
         get_incs(
-            'ext_modules/_maix_speech/Maix-Speech/components/asr_lib/include'),
+            './ext_modules/libmaix/components/maix_speech/Maix-Speech/components/asr_lib/include'),
         get_incs(
-            'ext_modules/_maix_speech/Maix-Speech/components/utils/include')
+            './ext_modules/libmaix/components/maix_speech/Maix-Speech/components/utils/include')
     ],
     sources = get_srcs('ext_modules/_maix_speech', exclude=["utils", "projects"]),
     libraries=[
@@ -47,10 +47,10 @@ _maix_speech_module = Pybind11Extension("_maix_speech",
     ],
     library_dirs=[
         ext_so,
-        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/v83x",
+        "./ext_modules/libmaix/components/maix_speech/Maix-Speech/components/asr_lib/lib/v83x",
     ],
     extra_objects=[
-        "./ext_modules/_maix_speech/Maix-Speech/components/asr_lib/lib/v83x/libms_asr_v83x.a",
+        "./ext_modules/libmaix/components/maix_speech/Maix-Speech/components/asr_lib/lib/v83x/libms_asr_v83x.a",
     ],
     extra_compile_args=['-D__ARM__', '-D__ARMV7__', '-DCONF_KERNEL_IOMMU', '-DCONF_KERNEL_VERSION_4_9', '-std=c++11', '-std=gnu++11'],
     extra_link_args=[

@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include <sys/time.h>
 
+#define debug_line //printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
 PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
 
@@ -786,8 +787,10 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     PyObject* result = Py_None;
     PyObject* o_result_numpy2 = Py_None;
 
-
-    result = PyList_New(0);
+    if(self->outputs_len > 1)
+    {
+        result = PyList_New(0);
+    }
     for(int i=0; i < self->outputs_len; ++i)
     {
         if(strcmp(output_fmt , "numpy") == 0)  // -->numpy
@@ -805,7 +808,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             Py_DECREF(call_keywords);
             Py_DECREF(call_args);
             Py_DECREF(result_bytes);
-
             if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
             {
                 // printf("py  output layout is CHW\n");
@@ -823,8 +825,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
                 result = o_result_numpy2;
                 break;
             }
-
-
             PyList_Append(result, o_result_numpy2);
             Py_DECREF(o_result_numpy2);
         }
@@ -842,15 +842,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         Py_DECREF(o_input_bytes);
 
     // return result;
-    if( self->outputs_len > 1)
-    {
-        return result;
-    }
-    else
-    {
-        return PyList_GetItem(result,0);
-    }
-
+    return result;
 
 err1:
     if(out_fmap)

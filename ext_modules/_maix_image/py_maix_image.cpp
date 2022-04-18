@@ -138,5 +138,6 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("find_circles",&maix_image::_imlib_find_circles,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("x_stride") = 2,py::arg("y_stride") = 1,py::arg("threshold") = 2000,py::arg("x_margin") = 10,py::arg("y_margin") = 10,py::arg("r_margin") = 10,py::arg("r_min") = 2,py::arg("r_max") = 0,py::arg("r_step") = 2)
         .def("find_line_segments",&maix_image::_imlib_find_line_segments,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("merge_distance") = 0,py::arg("max_theta_diff") = 15)
         .def("find_apriltags",&maix_image::_imlib_find_apriltags,py::arg("roi")=std::vector<int>{0,0,0,0},py::arg("families") = 16,py::arg("fx") = 0,py::arg("fy") = 0,py::arg("cx") = 0,py::arg("cy") = 0)
+        .def("find_qrcodes",&maix_image::_imlib_find_qrcodes,py::arg("roi")=std::vector<int>{0,0,0,0})
         ; // module end
 }

@@ -966,3 +966,152 @@ py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
   }
   return return_val;
 }
+
+py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+  fb_alloc_mark();
+  imlib_find_qrcodes(&out, &img, &_roi);
+  fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    py::list tmps;
+    find_qrcodes_list_lnk_data_t lnk_data;
+    list_pop_front(&out, &lnk_data);
+
+    tmps.append(lnk_data.rect.x);
+    tmps.append(lnk_data.rect.y);
+    tmps.append(lnk_data.rect.w);
+    tmps.append(lnk_data.rect.h);
+    tmps.append(std::string(lnk_data.payload, lnk_data.payload_len));
+    tmps.append(lnk_data.version);
+    tmps.append(lnk_data.ecc_level);
+    tmps.append(lnk_data.mask);
+    tmps.append(lnk_data.data_type);
+    tmps.append(lnk_data.eci);
+
+    return_val.append(tmps);
+  }
+
+  return return_val;
+}
+
+
+// void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
+maix_image::maix_histogram maix_image::_imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins)
+{
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return maix_histogram();
+  }
+  image_t img_tmp = { }, *arg_img = &img_tmp;
+  arg_img->w = this->_img->width;
+  arg_img->h = this->_img->height;
+  arg_img->pixels = (uint8_t*)this->_img->data;
+  arg_img->pixfmt = PIXFORMAT_RGB888;
+
+  image_t other_img = {}, *other = NULL;
+  if (NULL != other_src._img)
+  {
+      other->w = other_src._img->width;
+      other->h = other_src._img->height;
+      other->pixels = (uint8_t*)other_src._img->data;
+      other->pixfmt = PIXFORMAT_RGB888;
+      other = &other_img;
+  }
+
+  fb_alloc_mark();
+
+  list_t thresholds;
+  list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
+  for (auto src : thresholds_src)
+  {
+    color_thresholds_list_lnk_data_t tmp_ct;
+    tmp_ct.LMin = src[0];
+    tmp_ct.LMax = src[1];
+    tmp_ct.AMin = src[2];
+    tmp_ct.AMax = src[3];
+    tmp_ct.BMin = src[4];
+    tmp_ct.BMax = src[5];
+    list_push_back(&thresholds, &tmp_ct);
+  }
+
+  if (roi_src[2] == 0) roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0) roi_src[3] = arg_img->h;
+
+  rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
+  histogram_t hist;
+  switch (arg_img->pixfmt) {
+    case PIXFORMAT_GRAYSCALE: {
+      if (bins >= 2 && bins <= 255) {
+        hist.LBinCount = bins;
+      } else {
+        hist.LBinCount = bins = 255;
+      }
+      if (hist.LBinCount >= 2) {
+        hist.ABinCount = 0;
+        hist.BBinCount = 0;
+        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+        hist.ABins = NULL;
+        hist.BBins = NULL;
+        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+        list_free(&thresholds);
+      }
+      break;
+    }
+    case PIXFORMAT_RGB565:
+    case PIXFORMAT_RGB888: {
+      if (bins >= 2 && bins <= 255) {
+        hist.LBinCount = bins;
+      } else {
+        hist.LBinCount = bins = 255;
+      }
+      if (l_bins < 2) l_bins = bins;
+      hist.LBinCount = l_bins;
+      if (a_bins < 2) a_bins = bins;
+      hist.ABinCount = a_bins;
+      if (b_bins < 2) b_bins = bins;
+      hist.BBinCount = b_bins;
+
+      if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
+        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+        hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+        hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+        list_free(&thresholds);
+      }
+      break;
+    }
+  }
+
+  auto result = maix_histogram(hist);
+  result.pixfmt = arg_img->pixfmt;
+  fb_alloc_free_till_mark();
+  return result;
+}

@@ -939,30 +939,50 @@ py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
 
   for (size_t i = 0; list_size(&out); i++)
   {
-    py::list tmps;
     find_apriltags_list_lnk_data lnk_data;
     list_pop_front(&out,&lnk_data);
 
-    tmps.append(lnk_data.rect.x);
-    tmps.append(lnk_data.rect.y);
-    tmps.append(lnk_data.rect.w);
-    tmps.append(lnk_data.rect.h);
-    tmps.append(lnk_data.id);
-    tmps.append(lnk_data.family);
-    tmps.append(lnk_data.centroid.x);
-    tmps.append(lnk_data.centroid.y);
-    //tmps.append(lnk_data.rotation);
-    tmps.append(lnk_data.decision_margin);
-    tmps.append(lnk_data.hamming);
-    tmps.append(lnk_data.goodness);
-    tmps.append(lnk_data.x_translation);
-    tmps.append(lnk_data.y_translation);
-    tmps.append(lnk_data.z_translation);
-    tmps.append(lnk_data.x_rotation);
-    tmps.append(lnk_data.y_rotation);
-    tmps.append(lnk_data.z_rotation);
+    py::dict val;
+    val["x"] = lnk_data.rect.x;
+    val["y"] = lnk_data.rect.y;
+    val["w"] = lnk_data.rect.w;
+    val["h"] = lnk_data.rect.h;
+    val["id"] = lnk_data.id;
+    val["family"] = lnk_data.family;
 
-    return_val.append(tmps);
+    {
+      py::list tmp;
+      tmp.append(lnk_data.centroid.x);
+      tmp.append(lnk_data.centroid.y);
+      val["centroid"] = tmp;
+    }
+
+    py::list corners;
+    for (int i = 0; i < 4; i++)
+    {
+      py::list tmp;
+      tmp.append(lnk_data.corners[i].x);
+      tmp.append(lnk_data.corners[i].y);
+      corners.append(tmp);
+    }
+
+    val["corners"] = corners;
+
+    val["family"] = lnk_data.family;
+
+    val["x_translation"] = lnk_data.x_translation;
+    val["y_translation"] = lnk_data.y_translation;
+    val["z_translation"] = lnk_data.z_translation;
+
+    val["decision_margin"] = lnk_data.decision_margin;
+    val["hamming"] = lnk_data.hamming;
+    val["goodness"] = lnk_data.goodness;
+
+    val["x_rotation"] = lnk_data.x_rotation;
+    val["y_rotation"] = lnk_data.y_rotation;
+    val["z_rotation"] = lnk_data.z_rotation;
+
+    return_val.append(val);
   }
   return return_val;
 }
@@ -1000,22 +1020,32 @@ py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
 
   for (size_t i = 0; list_size(&out); i++)
   {
-    py::list tmps;
     find_qrcodes_list_lnk_data_t lnk_data;
     list_pop_front(&out, &lnk_data);
 
-    tmps.append(lnk_data.rect.x);
-    tmps.append(lnk_data.rect.y);
-    tmps.append(lnk_data.rect.w);
-    tmps.append(lnk_data.rect.h);
-    tmps.append(std::string(lnk_data.payload, lnk_data.payload_len));
-    tmps.append(lnk_data.version);
-    tmps.append(lnk_data.ecc_level);
-    tmps.append(lnk_data.mask);
-    tmps.append(lnk_data.data_type);
-    tmps.append(lnk_data.eci);
+    py::dict val;
+    val["x"] = lnk_data.rect.x;
+    val["y"] = lnk_data.rect.y;
+    val["w"] = lnk_data.rect.w;
+    val["h"] = lnk_data.rect.h;
+    val["payload"] = std::string(lnk_data.payload, lnk_data.payload_len);
+    val["version"] = lnk_data.version;
+    val["ecc_level"] = lnk_data.ecc_level;
+    val["mask"] = lnk_data.mask;
+    val["data_type"] = lnk_data.data_type;
+    val["eci"] = lnk_data.eci;
 
-    return_val.append(tmps);
+    py::list corners;
+    for (int i = 0; i < 4; i++)
+    {
+      py::list tmp;
+      tmp.append(lnk_data.corners[i].x);
+      tmp.append(lnk_data.corners[i].y);
+      corners.append(tmp);
+    }
+    val["corners"] = corners;
+
+    return_val.append(val);
   }
 
   return return_val;

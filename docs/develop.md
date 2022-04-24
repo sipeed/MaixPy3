@@ -83,13 +83,15 @@ your v83x
 
 - adb shell "pip install /root/maixpy3-0.3.5-cp38-cp38-linux_armv7l.whl --upgrade"
 
-- python3.8 setup.py clean --all bdist_wheel maix_v83x && adb shell 'rm ./dist/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl' && adb push ./dist/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl --upgrade"
+- python3.8 setup.py clean --all bdist_wheel maix_v83x && adb shell 'rm /root/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl' && adb push ./dist/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl --upgrade"
 
 your r329
 
 - source /opt/r329_linux_x86_python3.9_toolchain/envsetup.sh
 
 - python3.9 setup.py bdist_wheel maix_r329
+
+- rm /root/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl
 
 - python3.9 setup.py clean --all bdist_wheel maix_r329 && scp ./dist/maixpy3-0.4.3-cp39*.whl root@192.168.0.153:~/
 

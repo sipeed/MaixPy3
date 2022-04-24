@@ -97,6 +97,7 @@ public:
   py::list _imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff);
   py::list _imlib_find_apriltags(std::vector<int> &roi, int families, float fx, float fy, float cx, float cy);
   py::list _imlib_find_qrcodes(std::vector<int> &roi);
+  py::list _imlib_find_barcodes(std::vector<int> &roi);
 };
 
 class maix_image : virtual public any_image, public maix_vision, public maix_custom

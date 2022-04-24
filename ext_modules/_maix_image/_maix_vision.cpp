@@ -1051,6 +1051,67 @@ py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
   return return_val;
 }
 
+py::list maix_vision::_imlib_find_barcodes(std::vector<int> &roi)
+{
+  py::list return_val;
+  if(NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t*)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  rectangle_t _roi;
+
+  _roi.x = roi[0];
+  _roi.y = roi[1];
+  _roi.w = roi[2];
+  _roi.h = roi[3];
+
+  //默认整个图像
+  if(_roi.w == 0)  _roi.w = img.w;
+  if(_roi.h == 0)  _roi.h = img.h;
+
+  list_t out;
+  fb_alloc_mark();
+  imlib_find_barcodes(&out, &img, &_roi);
+  fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    find_barcodes_list_lnk_data_t lnk_data;
+    list_pop_front(&out, &lnk_data);
+
+    py::dict val;
+    val["x"] = lnk_data.rect.x;
+    val["y"] = lnk_data.rect.y;
+    val["w"] = lnk_data.rect.w;
+    val["h"] = lnk_data.rect.h;
+    val["payload"] = std::string(lnk_data.payload, lnk_data.payload_len);
+    val["rotation"] = lnk_data.rotation;
+    val["type"] = lnk_data.type;
+    val["quality"] = lnk_data.quality;
+
+    py::list corners;
+    for (int i = 0; i < 4; i++)
+    {
+      py::list tmp;
+      tmp.append(lnk_data.corners[i].x);
+      tmp.append(lnk_data.corners[i].y);
+      corners.append(tmp);
+    }
+    val["corners"] = corners;
+
+    return_val.append(val);
+  }
+
+  return return_val;
+}
 
 // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
 maix_image::maix_histogram maix_image::_imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins)

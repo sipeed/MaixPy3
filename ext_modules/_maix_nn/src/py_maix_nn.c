@@ -5,6 +5,7 @@
 
 #include "string.h"
 #include "libmaix_nn.h"
+#define MDSC 1
 
 
 static PyObject* _maix_nn_help() {
@@ -12,6 +13,49 @@ static PyObject* _maix_nn_help() {
 }
 
 PyDoc_STRVAR(_maix_nn_load_doc, "load model, returen a nn.Model object\n");
+#if MDSC
+static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args)
+{
+    static char *kwlist[] = {"mdsc_path", NULL};
+    PyObject *mdsc_path        = NULL;
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O:load", kwlist,
+                                     &mdsc_path))
+    {
+        return NULL;
+    }
+    if(!mdsc_path)
+    {
+        PyErr_SetString(PyExc_ValueError, "need mdsc_path");
+        return NULL;
+    }
+    /* new object */
+    PyObject* call_args = PyList_New(0);
+    PyObject* call_keywords = PyDict_New();
+    PyObject* model_obj = PyMaix_NN_Model_Type.tp_new(&PyMaix_NN_Model_Type, call_args, call_keywords);
+    Py_DECREF(call_args);
+    Py_DECREF(call_keywords);
+    if(!model_obj)
+    {
+        PyErr_NoMemory();
+        return NULL;
+    }
+    /*object init */
+    call_args = Py_BuildValue("(O)", mdsc_path);
+    call_keywords = PyDict_New();
+    PyObject *o_init_func = PyObject_GetAttrString(model_obj, "__init__");
+    PyObject* ret = PyObject_Call(o_init_func, call_args, call_keywords);
+    // Py_DECREF(opt);
+    Py_DECREF(call_args);
+    Py_DECREF(call_keywords);
+    Py_DECREF(o_init_func);
+    if( ret == NULL)
+    {
+        return NULL;
+    }
+    return model_obj;
+}
+
+#else
 static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args)
 {
     /* parse args */
@@ -59,6 +103,7 @@ static PyObject *_maix_nn_load(PyObject *self, PyObject *args, PyObject *kw_args
 
     return model_obj;
 }
+#endif
 
 static PyMethodDef _maix_nn_methods[] = {
     {"help", (PyCFunction)_maix_nn_help, METH_NOARGS, _maix_nn_doc},

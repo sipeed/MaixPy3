@@ -10,6 +10,7 @@
 #include <set>
 #include <typeinfo>
 #include "libmaix_nn.h"
+#include "libmaix_nn_decoder.h"
 #include "libmaix_nn_decoder_retinaface.h"
 
 #define MAX_LEN 10

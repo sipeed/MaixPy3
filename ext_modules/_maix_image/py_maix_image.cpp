@@ -40,12 +40,36 @@ py::tuple _get_string_size(std::string str, double scale, int thickness)
   return py::make_tuple(w, h);
 }
 
+maix_image *_image_new(std::vector<int> size, std::vector<int> color, std::string mode)
+{
+  auto tmp = new maix_image();
+  tmp->_new(size, color, mode);
+  return tmp;
+}
+
+maix_image *_image_load(py::object data, std::vector<int> size, std::string mode)
+{
+  auto tmp = new maix_image();
+  tmp->_load(data, size, mode);
+  return tmp;
+}
+
+maix_image *_image_open(std::string path)
+{
+  auto tmp = new maix_image();
+  tmp->_open_file(path);
+  return tmp;
+}
+
 PYBIND11_MODULE(_maix_image, mo)
 {
     // mode_init();         //模块的初始化函数
     mo.def("load_freetype", _load_freetype, py::arg("path"), py::arg("fontHeight") = 14)
       .def("free_freetype", _free_freetype)
-      .def("get_string_size", _get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1);
+      .def("get_string_size", _get_string_size, py::arg("str"), py::arg("scale") = 1.0, py::arg("thickness") = 1)
+      .def("new", _image_new, py::arg("size") = std::vector<int>{240, 240}, py::arg("color") = std::vector<int>{0, 0, 0}, py::arg("mode") = "RGB")
+      .def("load", _image_load, py::arg("data"), py::arg("size") = std::vector<int>{240, 240}, py::arg("mode") = "RGB")
+      .def("open", _image_open, py::arg("str"));
 
     pybind11::class_<maix_image::maix_histogram>(mo, "histogram")
         .def(pybind11::init<>())
@@ -106,6 +130,7 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("convert", &maix_image::_convert, py::arg("mode") = "RGB")
         .def("crop", &maix_image::_draw_crop, py::arg("x"), py::arg("y"), py::arg("w"), py::arg("h"))
         .def("draw_image", &maix_image::_draw_image, py::arg("img"), py::arg("x") = 0, py::arg("y") = 0, py::arg("alpha") = -1.)
+        .def("paste", &maix_image::_draw_image, py::arg("img"), py::arg("x") = 0, py::arg("y") = 0, py::arg("alpha") = -1.)
         .def("show", &maix_image::_show)
         .def("get_pixel", &maix_image::_get_pixel, py::arg("x"), py::arg("y"))
         .def("set_pixel", &maix_image::_set_pixel, py::arg("x"), py::arg("y"), py::arg("color"))

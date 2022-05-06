@@ -1,3 +1,5 @@
+2021年10月, dianjixz 所著.
+
 # 该指南可用于个人开发者开发自己想要的maix_version功能
 
 _maix_image模块采用c++语言进行开发,通过pybind11模块进行C++与python的函数绑定.

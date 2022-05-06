@@ -11,7 +11,7 @@
 #include <typeinfo>
 #include "libmaix_nn.h"
 #include "libmaix_nn_decoder.h"
-#include "libmaix_nn_decoder_yolo2.h"
+// #include "libmaix_nn_decoder_yolo2.h"
 #include "libmaix_nn_decoder_yolo2.h"
 
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)

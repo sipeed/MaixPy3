@@ -3,8 +3,27 @@
 #include "libmaix_nn.h"
 #include "stdlib.h"
 #include <sys/time.h>
-
+#include "mdsc.h"
 #define debug_line //printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
+#define MDSC 1
+int save_bin(const char *path, int size, uint8_t *buffer)
+{
+    FILE *fp = fopen(path, "wb");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "fopen %s failed\n", path);
+        return -1;
+    }
+    int nwrite = fwrite(buffer, 1, size, fp);
+    if (nwrite != size)
+    {
+        fprintf(stderr, "fwrite bin failed %d\n", nwrite);
+        return -1;
+    }
+    fclose(fp);
+
+    return 0;
+}
 
 PyDoc_STRVAR(Maix_NN_Model_Object_type_doc, "neural network model object.\n");
 
@@ -21,6 +40,8 @@ static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     self->out_buffer      = NULL;
     self->inputs = NULL;
     self->outputs = NULL;
+    self->mdsc = NULL;
+    self->info = NULL;
     return (PyObject*)self;
 }
 
@@ -51,6 +72,16 @@ static void Model_del(ModelObject *self)
         free(self->quantize_buffer);
         self->quantize_buffer = NULL;
     }
+    if(! self->mdsc)
+    {
+        free(self->mdsc);
+        self->mdsc = NULL;
+    }
+    if(! self->info)
+    {
+        free(self->info);
+        self->info = NULL;
+    }
     if(self->nn)
     {
         libmaix_nn_destroy(&(self->nn));
@@ -73,6 +104,66 @@ static void Model_del(ModelObject *self)
     Py_DECREF(self->m_numpy);
 }
 
+#if MDSC
+static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
+{
+    static char *kwlist[] = {"mdsc_path", NULL};
+    PyObject *o_mdsc_path = NULL;
+    libmaix_err_t err = LIBMAIX_ERR_NONE;
+    self->m_numpy = PyImport_ImportModule("numpy");
+    if(!self->m_numpy)
+    {
+        PyErr_SetString(PyExc_EnvironmentError, "need numpy module");
+        return -1;
+    }
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "O:__init__", kwlist,
+                                     &o_mdsc_path))
+    {
+        return -1;
+    }
+    if(!o_mdsc_path)
+    {
+        PyErr_SetString(PyExc_ValueError, "arg model_path is needed");
+        return -1;
+    }
+    if(! PyObject_TypeCheck(o_mdsc_path, &PyUnicode_Type))
+    {
+        PyErr_SetString(PyExc_NotImplementedError, "only support str type");
+        return -1;
+    }
+    if( PyObject_TypeCheck(o_mdsc_path, &PyUnicode_Type))
+    {
+        printf("string type\n");
+    }
+    //init by libmaix API
+    libmaix_nn_module_init();
+    char * mdsc = (char*)PyUnicode_DATA(o_mdsc_path);
+    printf("%s\n",mdsc);
+    self->mdsc = mdsc;
+    self->info = (ini_info_t *)malloc(sizeof(ini_info_t));
+    libmaix_nn_model_path_t *model_path = (libmaix_nn_model_path_t * )malloc(sizeof(libmaix_nn_model_path_t));
+    libmaix_nn_opt_param_t *opt_param = (libmaix_nn_opt_param_t *)malloc(sizeof(libmaix_nn_opt_param_t));
+    read_file(self->mdsc,self->info);
+    self->nn = build_model(self->info , model_path , opt_param);
+    if(!self->nn)
+    {
+        PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");
+        err = LIBMAIX_ERR_NOT_READY;
+        goto end;
+    }
+    self->is_init = true;
+    return 0;
+end:
+    /* load by libmaix API error deal*/
+    if(self->nn)
+    {
+        libmaix_nn_destroy(&(self->nn));
+    }
+    libmaix_nn_module_deinit();
+    /* load by libmaix API error deal end*/
+    return (int)err;
+}
+#else
 static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
 {
     static char *kwlist[] = {"model_path", "opt", NULL};
@@ -547,6 +638,10 @@ end:
     /* load by libmaix API error deal end*/
     return (int)err;
 }
+#endif
+
+
+
 
 static PyObject *Model_str(PyObject *object)
 {
@@ -559,6 +654,266 @@ static PyObject *Model_str(PyObject *object)
 }
 
 PyDoc_STRVAR(Model_forward_doc, "forward network.\n");
+#if MDSC
+static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_args)
+{
+    PyObject* o_input_bytes = NULL;
+    bool o_input_bytes_need_free = false;
+    libmaix_nn_layer_t* out_fmap = NULL;
+    struct timeval start, end;
+    int64_t interval_s;
+
+    if(!self->is_init)
+    {
+        PyErr_SetString(PyExc_PermissionError, "not initialize yet");
+        return NULL;
+    }
+    libmaix_err_t err = LIBMAIX_ERR_NONE;
+    PyObject *o_inputs = NULL;
+    const char* layout_str = "hwc";
+    int quantize = 1;
+    int debug = 0;
+    const char* output_fmt = "numpy";
+    static char *kwlist[] = {"inputs", "quantize", "layout", "debug","output_fmt", NULL};
+
+    /* Get the buffer's memory */
+    if (!PyArg_ParseTupleAndKeywords(args, kw_args, "O|$psps:forward", kwlist,
+                                     &o_inputs, &quantize, &layout_str, &debug,&output_fmt ))
+    {
+        return NULL;
+    }
+    if(!o_inputs)
+    {
+        printf("py  forward inputs is emputy \n");
+        PyErr_SetString(PyExc_ValueError, "input error");
+        return NULL;
+    }
+    if(PyList_Check(o_inputs))
+    {
+        PyErr_SetString(PyExc_NotImplementedError, "not support multiple input yet");
+        return NULL;
+    }
+
+    libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
+    if(strcmp(layout_str, "hwc") == 0)
+    {
+        // printf("py layout is hwc \n");
+        outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
+    }
+    else if (strcmp(layout_str, "chw") == 0)
+    {
+        // printf("py  layout is chw  \n");
+        outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
+    }
+    else
+    {
+          PyErr_SetString(PyExc_NotImplementedError, "not support recurrent output layout yet");
+          return NULL;
+    }
+    long input_h = self->info->inputs_shape[0][0];
+    long input_w = self->info->inputs_shape[0][1];
+    long input_c = self->info->inputs_shape[0][2];
+    self->inputs_len = self->info->input_num;
+    self->outputs_len = self->info->output_num;
+    if(PyBytes_Check(o_inputs))
+    {
+        // printf("py  input is bytes\n");
+        o_input_bytes = o_inputs;
+    }
+    else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)
+    {
+        o_input_bytes = PyObject_CallMethod(o_inputs, "tobytes", NULL);
+        if(o_input_bytes == NULL)
+        {
+            PyErr_SetString(PyExc_Exception, "tobytes error");
+            return NULL;
+        }
+        o_input_bytes_need_free = true;
+    }
+    else
+    {
+        PyErr_SetString(PyExc_ValueError, "not supported input object, only support bytes and PIL.Image object");
+        return NULL;
+    }
+
+    if((Py_ssize_t)(input_w * input_h * input_c) != PyBytes_Size(o_input_bytes))
+    {
+        PyErr_Format(PyExc_ValueError, "input shape error, need: %d (%d, %d, %d), but: %d", input_w * input_h * input_c, input_h, input_w, input_c, PyBytes_Size(o_input_bytes));
+        goto err0;
+    }
+    char* input_bytes = PyBytes_AsString(o_input_bytes);
+    // printf("py  input bytes as string \n");
+    if(input_bytes == NULL)
+    {
+        PyErr_SetString(PyExc_ValueError, "get bytes data error");
+        goto err0;
+    }
+    /* libmaix API */
+    libmaix_nn_layer_t input = {
+        .w = input_w,
+        .h = input_h,
+        .c = input_c,
+        .dtype = (quantize == 1 ? LIBMAIX_NN_DTYPE_INT8 : LIBMAIX_NN_DTYPE_UINT8),
+        .data = input_bytes,
+        .need_quantization = (quantize == 0 ? false : true),
+        .buff_quantization = NULL
+    };
+    Py_ssize_t _size = input.w * input.h * input.c;
+    if(input.need_quantization)
+    {
+        if(!self->quantize_buffer)
+        {
+            int8_t* quantize_buffer = (int8_t*)malloc(_size);
+            if(!quantize_buffer)
+            {
+                PyErr_Format(PyExc_MemoryError, "no memory for quantize buffer, size:%d", _size);
+                goto err0;
+            }
+            self->quantize_buffer = quantize_buffer;
+        }
+        input.buff_quantization = self->quantize_buffer;
+    }
+    // outputs as a list ,use a index to find a position and
+    out_fmap = (libmaix_nn_layer_t*)malloc(self->outputs_len * sizeof(libmaix_nn_layer_t));
+    if(!out_fmap)
+    {
+        PyErr_NoMemory();
+        goto err0;
+    }
+    for(int i=0; i<self->outputs_len; ++i)
+    {
+        long output_h = self->info->outputs_shape[i][0];
+        long output_w = self->info->outputs_shape[i][1];
+        long output_c = self->info->outputs_shape[i][2];
+
+        out_fmap[i].w = output_w;
+        out_fmap[i].h = output_h;
+        out_fmap[i].c = output_c;
+        out_fmap[i].dtype = LIBMAIX_NN_DTYPE_FLOAT;
+        out_fmap[i].layout = outputs_layout;
+        out_fmap[i].data = NULL;
+        out_fmap[i].need_quantization = true;
+    }
+    //  output buffer alloction
+    if(!self->out_buffer)
+    {
+        self->out_buffer = (float**)malloc(self->outputs_len * sizeof(float*));
+        if(!self->out_buffer)
+        {
+            PyErr_Format(PyExc_MemoryError, "no memory for out buffer, need size:%d", self->outputs_len * sizeof(float*));
+            goto err1;
+        }
+        memset(self->out_buffer, 0, self->outputs_len * sizeof(float*));    // init new memory area
+        for(int i=0; i<self->outputs_len; ++i)
+        {
+            _size = out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float);
+            self->out_buffer[i] = (float*)malloc(_size);
+            if(!self->out_buffer[i])
+            {
+                free_layers_data_mem(self->out_buffer, self->outputs_len);
+                PyErr_Format(PyExc_MemoryError, "no memory for out buffer, need size:%d", sizeof(float*));
+                goto err1;
+            }
+        }
+    }
+    for(int i=0; i < self->outputs_len; ++i)
+    {
+        out_fmap[i].data = self->out_buffer[i];
+    }
+    if(debug)
+    {
+        gettimeofday(&start, NULL);
+    }
+    // forward
+    err = self->nn->forward(self->nn, &input, out_fmap);
+
+    if(err != LIBMAIX_ERR_NONE)
+    {
+        printf("py  forward is faild\n");
+        PyErr_Format(PyExc_Exception, "libmaix_nn forward fail: %s\n", libmaix_get_err_msg(err));
+        goto err1;
+    }
+    if(debug)
+    {
+        gettimeofday(&end, NULL );
+        interval_s  =(int64_t)(end.tv_sec - start.tv_sec)*1000000ll + end.tv_usec - start.tv_usec;
+        printf("forward use time: %lld us\n", interval_s);
+    }
+
+    PyObject* result = Py_None;
+    PyObject* o_result_numpy2 = Py_None;
+
+    if(self->outputs_len > 1)
+    {
+        result = PyList_New(0);
+    }
+    for(int i=0; i < self->outputs_len; ++i)
+    {
+        if(strcmp(output_fmt , "numpy") == 0)  // -->numpy
+        {
+            // printf("py  output fmt is numpy \n");
+            PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float)); // get bytes result
+            PyObject *call_args = Py_BuildValue("(O)", result_bytes);
+            PyObject *call_keywords = PyDict_New();
+            PyObject *tmp = PyUnicode_FromString("float32");
+            PyDict_SetItemString(call_keywords, "dtype", tmp);
+            PyObject* o_frombuffer = PyObject_GetAttrString(self->m_numpy, "frombuffer");
+            PyObject* o_result_numpy = PyObject_Call(o_frombuffer, call_args, call_keywords); //  trainform  to  numpy type
+            Py_DECREF(o_frombuffer);
+            Py_DECREF(tmp);
+            Py_DECREF(call_keywords);
+            Py_DECREF(call_args);
+            Py_DECREF(result_bytes);
+            if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
+            {
+                // printf("py  output layout is CHW\n");
+                o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
+            }
+            else
+            {
+                // printf("py output layout is HWC\n");
+                o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
+            }
+            Py_DECREF(o_result_numpy);
+
+            if(result == Py_None)
+            {
+                result = o_result_numpy2;
+                break;
+            }
+
+            PyList_Append(result, o_result_numpy2);
+            Py_DECREF(o_result_numpy2);
+        }
+        else  //buffer
+        {
+            PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
+            if(result == Py_None)
+            {
+                result = result_bytes;
+                break;
+            }
+            PyList_Append(result, result_bytes);
+            Py_DECREF(result_bytes);
+        }
+    }
+    if(out_fmap)
+        free(out_fmap);
+    if(o_input_bytes_need_free)
+        Py_DECREF(o_input_bytes);
+
+    // return result;
+    return result;
+
+err1:
+    if(out_fmap)
+        free(out_fmap);
+err0:
+    if(o_input_bytes_need_free)
+        Py_DECREF(o_input_bytes);
+    return NULL;
+}
+#else
 static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_args)
 {
     PyObject* o_input_bytes = NULL;
@@ -604,12 +959,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     if(strcmp(layout_str, "hwc") == 0)
     {
-        // printf("py layout is hwc \n");
+        printf("py layout is hwc \n");
         outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     }
     else if (strcmp(layout_str, "chw") == 0)
     {
-        // printf("py  layout is chw  \n");
+        printf("py  layout is chw  \n");
         outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
     }
     else
@@ -637,7 +992,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
 
     if(PyBytes_Check(o_inputs))
     {
-        // printf("py  input is bytes\n");
+        printf("py  input is bytes\n");
         o_input_bytes = o_inputs;
     }
     else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)
@@ -729,7 +1084,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         out_fmap[i].dtype = LIBMAIX_NN_DTYPE_FLOAT;
         out_fmap[i].layout = outputs_layout;
         out_fmap[i].data = NULL;
-        // printf("py output %d   w:%d   h:%d   c:%d  \n", i, output_w,output_h,output_c);
+        out_fmap[i].need_quantization = true;
     }
     Py_DECREF(o_outputs_shape);
 
@@ -767,9 +1122,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         gettimeofday(&start, NULL);
     }
     // forward
-    // printf("py  forward\n");
     err = self->nn->forward(self->nn, &input, out_fmap);
-    // printf("py  forward has done\n");
 
     if(err != LIBMAIX_ERR_NONE)
     {
@@ -810,12 +1163,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             Py_DECREF(result_bytes);
             if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
             {
-                // printf("py  output layout is CHW\n");
+                printf("py  output layout is CHW\n");
                 o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
             }
             else
             {
-                // printf("py output layout is HWC\n");
+                printf("py output layout is HWC\n");
                 o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
             }
             Py_DECREF(o_result_numpy);
@@ -825,15 +1178,20 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
                 result = o_result_numpy2;
                 break;
             }
+
             PyList_Append(result, o_result_numpy2);
             Py_DECREF(o_result_numpy2);
         }
         else  //buffer
         {
-                // printf("py output  fmt is Bytes \n");
-                PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
-                PyList_Append(result,  result_bytes);
-                Py_DECREF(result_bytes);
+            PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float));
+            if(result == Py_None)
+            {
+                result = result_bytes;
+                break;
+            }
+            PyList_Append(result, result_bytes);
+            Py_DECREF(result_bytes);
         }
     }
     if(out_fmap)
@@ -852,6 +1210,10 @@ err0:
         Py_DECREF(o_input_bytes);
     return NULL;
 }
+#endif
+
+
+
 static PyMethodDef Model_methods[] = {
     {"forward", (PyCFunction)Model_forward, METH_VARARGS | METH_KEYWORDS, Model_forward_doc},
     {NULL, NULL, 0, NULL},

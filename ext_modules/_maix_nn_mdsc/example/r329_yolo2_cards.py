@@ -1,15 +1,15 @@
 class Yolo:
     path = {
         #R329
-        "bin": "./models/aipu_yolo_person.bin"
+        "bin": "./models/aipu_yolo_card.bin"
 
         # V831
-        # "bin": "./models/awnn_yolo_person.bin"
-        # "param": "./models/awnn_yolo_person.param"
+        # "bin": "./models/awnn_yolo_card.bin"
+        # "param": "./models/awnn_yolo_card.param"
     }
 
     input_size = (224, 224, 3)
-    output_size =(7, 7, (1+4+1)*5)
+    output_size =(7, 7, (1+4+35)*5)
     options = {
     "model_type":  "aipu",
     "inputs": {
@@ -23,8 +23,8 @@ class Yolo:
     "scale":[10.872787],# R329 有此选项，V831没有这个选项
     }
 
-    labels = ["person"]
-    anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
+    labels = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "mouse", "microbit", "ruler", "cat", "peer", "ship", "apple", "car", "pan", "dog", "umbrella", "airplane", "clock", "grape", ]
+    anchors = [2.44, 2.25, 5.03, 4.91, 3.5, 3.53, 4.16, 3.94, 2.97, 2.84]
 
     def __init__(self) -> None:
         from maix import nn

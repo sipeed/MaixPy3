@@ -9,10 +9,12 @@
 #include <map>
 #include <set>
 #include <typeinfo>
+
+#include "mdsc.h"
 #include "libmaix_nn.h"
 #include "string.h"
-#include "mdsc.h"
 
+// #include "py_maix_nn_new.h"
 #define MAX 5
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
@@ -32,8 +34,6 @@ typedef struct
     libmaix_nn_layer_t * input_layer;
     libmaix_nn_layer_t * output_layer;
 }NNObject;
-
-
 
 class _NN
 {

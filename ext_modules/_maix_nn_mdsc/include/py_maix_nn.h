@@ -7,6 +7,7 @@ extern "C" {
 
 #include <Python.h>
 #include "libmaix_nn.h"
+#include "mdsc.h"
 
 /////////////////////////////
 #define _MAIX_NN_VERSION_ "0.2.0"
@@ -40,6 +41,8 @@ typedef struct
     int           inputs_len;
     int           outputs_len;
     bool          is_init;
+    char * mdsc;
+    ini_info_t *info;
 } ModelObject;
 
 

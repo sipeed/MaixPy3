@@ -1,15 +1,15 @@
 class Yolo:
     path = {
         #R329
-        "bin": "./models/aipu_yolo_person.bin"
+        "bin": "./models/aipu_yolo_voc.bin"
 
         # V831
-        # "bin": "./models/awnn_yolo_person.bin"
-        # "param": "./models/awnn_yolo_person.param"
+        # "bin": "./models/awnn_yolo_voc.bin"
+        # "param": "./models/awnn_yolo_voc.param"
     }
 
     input_size = (224, 224, 3)
-    output_size =(7, 7, (1+4+1)*5)
+    output_size =(7, 7, (1+4+20)*5)
     options = {
     "model_type":  "aipu",
     "inputs": {
@@ -20,11 +20,11 @@ class Yolo:
     },
     "mean": [127.5, 127.5, 127.5],
     "norm": [0.0078125, 0.0078125, 0.0078125],
-    "scale":[10.872787],# R329 有此选项，V831没有这个选项
+    "scale":[8.031941],# R329 有此选项，V831没有这个选项
     }
 
-    labels = ["person"]
-    anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
+    labels = ["aeroplane","bicycle","bird","boat","bottle","bus","car","cat","chair","cow","diningtable","dog","horse","motorbike","person","pottedplant","sheep","sofa","train","tvmonitor"]
+    anchors = [0.4165, 0.693 , 0.9765, 1.6065, 1.5855, 3.122 , 2.821 , 1.8515 , 3.612 , 3.7275]
 
     def __init__(self) -> None:
         from maix import nn

@@ -117,10 +117,36 @@ _maix_display_module = Pybind11Extension(
 )
 
 
-max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
+# max_nn_srcs = get_srcs('ext_modules/_maix_nn/src')
+# max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
+# max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
+# _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
+#                             sources=max_nn_srcs,
+#                             libraries=[
+#     "maix_utils", "maix_nn",
+# ],
+#     library_dirs=[ ext_so, ],
+#     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
+#     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+# )
+
+# pybind11
+# _maix_nn_new_module = Pybind11Extension(
+#     name = '_maix_nn_new',
+#     include_dirs = [ 'ext_modules/libmaix/components/libmaix/include'],
+#     sources = get_srcs('ext_modules/_maix_nn_new') + get_srcs('ext_modules/libmaix/components/libmaix/src'),
+#     library_dirs = [ext_so ,],
+#     libraries = [
+#         "maix_utils", "maix_nn",
+#     ],
+#     extra_compile_args=['-std=c++11', '-std=gnu++11'],
+#     # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+#     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+# )
+max_nn_srcs = get_srcs('ext_modules/_maix_nn_mdsc/src')
 max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
 max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
-_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/include', 'ext_modules/libmaix/components/libmaix/include'],
+_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
                             sources=max_nn_srcs,
                             libraries=[
     "maix_utils", "maix_nn",
@@ -129,6 +155,41 @@ _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn/incl
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
+
+
+_maix_nn_decode_retinaface_module =Pybind11Extension(
+    name = '_maix_nn_decoder_retinaface',
+    include_dirs=['ext_modules/libmaix/components/libmaix/include'],
+    sources=['ext_modules/_maix_nn_decoder/py_maix_nn_decoder_retinaface.cpp','ext_modules/libmaix/components/libmaix/src/decoder/decoder_retinaface.c'] ,
+    libraries=[
+        "pthread",
+        "maix_nn",
+    ],
+    library_dirs=[ ext_so, ],
+    # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+    extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+)
+
+# _maix_nn_decode_yolo2_module =Pybind11Extension(
+#     name = '_maix_nn_decoder_yolo',
+#     include_dirs=['ext_modules/libmaix/components/libmaix/include'],
+#     # sources=get_srcs("ext_modules/_maix_nn_decoder") + get_srcs('ext_modules/libmaix/components/libmaix/src/decoder') + get_srcs('ext_modules/libmaix/components/libmaix/src'),
+#     sources=['ext_modules/_maix_nn_decoder/py_maix_nn_decoder_yolo.cpp' ,'ext_modules/libmaix/components/libmaix/src/decoder/decoder_yolo2.c'],
+
+#     libraries=[
+#         "pthread",
+#         # "maix_utils",
+#         "maix_nn",
+#         # "maix_nn_decoder",
+#     ],
+#     library_dirs=[ ext_so, ],
+#     # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+#     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+# )
+
+
+
+
 
 # python3.8 -m pip install pybind11
 _maix_image_module = Pybind11Extension("_maix_image",
@@ -182,7 +243,11 @@ _maix_modules = [
     # _maix_camera_module,
     _maix_speech_module,
     _maix_display_module,
-    _maix_nn_module
+    _maix_nn_module,
+    _maix_nn_decode_retinaface_module,
+    # _maix_nn_new_module,
+    # _maix_nn_decode_yolo2_module,
+
 ]
 
 _maix_data_files = [

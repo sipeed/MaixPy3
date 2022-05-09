@@ -43,6 +43,7 @@ typedef struct
     bool          is_init;
     char * mdsc;
     ini_info_t *info;
+    bool use_mdsc;
 } ModelObject;
 
 

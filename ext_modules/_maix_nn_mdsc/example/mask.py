@@ -1,15 +1,14 @@
-from dis import dis
-from time import time
 
-class Person:
+from time import time
+class Mask:
     #mdsc_path
         # V831
-    mdsc_path = "/root/mdsc/v831_yolo_person.mdsc"
+    mdsc_path = "/root/mdsc/v831_yolo_mask.mdsc"
         #R329
-    # mdsc_path = "/root/mdsc/r329_yolo_person.mdsc"
+    # mdsc_path = "/root/mdsc/r329_yolo_mask.mdsc"
 
-    labels = ["person"]
-    anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
+    labels = ["no wear","wear"]
+    anchors = [1.19, 1.98, 2.79, 4.59, 4.53, 8.92, 8.06, 5.29, 10.32, 10.65]
 
     def __init__(self) -> None:
 
@@ -30,8 +29,8 @@ class Person:
 
     def draw_rectangle_with_title(self ,img, box, disp_str , fps ):
         img.draw_rectangle(box[0], box[1], box[0] + box[2], box[1] + box[3],color=(255, 0, 0), thickness=2)
-        img.draw_string(box[0], box[1]+ box[3] ,disp_str, scale=0.5,color=(0, 0, 255), thickness=2)
-        img.draw_string(0, 0 ,'FPS :'+str(fps), scale=2 ,color=(0, 0, 255), thickness=2)
+        img.draw_string(box[0], box[1]+ box[3] ,disp_str, scale=1,color=(0, 0, 255), thickness=1)
+        img.draw_string(0, 0 ,'FPS :'+str(fps), scale=2 ,color=(0, 0, 255), thickness=1)
 
     def process(self,input):
         t =  time()
@@ -46,11 +45,10 @@ class Person:
 
 def main():
     from maix import display, camera
-    app = Person()
+    app = Mask()
     camera.config((224,224))
     while True:
         img = camera.capture()
         app.process(img)
         display.show(img)
-
 main()

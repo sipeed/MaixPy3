@@ -1,21 +1,5 @@
 class Yolo:
     mdsc_path = "/root/mdsc/v831_yolo_person.mdsc"
-    # model = {
-    #     "bin": "/root/models/awnn_yolo_person.bin",
-    #     "param":"/root/models/awnn_yolo_person.param"
-    # }
-
-    # options = {
-    #     "model_type":  "awnn",
-    #     "inputs": {
-    #         "input0": (224, 224, 3)
-    #     },
-    #     "outputs": {
-    #         "output0": (7, 7, 30)
-    #     },
-    #     "mean": [127.5, 127.5, 127.5],
-    #     "norm": [0.0078125, 0.0078125, 0.0078125],
-    # }
     labels = ["person"]
     anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
 
@@ -55,7 +39,6 @@ while True:
     img = camera.capture()
     t = time.time()
     out = m.model.forward(img, quantize=1, layout = "hwc")
-    print("out done")
     boxes, probs = m.decoder.run(out, nms=0.5, threshold=0.4, img_size=(224,224))
     for i, box in enumerate(boxes):
         class_id = probs[i][0]

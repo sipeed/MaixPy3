@@ -242,7 +242,7 @@ _maix_modules = [
     _maix_image_module,
     # _maix_camera_module,
     _maix_speech_module,
-    _maix_display_module,
+    # _maix_display_module,
     _maix_nn_module,
     _maix_nn_decode_retinaface_module,
     # _maix_nn_new_module,

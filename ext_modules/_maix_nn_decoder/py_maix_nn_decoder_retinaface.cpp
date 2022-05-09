@@ -153,6 +153,11 @@ _retinaface_decoder::_retinaface_decoder(std::vector<int> input_size, std::vecto
   // this->object.config.min_sizes_len = min_sizes.size();
   // this->object.config.steps = (int *)malloc(sizeof(int) * this->object.config.steps_len);
   // this->object.config.min_sizes =  (int *)malloc(sizeof(int) * this->object.config.min_sizes_len);
+
+  //debug
+  // std::cout << "inputs size:" << this->object.config.input_h  <<  " " <<  this->object.config.input_w;
+  // std::cout << "step size:"<< steps.size() << "min size:" << min_sizes.size() << "variances size" << variance.size() << std::endl;
+
   for (int i = 0; i != steps.size(); i++)
   {
     this->object.config.steps[i] = (int)steps[i];
@@ -165,6 +170,8 @@ _retinaface_decoder::_retinaface_decoder(std::vector<int> input_size, std::vecto
   this->object.config.score_thresh = 0.7;
   this->object.config.channel_num = retinaface_get_channel_num(&(this->object.config));
 
+  // std::cout << "py channel num:"<< this->object.config.channel_num << std::endl;
+
   // decoder object create and init
   // printf("libmaix nn decoder create\n");
   this->object.decoder = libmaix_nn_decoder_retinaface_create();
@@ -173,7 +180,6 @@ _retinaface_decoder::_retinaface_decoder(std::vector<int> input_size, std::vecto
     this->object.init = false;
     // printf("libmaix nn retinaface object create faild\n");
   }
-
   // printf("libmaix nn decoder retinaface object init\r\n");
   err = this->object.decoder->init(this->object.decoder, &(this->object.config));
   if (err != LIBMAIX_ERR_NONE)

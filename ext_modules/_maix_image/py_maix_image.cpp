@@ -134,7 +134,7 @@ PYBIND11_MODULE(_maix_image, mo)
         .def("show", &maix_image::_show)
         .def("get_pixel", &maix_image::_get_pixel, py::arg("x"), py::arg("y"))
         .def("set_pixel", &maix_image::_set_pixel, py::arg("x"), py::arg("y"), py::arg("color"))
-        //maix_image继承maix_version方法
+        //maix_image继承maix_vision方法
         .def("get_blob_lab", &maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
         .def("get_blob_color", &maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
         .def("find_blob_lab", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)

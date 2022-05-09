@@ -116,7 +116,7 @@ Image类 – 图像对象
   得到图像x,y位置的像素值,返回是一个四元组对象,(r, g, b, a),如果为灰度,那只有r有效
 
 
-maix_version类 – 图像对象视觉操作
+maix_vision类 – 图像对象视觉操作
 -----------------------------
 
 图像对象视觉操作类是对于图像的一系列操作方法的集合
@@ -158,7 +158,7 @@ maix_version类 – 图像对象视觉操作
   (x, y, w, h)色块的外框,pixels,色块的像素大小,(cx, cy)色块的中心点.
 
 - maix_vision.find_ball_color(thresholds, co = 1)
-  该函数是在maix_version.find_blobs的基础上通过基尔霍夫圆拟合,并返回拟合的圆.
+  该函数是在maix_vision.find_blobs的基础上通过基尔霍夫圆拟合,并返回拟合的圆.
   thresholds 必须是元组列表. [(minL, minA, minB, maxL, maxA, maxB)]
   co为返回的颜色空间模型.可选为,如果不是特殊需要,请保持默认
   0       rgb

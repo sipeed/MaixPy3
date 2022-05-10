@@ -130,6 +130,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     else if(PyObject_TypeCheck(o_model_path, &PyDict_Type))
     {
         // dict
+        printf("Dict mode");
         if(!o_opt || !PyObject_TypeCheck(o_opt, &PyDict_Type))
         {
             PyErr_SetString(PyExc_ValueError, "arg opt is needed");
@@ -557,6 +558,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     else if(PyObject_TypeCheck(o_model_path, &PyUnicode_Type))
     {
         // mud
+        printf("mud mode \n");
         self->use_mdsc = true;
         libmaix_nn_module_init();
         char * mud = (char*)PyUnicode_DATA(o_model_path);
@@ -888,7 +890,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
 
         if(PyBytes_Check(o_inputs))
         {
-            printf("py  input is bytes\n");
+            // printf("py  input is bytes\n");
             o_input_bytes = o_inputs;
         }
         else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)

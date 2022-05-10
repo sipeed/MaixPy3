@@ -1,7 +1,7 @@
 class Yolo:
     path = {
         #R329
-        "bin": "./models/aipu_yolo_person.bin"
+        "bin": "/root/models/aipu_yolo_person.bin"
 
         # V831
         # "bin": "./models/awnn_yolo_person.bin"
@@ -40,13 +40,13 @@ class Yolo:
         del self.model
         del self.decoder
 
-    def cal_fps(start , end):
+    def cal_fps(self ,start , end):
         one_second = 1
         one_flash = end - start
         fps = one_second / one_flash
         return  fps
 
-    def draw_rectangle_with_title(img, box, disp_str , fps ):
+    def draw_rectangle_with_title(self ,img, box, disp_str , fps ):
         img.draw_rectangle(box[0], box[1], box[0] + box[2], box[1] + box[3],color=(255, 0, 0), thickness=1)
         img.draw_string(box[0], box[1]+ box[3] ,disp_str, scale=0.5,color=(0, 0, 255), thickness=1)
         img.draw_string(0, 0 ,'FPS :'+str(fps), scale=2 ,color=(0, 0, 255), thickness=2)
@@ -60,7 +60,7 @@ camera.config((m.input_size[0] ,m.input_size[1]))
 while True:
     img = camera.capture()
     t = time.time()
-    out = m.forward(img.tobytes(), quantize=1, layout = "chw")
+    out = m.model.forward(img.tobytes(), quantize=1, layout = "hwc")
     boxes, probs = m.decoder.run(out, nms=0.5, threshold=0.5, img_size=(224,224))
     for i, box in enumerate(boxes):
         class_id = probs[i][0]
@@ -68,3 +68,4 @@ while True:
         disp_str = "{}:{:.2f}%".format(m.labels[class_id], prob*100)
         fps = m.cal_fps(t, time.time())
         m.draw_rectangle_with_title(img, box, disp_str, fps)
+    display.show(img)

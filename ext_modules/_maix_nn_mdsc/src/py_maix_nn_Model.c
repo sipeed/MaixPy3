@@ -813,7 +813,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         {
             if(strcmp(output_fmt , "numpy") == 0)  // -->numpy
             {
-                printf("py  output fmt is numpy \n");
+                // printf("py  output fmt is numpy \n");
                 PyObject* result_bytes = PyBytes_FromStringAndSize((const char*)out_fmap[i].data, out_fmap[i].w * out_fmap[i].h * out_fmap[i].c * sizeof(float)); // get bytes result
                 PyObject *call_args = Py_BuildValue("(O)", result_bytes);
                 PyObject *call_keywords = PyDict_New();
@@ -828,12 +828,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
                 Py_DECREF(result_bytes);
                 if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
                 {
-                    printf("py  output layout is CHW\n");
+                    // printf("py  output layout is CHW\n");
                     o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
                 }
                 else
                 {
-                    printf("py output layout is HWC\n");
+                    // printf("py output layout is HWC\n");
                     o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
                 }
                 Py_DECREF(o_result_numpy);
@@ -1059,12 +1059,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
                 Py_DECREF(result_bytes);
                 if(outputs_layout == LIBMAIX_NN_LAYOUT_CHW)
                 {
-                    printf("py  output layout is CHW\n");
+                    // printf("py  output layout is CHW\n");
                     o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].c, out_fmap[i].h, out_fmap[i].w);
                 }
                 else
                 {
-                    printf("py output layout is HWC\n");
+                    // printf("py output layout is HWC\n");
                     o_result_numpy2 = PyObject_CallMethod(o_result_numpy, "reshape", "(iii)", out_fmap[i].h, out_fmap[i].w, out_fmap[i].c);
                 }
                 Py_DECREF(o_result_numpy);

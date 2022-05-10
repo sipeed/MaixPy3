@@ -245,8 +245,6 @@ _maix_modules = [
     _maix_display_module,
     _maix_nn_module,
     _maix_nn_decode_retinaface_module,
-    # _maix_nn_new_module,
-    # _maix_nn_decode_yolo2_module,
 
 ]
 

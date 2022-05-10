@@ -11,13 +11,13 @@ class Retinaface():
     steps = [8, 16, 32]
     min_sizes = [16, 32, 64, 128, 256, 512]
     #R329
-    variances = [0.1, 0.2]
-    steps = [8, 16, 32, 64]
-    min_sizes = [10, 16, 24, 32, 48, 64, 96, 128, 192, 256]
+    # variances = [0.1, 0.2]
+    # steps = [8, 16, 32, 64]
+    # min_sizes = [10, 16, 24, 32, 48, 64, 96, 128, 192, 256]
 
     def __init__(self) -> None:
         from maix import nn
-        self.model = nn.load(self.mdsc_path)
+        self.model = nn.load(self.mdsc_path,opt = None)
         from maix.nn import decoder
         self.decoder = decoder.Retinaface([224,224] , self.steps , self.min_sizes, self.variances)
 
@@ -46,13 +46,11 @@ class Retinaface():
 
 
     def process(self,input):
-        t = time()
         out = self.model.forward(input, quantize=1, layout = "chw") # retinaface decoder only support chw layout
         boxes , landmarks = self.decoder.run(out, nms = 0.2 ,score_thresh = 0.7 , outputs_shape =[[1,4,2058],[1,2,2058],[1,10,2058]])
         for i,box in enumerate(boxes):
             self.draw_rectangle(input,box)
             self.draw_point(input , landmarks[i])
-            self.cal_fps(input ,)
 
 def main():
     from maix import display, camera

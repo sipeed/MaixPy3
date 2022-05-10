@@ -3,7 +3,7 @@
 #include "libmaix_nn.h"
 #include "stdlib.h"
 #include <sys/time.h>
-#include "mdsc.h"
+#include "mud.h"
 #define debug_line //printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)
 
 int save_bin(const char *path, int size, uint8_t *buffer)
@@ -40,7 +40,7 @@ static PyObject* Model_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
     self->out_buffer      = NULL;
     self->inputs = NULL;
     self->outputs = NULL;
-    self->mdsc = NULL;
+    self->mud = NULL;
     self->info = NULL;
     return (PyObject*)self;
 }
@@ -72,10 +72,10 @@ static void Model_del(ModelObject *self)
         free(self->quantize_buffer);
         self->quantize_buffer = NULL;
     }
-    if(! self->mdsc)
+    if(! self->mud)
     {
-        free(self->mdsc);
-        self->mdsc = NULL;
+        free(self->mud);
+        self->mud = NULL;
     }
     if(! self->info)
     {
@@ -556,16 +556,16 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     }
     else if(PyObject_TypeCheck(o_model_path, &PyUnicode_Type))
     {
-        // mdsc
+        // mud
         self->use_mdsc = true;
         libmaix_nn_module_init();
-        char * mdsc = (char*)PyUnicode_DATA(o_model_path);
-        printf("%s\n",mdsc);
-        self->mdsc = mdsc;
+        char * mud = (char*)PyUnicode_DATA(o_model_path);
+        printf("%s\n",mud);
+        self->mud = mud;
         self->info = (ini_info_t *)malloc(sizeof(ini_info_t));
         libmaix_nn_model_path_t *model_path = (libmaix_nn_model_path_t * )malloc(sizeof(libmaix_nn_model_path_t));
         libmaix_nn_opt_param_t *opt_param = (libmaix_nn_opt_param_t *)malloc(sizeof(libmaix_nn_opt_param_t));
-        read_file(self->mdsc,self->info);
+        read_file(self->mud,self->info);
         self->nn = build_model(self->info , model_path , opt_param);
         if(!self->nn)
         {

@@ -12,7 +12,7 @@
 #include <typeinfo>
 #include "libmaix_nn.h"
 #include "string.h"
-#include "mdsc.h"
+#include "mud.h"
 #include <math.h>
 
 #define debug_line printf("%s:%d %s %s %s \r\n", __FILE__, __LINE__, __FUNCTION__, __DATE__, __TIME__)

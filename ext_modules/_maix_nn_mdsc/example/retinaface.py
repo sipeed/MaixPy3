@@ -4,7 +4,7 @@ from statistics import variance
 from time import time
 
 class Retinaface():
-    mdsc_path = "/root/mdsc/v831_retinaface.mdsc"
+    mdsc_path = "/root/mud/v831_retinaface.mud"
 
     # v831
     variances = [0.1, 0.2]

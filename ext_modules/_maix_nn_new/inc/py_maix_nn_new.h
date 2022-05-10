@@ -1,5 +1,5 @@
 #include "libmaix_nn.h"
-#include "mdsc.h"
+#include "mud.h"
 typedef struct
 {
     libmaix_nn_model_path_t  model_path;

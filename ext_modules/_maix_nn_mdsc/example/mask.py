@@ -3,9 +3,9 @@ from time import time
 class Mask:
     #mdsc_path
         # V831
-    mdsc_path = "/root/mdsc/v831_yolo_mask.mdsc"
+    mdsc_path = "/root/mud/v831_yolo_mask.mud"
         #R329
-    # mdsc_path = "/root/mdsc/r329_yolo_mask.mdsc"
+    # mdsc_path = "/root/mud/r329_yolo_mask.mud"
 
     labels = ["no wear","wear"]
     anchors = [1.19, 1.98, 2.79, 4.59, 4.53, 8.92, 8.06, 5.29, 10.32, 10.65]

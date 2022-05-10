@@ -10,7 +10,7 @@
 #include <set>
 #include <typeinfo>
 
-#include "mdsc.h"
+#include "mud.h"
 #include "libmaix_nn.h"
 #include "string.h"
 
@@ -331,9 +331,9 @@ py::object _NN::_nn_method_forward(py::object inputs ,  bool quantize ,  std::st
 }
 
 
-_NN _maix_nn_load(std::string mdsc)
+_NN _maix_nn_load(std::string mud)
 {
-    return _NN(mdsc);
+    return _NN(mud);
 }
 
 

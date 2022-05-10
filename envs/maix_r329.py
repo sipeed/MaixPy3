@@ -134,12 +134,10 @@ _maix_speech_module = Pybind11Extension("_maix_speech",
 _maix_nn_decode_retinaface_module =Pybind11Extension(
     name = '_maix_nn_decoder_retinaface',
     include_dirs=['ext_modules/libmaix/components/libmaix/include'],
-    sources=get_srcs("ext_modules/_maix_nn_decoder"),
+    sources=['ext_modules/_maix_nn_decoder/py_maix_nn_decoder_retinaface.cpp','ext_modules/libmaix/components/libmaix/src/decoder/decoder_retinaface.c'] ,
     libraries=[
         "pthread",
-        # "maix_utils",
         "maix_nn",
-        "maix_nn_decoder",
     ],
     library_dirs=[ ext_so, ],
     # library_dirs=["/lib",  "/usr/lib", ext_so, ],

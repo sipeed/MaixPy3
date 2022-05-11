@@ -132,6 +132,7 @@ public:
   maix_image &_draw_string(int x, int y, std::string str, double scale, std::vector<int> color, int thickness);
   maix_image &_draw_ellipse(int cx, int cy, int rx, int ry, double angle, double startAngle, double endAngle, std::vector<int> color, int thickness);
   maix_image &_rotate(double rotate, int adjust);
+  maix_image &_flip(int flip);
   maix_image &_convert(std::string mode);
   maix_image *_draw_crop(int x, int y, int w, int h);
   maix_image &_draw_image(py::object data, int x, int y, double alpha);

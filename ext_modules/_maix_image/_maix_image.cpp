@@ -579,6 +579,17 @@ maix_image &maix_image::_rotate(double rotate, int adjust)
   return *this;
 }
 
+maix_image &maix_image::_flip(int flip)
+{
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
+  libmaix_cv_image_flip(this->_img, flip);
+  return *this;
+}
+
 maix_image &maix_image::_convert(std::string mode)
 {
   if (NULL == this->_img)

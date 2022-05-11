@@ -563,7 +563,7 @@ maix_image &maix_image::_draw_string(int x, int y, std::string str, double scale
   return *this;
 }
 
-maix_image &maix_image::_rotate(double rotate, int adjust)
+maix_image &maix_image::_rotate(double angle, int adjust)
 {
   if (NULL == this->_img)
   {
@@ -571,7 +571,7 @@ maix_image &maix_image::_rotate(double rotate, int adjust)
     return *this;
   }
   libmaix_image_t *tmp = NULL;
-  if (libmaix_cv_image_rotate(this->_img, rotate, adjust, &tmp) != 0)
+  if (libmaix_cv_image_rotate(this->_img, angle, adjust, &tmp) != 0)
   {
     return *this;
   }

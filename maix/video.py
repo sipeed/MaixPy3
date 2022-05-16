@@ -36,4 +36,5 @@ class MaixVideo():
         return None
 
     def close(self):
-        pass  # for file
+        self.__del__()
+

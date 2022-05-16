@@ -28,7 +28,7 @@ except Exception as e:
 __display__ = None
 
 
-def get_display():
+def as_image():
     from maix import image
     global __display__
     if __display__ is None:
@@ -36,9 +36,17 @@ def get_display():
       __display__ = image.Image().new(mode=__mode__, size=(__width__, __height__))
     return __display__
 
+def width():
+    global __width__
+    return __width__
+
+def height():
+    global __height__
+    return __height__
+
 # def get_draw():
 #     from PIL import ImageDraw
-#     disp = get_display()
+#     disp = as_image()
 #     if disp:
 #         tmp = ImageDraw.Draw(disp)
 #         tmp.paste = disp.paste
@@ -56,9 +64,9 @@ def get_display():
 def show(img=None, box=(0, 0), local_show=True, remote_show=True):
     global __display__, __mode__, __width__, __height__
     if img is None:
-        img = get_display()
+        img = as_image()
     else:
-        get_display()
+        as_image()
 
     if remote_show:
         from maix import mjpg

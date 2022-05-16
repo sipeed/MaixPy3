@@ -11,6 +11,7 @@ try:
             def __init__(self, source="/v831"):
                 self.source = source
                 self.cam = None
+                self._width, self._height = (0, 0)
 
             def config(self, size=(240, 240), _vo_dir=0, _ai_dir=0):
                 if self.cam == None:
@@ -71,9 +72,10 @@ try:
 
         class SpMaixVideo(MaixVideo):
 
-            def __init__(self, source="/v831"):
+            def __init__(self, source="/dev/video"):
                 self.source = source
                 self.cam = None
+                self._width, self._height = (0, 0)
 
             def config(self, size=None, video=0, horizontal=1, vertical=1):
                 if self.cam == None:
@@ -110,6 +112,7 @@ except Exception as e:
             def __init__(self, source=0):
                 self.source = source
                 self.cam = None
+                self._width, self._height = (0, 0)
 
             def config(self, size=(640, 480), source=None):
                 if self.cam == None:

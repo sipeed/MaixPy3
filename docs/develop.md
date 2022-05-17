@@ -93,7 +93,7 @@ your r329
 
 - rm /root/maixpy3-0.4.*-cp38-cp38-linux_armv7l.whl
 
-- python3.9 setup.py clean --all bdist_wheel maix_r329 && scp ./dist/maixpy3-0.4.3-cp39*.whl root@192.168.0.153:~/
+- python3.9 setup.py clean --all bdist_wheel maix_r329 && scp ./dist/maixpy3-0.4.*-cp39*.whl root@192.168.0.247:~/
 
 - pip uninstall maixpy3 -y && pip install ~/maixpy3-0.4.*-cp39*.whl
 

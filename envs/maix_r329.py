@@ -91,11 +91,12 @@ _maix_display_module = Pybind11Extension(
 max_nn_srcs = get_srcs('ext_modules/_maix_nn_mdsc/src')
 max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
 max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
-_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
-                            sources=max_nn_srcs,
-                            libraries=[
-    "maix_utils", "maix_nn", "maix_nn_app"
-],
+_maix_nn_module = Extension('_maix_nn',
+    include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
+    sources=max_nn_srcs,
+    libraries=[
+        "maix_utils", "maix_nn", "maix_nn_app"
+    ],
     library_dirs=[ ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
     extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_R329'],
@@ -134,7 +135,9 @@ _maix_speech_module = Pybind11Extension("_maix_speech",
 _maix_nn_decode_retinaface_module =Pybind11Extension(
     name = '_maix_nn_decoder_retinaface',
     include_dirs=['ext_modules/libmaix/components/libmaix/include'],
-    sources=['ext_modules/_maix_nn_decoder/py_maix_nn_decoder_retinaface.cpp','ext_modules/libmaix/components/libmaix/src/decoder/decoder_retinaface.c'] ,
+    sources=[
+        'ext_modules/_maix_nn_decoder/py_maix_nn_decoder_retinaface.cpp',
+        'ext_modules/libmaix/components/libmaix/src/decoder/decoder_retinaface.c'] ,
     libraries=[
         "pthread",
         "maix_nn",

@@ -430,59 +430,54 @@ py::bytes maix_image::_tobytes()
   return py::bytes((const char *)this->_img->data, this->_maix_image_size);
 }
 
-maix_image &maix_image::_resize(int w, int h, int func)
+maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding)
 {
   if (NULL == this->_img)
   {
     py::print("no img");
     return *this;
   }
-  if (this->_img->width == w && this->_img->height == h)
+  int src_w = this->_img->width, src_h = this->_img->height;
+  if (src_w == dst_w && src_h == dst_h)
     return *this;
-  libmaix_image_t *tmp = libmaix_image_create(w, h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+  libmaix_image_t *tmp = libmaix_image_create(dst_w, dst_h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (tmp)
   {
-    cv::Mat src(this->_img->height, this->_img->width, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
-    cv::Mat dst(h, w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), tmp->data);
-    switch (func)
-    {
-    case 0: //INTER_NEAREST
-    {
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_NEAREST);
-    }
-    break;
-    case 1: //INTER_LINEAR
-    {
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_LINEAR);
-    }
-    break;
-    case 3: //INTER_AREA
-    {
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_AREA);
-    }
-    break;
-    case 2: //INTER_CUBIC
-    {
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_CUBIC);
-    }
-    break;
-    case 4: //INTER_LANCZOS4
-    {
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_LANCZOS4);
-    }
-    break;
-    default: //INTER_LINEAR
-      cv::resize(src, dst, cv::Size(w, h), cv::INTER_LINEAR);
-      break;
+    cv::Mat src(src_h, src_w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
+    cv::Mat dst(dst_h, dst_w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), tmp->data);
+
+    if (padding) {
+      float scale_src = ((float)src_w) / ((float)src_h), scale_dst = ((float)dst_w) / ((float)dst_h);
+      if (scale_dst == scale_src) {
+        // func == InterpolationFlags default 1 == cv::INTER_LINEAR
+        cv::resize(src, dst, cv::Size(dst_w, dst_h), func);
+      } else {
+        // Scale to original image
+        int new_w = 0, new_h = 0, top = 0, bottom = 0, left = 0, right = 0;
+        if (scale_src > scale_dst) {
+          new_w = dst_w, new_h = new_w * src_h / src_w; // new_h / src_h = new_w / src_w => new_h = new_w * src_h / src_w
+          top = (dst_h - new_h) / 2, bottom = top;
+        } else { // Division loses precision
+          new_h = dst_h, new_w = new_h * src_w / src_h;
+          left = (dst_w - new_w) / 2, right = left;
+        }
+        // printf("_resize %d %d > %d %d > %d %d : %d %d %d %d \r\n", src_w, src_h, new_w, new_h, dst_w, dst_h, top, bottom, left, right);
+        cv::Mat tmp;
+        cv::resize(src, tmp, cv::Size(new_w, new_h), func);
+        cv::copyMakeBorder(tmp, dst, top, bottom, left, right, IPL_BORDER_CONSTANT);
+      }
+    } else {
+      // func == InterpolationFlags default 1 == cv::INTER_LINEAR
+      cv::resize(src, dst, cv::Size(dst_w, dst_h), func);
     }
     if (dst.data != tmp->data)
     {
-      memcpy(tmp->data, dst.data, h * w * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]));
+      memcpy(tmp->data, dst.data, dst_h * dst_w * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]));
     }
     libmaix_image_destroy(&this->_img), this->_img = tmp;
-    this->_maix_image_height = h;
-    this->_maix_image_width = w;
-    this->_maix_image_size = w * h * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]);
+    this->_maix_image_height = dst_h;
+    this->_maix_image_width = dst_w;
+    this->_maix_image_size = dst_w * dst_h * any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][1]);
   }
   else
   {

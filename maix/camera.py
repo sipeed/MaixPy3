@@ -6,6 +6,7 @@ camera = MaixVideo()
 try:
     try:
         # use mpp vivo on v831
+        from maix import display, image
         from _maix_vivo import _v83x_vivo
         class V831VivoMaixVideo(MaixVideo):
             def __init__(self, source="/v831"):
@@ -13,25 +14,19 @@ try:
                 self.cam = None
                 self._width, self._height = (0, 0)
 
-            def config(self, size=(240, 240), _vo_dir=0, _ai_dir=0):
+            def config(self, size=(display.__width__, display.__height__), _vo_dir=1, _ai_dir=1):
                 if self.cam == None:
                     super(V831VivoMaixVideo, self).__init__(size)
                     try:
                         # from PIL import Image
-                        from maix import display, image
                         self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = _vo_dir, ai_dir = _ai_dir)
-                        # display.__display__ = Image.new("RGBA", (display.__width__, display.__height__), "#00000000")
                         display.__display__ = image.Image().new(mode="RGBA", size=(display.__width__, display.__height__), color=(0, 0, 0, 0))
                         display.__fastview__ = self.cam
                         def __new_draw__(img):
                             if isinstance(img, bytes):
+                                # print('V831VivoMaixVideo', display.__width__, display.__height__, self.width(), self.height())
                                 display.__fastview__.set(img)
-                            # elif isinstance(img, Image.Image):
-                            #     display.get_draw().paste(img)
-                            #     display.__fastview__.set(display.__display__.tobytes())
-                            #     display.get_draw().paste((0, 0, 0, 0), (0, 0) + img.size) # clear
                         display.__draw__ = __new_draw__
-
                     except ModuleNotFoundError as e:
                         pass
                     except Exception as e:
@@ -43,7 +38,7 @@ try:
                     self._width, self._height = size
                     self.cam.resize(size[0], size[1])
 
-            def read(self, video_num=1, show=True, skip_frame=8):
+            def read(self, video_num=1, show=False, skip_frame=8):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()

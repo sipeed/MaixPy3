@@ -160,17 +160,17 @@ private:
 public:
     void set(py::bytes &bytes)
     {
-        frame_t *frame = this->ui;
+        frame_t *ui = this->ui;
         std::string value = static_cast<std::string>(bytes);
         void *tmp = this->vo->get_frame(this->vo, VO_UI);
         if (tmp != NULL)
         {
-            const int frame_size = frame->size.w * frame->size.h;
+            const int frame_size = ui->size.w * ui->size.h;
             if (frame_size * 4 == value.length())
             {
                 // puts("rgba");
                 // rgba > abgr > argb
-                uint32_t *argb = (uint32_t *)frame->buf, *abgr = (uint32_t *)value.c_str();
+                uint32_t *argb = (uint32_t *)ui->buf, *abgr = (uint32_t *)value.c_str();
                 for (int i = 0, sum = frame_size; i != sum; i++)
                 {
                     argb[i] =   (abgr[i] & 0xFF000000) |         // ______AA
@@ -183,7 +183,7 @@ public:
             {
                 // puts("rgb");
                 // rgb > argb
-                uint32_t *argb = (uint32_t *)frame->buf;
+                uint32_t *argb = (uint32_t *)ui->buf;
                 uint8_t *rgb = (uint8_t *)value.c_str();
                 for (int i = 0, sum = frame_size; i != sum; i++)
                 {
@@ -197,30 +197,31 @@ public:
             {
                 return;
             }
-            // memcpy(frame->buf, value.c_str(), frame_size); // bgra
+            // printf("[set] ui->ion %d this->vo_dir %d \r\n", ui->ion, this->vo_dir);
+            // memcpy(ui->buf, value.c_str(), frame_size); // bgra
             uint32_t *phy = NULL, *vir = NULL;
             this->vo->frame_addr(this->vo, tmp, &vir, &phy);
             if (this->vo_dir)
             {
-                if (frame->ion)
+                if (ui->ion)
                 {
-                    _g2d_argb_rotate((void *)frame_phy(frame->buf), (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
+                    // printf("[set] ui->size.w %d ui->size.h %d \r\n", ui->size.w, ui->size.h);
+                    _g2d_argb_rotate((void *)frame_phy(ui->buf), (void *)phy[0], ui->size.w, ui->size.h, this->vo_dir);
                 }
                 else
                 {
-                    g2d_argb_rotate((uint32_t *)frame->buf, (void *)phy[0], frame->size.w, frame->size.h, this->vo_dir);
+                    g2d_argb_rotate((uint32_t *)ui->buf, (void *)phy[0], ui->size.w, ui->size.h, this->vo_dir);
                 }
             }
             else
             {
-                memcpy((uint8_t *)vir[0], frame->buf, frame->size.w * frame->size.h * 4);
+                memcpy((uint8_t *)vir[0], ui->buf, ui->size.w * ui->size.h * 4);
             }
             this->vo->set_frame(this->vo, tmp, VO_UI);
-
         }
     }
 
-    py::list get(bool show=true)
+    py::list get(bool show=false, bool more=false)
     {
         py::list result; // l.attr("pop")();
         if (LIBMAIX_ERR_NONE == this->vi[0]->capture(this->vi[0], (uint8_t *)this->fm[0]->buf))
@@ -235,6 +236,7 @@ public:
                     this->vo->frame_addr(this->vo, tmp, &vir, &phy);
                     if (this->vo_dir)
                     {
+                        // printf("[get] frame->ion %d this->vo_dir %d \r\n", frame->ion, this->vo_dir);
                         if (frame->ion)
                         {
                             const int _w_h_ = frame->size.w * frame->size.h; //ALIGN(w, 16) * ALIGN(h, 16);
@@ -266,24 +268,26 @@ public:
                     result.append(py::bytes((char *)this->y2r[0]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3));
                     if (LIBMAIX_ERR_NONE == this->vi[1]->capture(this->vi[1], (uint8_t *)this->fm[1]->buf))
                     {
-                        frame_t *frame = this->fm[1];
-                        if (this->ai_dir)
-                        {
-                            g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->ai_dir);
-                            this->yuv2rgb->width = this->fm[1]->size.h;
-                            this->yuv2rgb->height = this->fm[1]->size.w;
-                        }
-                        else
-                        {
-                            this->yuv2rgb->width = this->fm[1]->size.w;
-                            this->yuv2rgb->height = this->fm[1]->size.h;
-                        }
-                        this->yuv2rgb->data = this->fm[1]->buf;
-                        libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[1]);
-                        if (err == LIBMAIX_ERR_NONE)
-                        {
-                            result.append(py::bytes((char *)this->y2r[1]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3));
-                            // CALC_FPS("get");
+                        if (more) {
+                            frame_t *frame = this->fm[1];
+                            if (this->ai_dir)
+                            {
+                                g2d_nv21_rotate((uint8_t *)frame->buf, frame->size.w, frame->size.h, this->ai_dir);
+                                this->yuv2rgb->width = this->fm[1]->size.h;
+                                this->yuv2rgb->height = this->fm[1]->size.w;
+                            }
+                            else
+                            {
+                                this->yuv2rgb->width = this->fm[1]->size.w;
+                                this->yuv2rgb->height = this->fm[1]->size.h;
+                            }
+                            this->yuv2rgb->data = this->fm[1]->buf;
+                            libmaix_err_t err = this->yuv2rgb->convert(this->yuv2rgb, LIBMAIX_IMAGE_MODE_RGB888, &this->y2r[1]);
+                            if (err == LIBMAIX_ERR_NONE)
+                            {
+                                result.append(py::bytes((char *)this->y2r[1]->data, this->yuv2rgb->height * this->yuv2rgb->width * 3));
+                                // CALC_FPS("get");
+                            }
                         }
                     }
                 }
@@ -297,6 +301,7 @@ public:
         // // save buffer used default 3 3
         // extern uint8_t libmaix_cam_vovi_bufmax, libmaix_cam_voui_bufmax;
         // libmaix_cam_vovi_bufmax = 3, libmaix_cam_voui_bufmax = 3;
+        // printf("[_v83x_vivo] %d %d %d %d %d %d \r\n", vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 
@@ -354,11 +359,11 @@ public:
             if (NULL == this->vi[1])
                 return exit();
 
-            // if (this->ai_dir % 2 == 1)
-            // {
-            //     int tmp = ai_w;
-            //     ai_w = ai_h, ai_h = tmp;
-            // }
+            if (this->ai_dir % 2 == 1)
+            {
+                int tmp = ai_w;
+                ai_w = ai_h, ai_h = tmp;
+            }
 
             this->fm[1] = frame_new(VI_YUV420, {0, 0, ai_w, ai_h}, 0);
             if (NULL == this->fm[1])
@@ -368,20 +373,20 @@ public:
                 return exit();
             this->vi[1]->start_capture(this->vi[1]);
 
-            int _w = vi_w, _h = vi_h;
+            int ui_w = vi_w, ui_h = vi_h;
 
             if (this->vo_dir % 2 == 1)
             {
-                int tmp = vi_w;
-                vi_w = vi_h, vi_h = tmp;
+                ui_w = vi_h, ui_h = vi_w;
             }
 
             // vi 320*240 > 90 > 240*320 => vo 240*320
+            // printf("[init] ui_w %d ui_h %d \r\n", ui_w, ui_h);
             this->ui = frame_new(VI_ARGB8888, (rect_size_t){0, 0, vi_w, vi_h}, this->vo_dir);
             if (NULL == this->ui)
                 return exit();
 
-            this->vo = libmaix_vo_create(vi_w, vi_h, 0, 0, _w, _h);
+            this->vo = libmaix_vo_create(ui_w, ui_h, 0, 0, ui_w, ui_h);
             if (NULL == this->vo)
                 return exit();
 
@@ -409,8 +414,8 @@ public:
                 libmaix_image_destroy(&this->yuv2rgb);
             if (NULL != this->vo)
                 libmaix_vo_destroy(&this->vo);
-            libmaix_camera_module_deinit();
-            usleep(200000); // wait 1s to deinit
+            // libmaix_camera_module_deinit();
+            // usleep(200000); // wait 1s to deinit
             libmaix_image_module_deinit();
             libmaix_camera_module_deinit();
             this->inited = false;
@@ -428,8 +433,8 @@ PYBIND11_MODULE(_maix_vivo, m)
 {
     pybind11::class_<_v83x_vivo>(m, "_v83x_vivo")
         .def(pybind11::init<int, int, int, int, int, int>(),
-             py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
-        .def("get", &_v83x_vivo::get, py::arg("show") = 1)
+             py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 224, py::arg("ai_h") = 224, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
+        .def("get", &_v83x_vivo::get, py::arg("show") = false, py::arg("more") = false)
         .def("resize", &_v83x_vivo::resize, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 1)
         .def("set", &_v83x_vivo::set);
 }

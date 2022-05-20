@@ -1,5 +1,44 @@
-from typing import Tuple
-from .video import MaixVideo
+
+class MaixVideo():
+
+    def __init__(self):
+        self.cam, self._width, self._height = None, 0, 0
+
+    def width(self):
+        return self._width
+
+    def height(self):
+        return self._height
+
+    def write(self):
+        pass  # for file
+
+    def read(self):
+        return b'\xFF\x00\x00' * (self._width * self._height)
+
+    def config(self, size):
+        # print("MaixVideo", size)
+        self._width, self._height = size[0], size[1]
+
+    def capture(self, pillow=False):
+        tmp = self.read()
+        if tmp:
+            try:
+                if pillow == False:
+                    from maix import image
+                    return image.Image().load(tmp, (self._width, self._height), "RGB")
+            except Exception as e:
+                pass
+            try:
+                from PIL import Image
+                return Image.frombytes("RGB", (self._width, self._height), tmp)
+            except Exception as e:
+                pass
+        return None
+
+    def close(self):
+        self.__del__()
+
 
 camera = MaixVideo()
 
@@ -9,48 +48,42 @@ try:
         from maix import display, image
         from _maix_vivo import _v83x_vivo
         class V831VivoMaixVideo(MaixVideo):
-            def __init__(self, source="/v831"):
+            def __init__(self, source="allwinner mpp"):
                 self.source = source
-                self.cam = None
-                self._width, self._height = (0, 0)
+                self._vo_dir = self._ai_dir = 0
+                super(V831VivoMaixVideo, self).__init__()
+                if display.width() < display.height(): # 240 x 320 to 320 x 240
+                    # maix-smart or other display.config 240 x 320 => 320 x 240
+                    display.config(size=(display.height(), display.width()))
+                    self._vo_dir = self._ai_dir = 3 # -90 rotate show
+                    self.config() # for maix smart
 
-            def config(self, size=(display.__width__, display.__height__), _vo_dir=1, _ai_dir=1):
+            def config(self, size=None, _ai_size=(224, 224)):
+                if size == None:
+                    size = (display.width(), display.height())
+                super(V831VivoMaixVideo, self).config(size)
                 if self.cam == None:
-                    super(V831VivoMaixVideo, self).__init__(size)
-                    try:
-                        # from PIL import Image
-                        self.cam = _v83x_vivo(display.__width__, display.__height__, self.width(), self.height(), vo_dir = _vo_dir, ai_dir = _ai_dir)
-                        display.__display__ = image.Image().new(mode="RGBA", size=(display.__width__, display.__height__), color=(0, 0, 0, 0))
-                        display.__fastview__ = self.cam
-                        def __new_draw__(img):
-                            if isinstance(img, bytes):
-                                # print('V831VivoMaixVideo', display.__width__, display.__height__, self.width(), self.height())
-                                display.__fastview__.set(img)
-                        display.__draw__ = __new_draw__
-                    except ModuleNotFoundError as e:
-                        pass
-                    except Exception as e:
-                        pass
-
-                    print('[camera] config input size(%d, %d)' %
-                        (self.width(), self.height()))
+                    self.cam = _v83x_vivo(display.width(), display.height(), _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
+                    display.__display__ = image.new(mode="RGBA", size=size, color=(0, 0, 0, 0))
+                    display.__fastview__ = self.cam
+                    def __new_draw__(img):
+                        if isinstance(img, bytes):
+                            display.__fastview__.set(img)
+                    display.__draw__ = __new_draw__
                 else:
-                    self._width, self._height = size
                     self.cam.resize(size[0], size[1])
+                print('[camera] config input size(%d, %d)' %
+                    (self.width(), self.height()))
 
-            def read(self, video_num=1, show=False, skip_frame=8):
+            def read(self, video_num=0, show=False, skip_frame=8):
                 if self.cam == None:
                     print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                     for i in range(skip_frame):
                         frame = self.cam.get(False)
-                if self.cam:
+                if self.cam: # allow bytes 240*240*3, bytes 224*224*3
                     frame = self.cam.get(show)
-                    if len(frame) == 2:
-                        return frame[video_num]  # bytes 240*240*3, bytes 224*224*3
-                    # try again if fail
-                    frame = self.cam.get(show)
-                    if len(frame) == 2:
+                    if len(frame) > 0:
                         return frame[video_num]
                 return None
 
@@ -67,20 +100,21 @@ try:
 
         class SpMaixVideo(MaixVideo):
 
-            def __init__(self, source="/dev/video"):
+            def __init__(self, source="/dev/videoX"):
                 self.source = source
-                self.cam = None
-                self._width, self._height = (0, 0)
+                super(SpMaixVideo, self).__init__()
 
             def config(self, size=None, video=0, horizontal=1, vertical=1):
+                if size == None:
+                    from maix import display
+                    size = (display.width(), display.height())
+                super(SpMaixVideo, self).config(size)
                 if self.cam == None:
-                    if size == None:
-                        from maix import display
-                        size = (display.__width__, display.__height__)
-                    super(SpMaixVideo, self).__init__(size)
                     self.cam = Camera(self.width(), self.height(), video, horizontal, vertical)
-                    print('[camera] config input size(%d, %d, %d)' %
-                        (self.width(), self.height(), video))
+                else:
+                    pass
+                print('[camera] config input size(%d, %d, %d)' %
+                    (self.width(), self.height(), video))
 
             def read(self):
                 if self.cam == None:
@@ -106,15 +140,14 @@ except Exception as e:
 
             def __init__(self, source=0):
                 self.source = source
-                self.cam = None
-                self._width, self._height = (0, 0)
+                super(CvMaixVideo, self).__init__()
 
             def config(self, size=(640, 480), source=None):
                 if self.cam == None:
-                    super(CvMaixVideo, self).__init__(size)
                     if source:
                         self.source = source
                     self.cam = VideoCapture(self.source)
+                    super(CvMaixVideo, self).config(size)
                     print('[camera] config input size(%s, %d, %d)' %
                         (self.source, self.width(), self.height()))
 
@@ -144,17 +177,3 @@ config = camera.config
 height = camera.height
 width = camera.width
 close = camera.close
-
-if __name__ == '__main__':
-    camera.config((224, 224))
-    from maix import display
-    display.clear((255, 0, 0))
-    display.show(camera.capture())
-    # tmp = camera.read()
-    # import _maix
-    # frame = _maix.rgb2jpg(camera.rgbbuf, camera.width, camera.height)
-    # print(len(frame) // 1024, camera.width, camera.height)
-    # from PIL import Image
-    # from io import BytesIO
-    # img = Image.open(BytesIO(frame))
-    # img.show()

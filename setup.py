@@ -4,13 +4,10 @@
 setup.py file for maixpy3
 """
 
-import sys
-import platform
-from setuptools import setup, Extension, find_packages
+import sys, platform
+from setuptools import setup, find_packages
 
-ext_modules = []
-data_files = []
-py_modules = []
+ext_modules, data_files, py_modules = [], [], []
 
 sysstr = platform.system()
 
@@ -30,9 +27,11 @@ ext_modules.extend(_maix_modules)
 data_files.extend(_maix_data_files)
 py_modules.extend(_maix_py_modules)
 
+from maix import version
+
 setup(
   name='maixpy3',
-  version='0.4.8',
+  version=version,
   license='MIT',
   author='Sipeed',
   author_email="support@sipeed.com",

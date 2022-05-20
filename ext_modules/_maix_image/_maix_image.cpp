@@ -264,6 +264,7 @@ maix_image &maix_image::_open_file(std::string path)
   libmaix_image_t *tmp_img = NULL;
   if (libmaix_cv_image_open_file(&tmp_img, path.c_str()) != 0)
   {
+    printf("[image.open] %s file does not exist\r\n", path.c_str());
     this->v_close();
     return *this;
   }

@@ -101,7 +101,8 @@ your r329
 
 ## pypi upload
 
-- python3 setup.py sdist build
+- python3 setup.py sdist
+- python3 setup.py build && pip3 install .
 - python3.8 setup.py bdist_wheel maix_v83x
 
 > pip3 install twine

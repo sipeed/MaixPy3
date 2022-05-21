@@ -431,13 +431,14 @@ py::bytes maix_image::_tobytes()
   return py::bytes((const char *)this->_img->data, this->_maix_image_size);
 }
 
-maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding)
+maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std::vector<int> size)
 {
   if (NULL == this->_img)
   {
     py::print("no img");
     return *this;
   }
+  if (dst_w == 0 && dst_h == 0) dst_w = size[0], dst_h = size[1];
   int src_w = this->_img->width, src_h = this->_img->height;
   if (src_w == dst_w && src_h == dst_h)
     return *this;

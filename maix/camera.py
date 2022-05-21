@@ -63,9 +63,7 @@ try:
                     size = (display.width(), display.height())
                 super(V831VivoMaixVideo, self).config(size)
                 if self.cam == None:
-                    self.cam = _v83x_vivo(display.width(), display.height(), _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
-                    display.__display__ = image.new(mode="RGBA", size=size, color=(0, 0, 0, 0))
-                    display.__fastview__ = self.cam
+                    display.__fastview__ = self.cam = _v83x_vivo(display.width(), display.height(), _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
                     def __new_draw__(img):
                         if isinstance(img, bytes):
                             display.__fastview__.set(img)

@@ -124,7 +124,7 @@ public:
   maix_image &_clear();
   void _load_freetype(std::string path);
   py::tuple _get_string_size(std::string str, double scale, int thickness);
-  maix_image &_resize(int w, int h, int func, int padding);
+  maix_image &_resize(int w, int h, int func, int padding, std::vector<int> size);
   maix_image &_draw_line(int x1, int y1, int x2, int y2, std::vector<int> color, int thickness);
   maix_image &_draw_cross(int x, int y, int c, int size, int thickness);
   maix_image &_draw_rectangle(int x1_x, int y1_y, int x2_w, int y2_h, std::vector<int> color, int thickness, int is_xywh);

@@ -56,9 +56,9 @@ from maix import display,camera
 import time
 global m
 m = Yolo()
-camera.config((m.input_size[0] ,m.input_size[1]))
+
 while True:
-    img = camera.capture()
+    img = camera.capture().resize(size=(m.input_size[0] ,m.input_size[1]))
     t = time.time()
     out = m.model.forward(img.tobytes(), quantize=1, layout = "hwc")
     boxes, probs = m.decoder.run(out, nms=0.5, threshold=0.5, img_size=(224,224))

@@ -149,7 +149,7 @@ max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
 _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
                             sources=max_nn_srcs,
                             libraries=[
-    "maix_utils", "maix_nn",
+    "maix_utils", "maix_nn", "maix_cam",
 ],
     library_dirs=[ ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
@@ -212,7 +212,7 @@ _maix_image_module = Pybind11Extension("_maix_image",
             get_srcs('ext_modules/libmaix/components/maix_cv_image/src') +
             get_srcs('ext_modules/libmaix/components/third_party/imlib/src'),
     libraries=[
-        "maix_utils", "maix_cam", "maix_disp", "maix_image",
+        "maix_utils", "maix_cam", "maix_image",
         "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
         # "opencv_aruco", "opencv_dnn", "opencv_hfs", "opencv_optflow", "opencv_shape",
         # "opencv_videoio","opencv_bgsegm", "opencv_dpm", "opencv_highgui", "opencv_phase_unwrapping", "opencv_stereo",
@@ -260,5 +260,4 @@ _maix_py_modules = [
     "evdev",
     "spidev",
     "pyserial",
-    "zbarlight",
 ]

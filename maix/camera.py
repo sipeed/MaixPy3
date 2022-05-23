@@ -14,7 +14,7 @@ class MaixVideo():
         pass  # for file
 
     def read(self):
-        return b'\xFF\x00\x00' * (self._width * self._height)
+        return None
 
     def config(self, size):
         # print("MaixVideo", size)
@@ -34,14 +34,12 @@ class MaixVideo():
                 return Image.frombytes("RGB", (self._width, self._height), tmp)
             except Exception as e:
                 pass
+        else:
+            print("[camera.capture] can't get image, camera is busy!!!")
         return None
 
     def close(self):
         self.__del__()
-
-
-camera = MaixVideo()
-
 try:
     try:
         # use mpp vivo on v831
@@ -56,7 +54,7 @@ try:
                     # maix-smart or other display.config 240 x 320 => 320 x 240
                     display.config(size=(display.height(), display.width()))
                     self._vo_dir = self._ai_dir = 3 # -90 rotate show
-                    self.config() # for maix smart
+                self.config() # for v831 mpp ready
 
             def config(self, size=None, _ai_size=(224, 224)):
                 if size == None:
@@ -75,7 +73,6 @@ try:
 
             def read(self, video_num=0, show=False, skip_frame=8):
                 if self.cam == None:
-                    print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                     for i in range(skip_frame):
                         frame = self.cam.get(False)
@@ -116,7 +113,6 @@ try:
 
             def read(self):
                 if self.cam == None:
-                    print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                 if self.cam:
                     ret, frame = self.cam.read()
@@ -151,7 +147,6 @@ except Exception as e:
 
             def read(self):
                 if self.cam == None:
-                    print('[camera] run config(size=(w, h)) before capture.')
                     self.config()
                 ret, frame = self.cam.read()
                 if ret:
@@ -166,12 +161,17 @@ except Exception as e:
 
         camera = CvMaixVideo()
     except Exception as e:
-        pass
+        # camera = MaixVideo()
+        raise e
+
+def _del_config(*args, **kwargs):
+    # or use camera.camera.config if you knew what you were doing.
+    print("[camera.config] is deprecated, use [image.resize] for images.")
 
 # registered interface
 capture = camera.capture
 read = camera.read
-config = camera.config
+config = _del_config
 height = camera.height
 width = camera.width
 close = camera.close

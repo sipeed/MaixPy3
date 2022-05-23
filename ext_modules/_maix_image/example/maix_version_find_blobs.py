@@ -61,7 +61,6 @@ if __name__ == "__main__":
         print("father over")
         exit(0)
     signal.signal(signal.SIGINT, handle_signalm)
-    camera.config(size=(240, 240))
     start = funation()
     while True:
         start.event()

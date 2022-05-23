@@ -43,10 +43,8 @@ import numpy as np
 from maix import nn
 global m
 m = MobileNetv2()
-camera.config((224,224))
-#loop
 while True:
-    img = camera.capture()
+    img = camera.capture().resize(size=(224,224))
     out = m.model.forward(img, quantize=True, layout="hwc")
     out2 = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])

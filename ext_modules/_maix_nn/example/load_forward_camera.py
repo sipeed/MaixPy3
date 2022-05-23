@@ -8,8 +8,6 @@ model = {
     "bin": "/root/models/resnet_awnn.bin"
 }
 
-camera.config(size=(224, 224))
-
 options = {
     "model_type":  "awnn",
     "inputs": {
@@ -38,10 +36,7 @@ print(out.max(), out.argmax())
 
 from classes_label import labels
 while 1:
-    img = camera.capture()
-    if not img:
-        time.sleep(0.02)
-        continue
+    img = camera.capture().resize(size=(224, 224))
     out = m.forward(img, quantize=True)
     out = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out.max(), labels[out.argmax()])

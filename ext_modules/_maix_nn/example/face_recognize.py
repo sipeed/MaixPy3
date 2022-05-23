@@ -51,7 +51,7 @@ class Face_Recognizer:
             "outputs": {
                 "output0": (1, 4, 2508) ,
                 "431": (1, 2, 2508) ,
-                "output2": (1, 10, 2508) 
+                "output2": (1, 10, 2508)
             },
             "mean": [127.5, 127.5, 127.5],
             "norm": [0.0078125, 0.0078125, 0.0078125],
@@ -110,7 +110,7 @@ class Face_Recognizer:
         if uid >= 0:
             return self.features[uid][0], max_score
         return None, 0
-        
+
 
     def get_input_size(self):
         '''
@@ -147,7 +147,6 @@ score_threshold = 70
 names = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 face_recognizer = Face_Recognizer(detect_threshold, detect_nms, max_face_num = max_face_num)
-camera.config(size=face_recognizer.get_input_size()[:2])
 
 keys_device = InputDevice('/dev/input/event0')
 def key_pressed():
@@ -157,7 +156,7 @@ def key_pressed():
 key_l = False
 key_r = False
 while 1:
-    img = camera.capture()
+    img = camera.capture().resize(size=face_recognizer.get_input_size()[:2])
     if not img:
         time.sleep(0.02)
         continue
@@ -201,5 +200,5 @@ while 1:
     display.show(img)
 
 
-    
+
 

@@ -37,10 +37,10 @@ from maix import  display, camera
 import numpy as np
 global m
 m =Edge()
-camera.config((224,224))
+
 #loop
 while True:
-    img = camera.capture()
+    img = camera.capture().resize(size=(224, 224))
     out = m.model.forward(img, quantize=True, layout="hwc")
     out = out.astype(np.float32).reshape(m.output_size)
     out = (np.ndarray.__abs__(out) * 255 / out.max()).astype(np.uint8)

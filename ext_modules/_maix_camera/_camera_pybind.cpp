@@ -64,7 +64,9 @@ void v_init(_camera *tp)
     cout << "virtual_camera init success!" << endl;
 #else // VirtualCamera
 
+    // printf("libmaix_camera_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
     libmaix_camera_module_init();
+    // printf("libmaix_image_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
     libmaix_image_module_init();
     tp->rgb_img = NULL;
     tp->cam = libmaix_cam_create(tp->dev_id, tp->width, tp->height, tp->m, tp->f);

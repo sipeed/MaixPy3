@@ -43,7 +43,6 @@ if __name__ == "__main__":
         print("APP OVER")
         exit(0)
     signal.signal(signal.SIGINT, handle_signal_z)
-    camera.config(size=(240, 240))
     start = funation()
     while True:
         start.event()

@@ -11,7 +11,6 @@ model = {
 
 input_size = (224, 224, 3)
 output_size = (222, 222, 3)
-camera.config(size=input_size[:2])
 
 options = {
     "model_type":  "awnn",
@@ -34,7 +33,7 @@ while 1:
     # if len(tmp):
     #   img = Image.frombytes("RGB", (224, 224), tmp)
     #   img.save("img.jpg")
-    img = camera.capture()
+    img = camera.capture().resize(size=input_size[:2])
     if img:
       # img.save("img.jpg")
       out = m.forward(img, quantize=True)

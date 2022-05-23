@@ -46,9 +46,9 @@ class Mask:
 def main():
     from maix import display, camera
     app = Mask()
-    camera.config((224,224))
+
     while True:
-        img = camera.capture()
+        img = camera.capture().resize(size=(224, 224))
         app.process(img)
         display.show(img)
 main()

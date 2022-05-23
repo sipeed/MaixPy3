@@ -160,7 +160,7 @@ import time
 class BgImage:
     def __init__(self):
         from maix import display, image
-        self.image = image.Image().new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
+        self.image = image.new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
         self.info = ""
         self.height = 40
         self.pwm_led = pwm.PWM(8)
@@ -178,7 +178,7 @@ class BgImage:
         self.pwm_led.unexport()
     def draw_clear(self):
         self.height = 40
-        self.image = image.Image().new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
+        self.image = image.new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
         self.draw_next(self.info)
     def draw_next(self, info=""):
         self.info = info

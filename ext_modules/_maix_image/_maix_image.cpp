@@ -106,16 +106,15 @@ maix_image::~maix_image()
 
 std::string maix_image::repr__()
 {
-  return std::string();
-  // std::string info_str;
-  // std::stringstream ss;
-  // ss << "<_maix_image.Image \"width\":" << this->_maix_image_width
-  //    << ", \"height\":" << this->_maix_image_height
-  //    << ", \"type\"=" << this->_maix_image_type
-  //    << ", \"size\":" << this->_maix_image_size
-  //    << ">";
-  // info_str = ss.str();
-  // return info_str;
+  std::string info_str;
+  std::stringstream ss;
+  ss << "<_maix_image.Image \"width\":" << this->_maix_image_width
+     << ", \"height\":" << this->_maix_image_height
+     << ", \"type\"=" << this->_maix_image_type
+     << ", \"size\":" << this->_maix_image_size
+     << ">";
+  info_str = ss.str();
+  return info_str;
 }
 
 std::string maix_image::str__()

@@ -15,7 +15,7 @@ signal.signal(signal.SIGINT, handle_signal_z)
 
 
 def test_draw():
-    img = image.Image().new(size=(240, 240), color=(255, 0, 0), mode="RGB")
+    img = image.new(size=(240, 240), color=(255, 0, 0), mode="RGB")
     # draw_string
     img.draw_string(10, 200, "hello word!", scale=0.5,
                     color=(0, 0, 255), thickness=1)
@@ -44,7 +44,7 @@ test_draw()
 
 
 def test_img_copy():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     print(img)
     display.show(img)
     time.sleep(0.5)
@@ -70,7 +70,7 @@ test_set_pixel()
 
 
 def test_crop():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     img.draw_string(100, 100, "nihao", color=(0, 0, 255))
     display.show(img)
     mk = img.crop(90, 90, 100, 50)
@@ -82,12 +82,12 @@ test_crop()
 
 
 def test_draw_image():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     img.draw_string(100, 100, "nihao", color=(0, 0, 255))
     display.show(img)
     # time.sleep(0.5)
     mk = img.crop(90, 90, 100, 50)
-    imga = image.Image().new(color=(0, 255, 0))
+    imga = image.new(color=(0, 255, 0))
     imga.draw_image(mk, 10, 10)
     # imga.draw_image(imga) # py no-allow use self but libmaix support
     display.show(imga)
@@ -96,7 +96,7 @@ def test_draw_image():
 test_draw_image()
 
 def test_rotate():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     img.draw_string(100, 100, "nihao", color=(0, 0, 255))
     for i in range(5):
         time.sleep(0.5)
@@ -107,7 +107,7 @@ test_rotate()
 
 
 def test_convert():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     print(img)
     img.convert("L")
     print(img)
@@ -119,7 +119,7 @@ def test_convert():
 test_convert()
 
 def test_font_draw():
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
     image.load_freetype("./smart/assets/fonts/Alibaba-PuHuiTi-Regular.ttf")
     s = "二进制例程"
     x, y = image.get_string_size(s, 3)
@@ -134,7 +134,7 @@ def test_font_draw():
     display.show(img)
     time.sleep(1)
 
-    img = image.Image().new(color=(255, 0, 0))
+    img = image.new(color=(255, 0, 0))
 
     image.load_freetype("./smart/assets/fonts/JosefinSans-Regular.ttf")
     s = "bin example"

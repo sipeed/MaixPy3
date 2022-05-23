@@ -19,11 +19,11 @@ class v83x_ADC():
 
 if __name__ == '__main__':
   import time
-  from maix import display, image
+  from maix import camera, display, image
   v831_adc0 = v83x_ADC()
   while True:
     time.sleep(0.1)
-    tmp = image.Image().new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
+    tmp = image.new((240, 240), (0x2c, 0x3e, 0x50), "RGB")
     val = v831_adc0.value()
     print(val)
     img = image.Image().open('/home/res/logo.png')

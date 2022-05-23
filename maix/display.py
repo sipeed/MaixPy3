@@ -16,6 +16,7 @@ try:
         global __fastview__, _width, _height
         if isinstance(img, bytes):
           __fastview__.draw(img, _width, _height)
+    from maix import camera
 except ModuleNotFoundError as e:
     pass
 except Exception as e:
@@ -28,7 +29,7 @@ def as_image():
     global __display__
     if __display__ is None:
       global _width, _height, __mode__
-      __display__ = image.Image().new(mode=__mode__, size=(_width, _height))
+      __display__ = image.new(mode=__mode__, size=(_width, _height))
     return __display__
 
 def width():

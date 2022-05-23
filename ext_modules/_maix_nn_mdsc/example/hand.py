@@ -1,14 +1,10 @@
 from time import time
 
-class Person:
-    #mdsc_path
-        # V831
-    #mdsc_path = "/root/mud/v831_yolo_person.mud"
-        #R329
-    mdsc_path = "/root/mud/r329_yolo_person.mud"
+class Hnad:
+    mdsc_path = "./v831_yolo_hand.mud"
 
-    labels = ["person"]
-    anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
+    labels = ["0","1","2","3","4","5"]
+    anchors = [3.78, 5.81, 3.97, 3.98, 4.05, 4.98, 4.81, 5.41, 2.91, 4.53]
 
     def __init__(self) -> None:
 
@@ -45,8 +41,7 @@ class Person:
 
 def main():
     from maix import display, camera
-    app = Person()
-
+    app = Hnad()
     while True:
         img = camera.capture().resize(size=(224,224))
         app.process(img)

@@ -85,6 +85,7 @@ static void Model_del(ModelObject *self)
     if(self->nn)
     {
         libmaix_nn_destroy(&(self->nn));
+        // printf("libmaix_nn_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
         libmaix_nn_module_deinit();
     }
     if(Py_TYPE(self)->tp_free)
@@ -192,6 +193,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             Py_INCREF(self->outputs);
 
             /* load by libmaix API */
+            // printf("libmaix_nn_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
+            libmaix_camera_module_init();
             libmaix_nn_module_init();
             libmaix_nn_model_path_t model_path = {
                 .awnn.param_path = (char*)PyUnicode_DATA(o_param_path),
@@ -379,6 +382,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             Py_INCREF(self->outputs);
 
             /* load by libmaix API */
+            // printf("libmaix_nn_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
+            libmaix_camera_module_init();
             libmaix_nn_module_init();
             libmaix_nn_model_path_t model_path = {
                 .aipu.model_path = (char*)PyUnicode_DATA(o_bin_path),
@@ -560,6 +565,8 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
         // mud
         printf("mud mode \n");
         self->use_mdsc = true;
+        // printf("libmaix_nn_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
+        libmaix_camera_module_init();
         libmaix_nn_module_init();
         char * mud = (char*)PyUnicode_DATA(o_model_path);
         printf("%s\n",mud);
@@ -594,7 +601,9 @@ end:
     {
         libmaix_nn_destroy(&(self->nn));
     }
+    // printf("libmaix_nn_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
     libmaix_nn_module_deinit();
+    libmaix_camera_module_deinit();
     /* load by libmaix API error deal end*/
     return (int)err;
 }

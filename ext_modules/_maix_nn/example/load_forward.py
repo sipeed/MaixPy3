@@ -26,9 +26,9 @@ options = {
 print("-- load model:", model)
 m = nn.load(model, opt=options)
 print("-- load ok")
-camera.config((224, 224))
+
 while True:
-    img = camera.capture()
+    img = camera.capture().resize(size=(224, 224))
     out = m.forward(img.tobytes(), quantize=True)
     out2 = nn.F.softmax(out)
     msg = "{:.2f}: {}".format(out2.max(), labels[out.argmax()])

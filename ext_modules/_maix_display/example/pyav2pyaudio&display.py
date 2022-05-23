@@ -1,7 +1,6 @@
 import pyaudio
 from maix import display, camera
 import av
-# camera.config()
 
 display.show(camera.capture())
 

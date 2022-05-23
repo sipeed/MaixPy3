@@ -334,7 +334,9 @@ public:
     {
         if (!this->inited)
         {
+            // printf("libmaix_camera_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
             libmaix_camera_module_init();
+            // printf("libmaix_image_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
             libmaix_image_module_init();
 
             this->ai_dir = ai_dir;
@@ -414,9 +416,10 @@ public:
                 libmaix_image_destroy(&this->yuv2rgb);
             if (NULL != this->vo)
                 libmaix_vo_destroy(&this->vo);
-            // libmaix_camera_module_deinit();
             // usleep(200000); // wait 1s to deinit
+            // printf("libmaix_image_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
             libmaix_image_module_deinit();
+            // printf("libmaix_camera_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
             libmaix_camera_module_deinit();
             this->inited = false;
         }

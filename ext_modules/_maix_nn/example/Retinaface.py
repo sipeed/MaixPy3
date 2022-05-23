@@ -77,9 +77,9 @@ from maix import nn
 import time
 global m
 m = Retinaface()
-camera.config((m.input_size[0],m.input_size[1]))
+
 while True:
-    img = camera.capture()
+    img = camera.capture().resize(size=(m.input_size[0],m.input_size[1]))
     t = time.time()
     out = m.forward(img.tobytes(), quantize=1, layout = "chw")
     boxes , landmarks = m.decoder.run(out, nms = 0.2 ,score_thresh = 0.7 , outputs_shape =[[1,4,5875],[1,2,5875],[1,10,5875]])

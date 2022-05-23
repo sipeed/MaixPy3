@@ -30,8 +30,6 @@ print("-- load model:", model)
 m = nn.load(model, opt=options)
 print("-- load ok")
 
-camera.config(size=(224, 224))
-
 def key_pressed():
     # TODO: is button pressed
     return 1
@@ -41,7 +39,7 @@ classifier = Classifier(m, class_num, sample_num, feature_len, input_w, input_h)
 curr_class = 0
 curr_sample = 0
 while 1:
-    img = camera.capture()
+    img = camera.capture().resize(size=(224, 224))
     if not img:
         time.sleep(0.02)
         continue

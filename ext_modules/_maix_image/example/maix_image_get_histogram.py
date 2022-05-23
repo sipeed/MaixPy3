@@ -1,7 +1,7 @@
 
 from maix import image
 
-# img = image.Image().new(size=(10, 10), color=(255, 255, 255), mode="RGB")
+# img = image.new(size=(10, 10), color=(255, 255, 255), mode="RGB")
 img = image.Image().open("ext_modules/_maix_image/example/test_image.jpg")
 tmp = img.get_histogram(bins=8, roi=(20, 20, 80, 80))
 

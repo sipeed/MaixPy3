@@ -49,12 +49,10 @@ anchors = [4.72, 6.26, 1.39, 3.53, 0.78, 1.9, 0.35, 0.95, 2.49, 4.87]
 # 声明解码器并初始化
 yolo2_decoder = decoder.Yolo2(len(labels), anchors, net_in_size=(w, h), net_out_size=(7, 7))
 
-camera.config((h, w))
-
 while 1:
     # 获取摄像头图像
     t  = time.time()
-    img = camera.capture()
+    img = camera.capture().resize(size=(w, h))
 
     #模型前向推理
     out = m.forward(img.tobytes(), quantize  =1 ,layout = "chw")  #返回对象是一个List对象，实际输出的内容是需要进行解包

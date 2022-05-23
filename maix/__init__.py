@@ -1,7 +1,7 @@
 
-version='0.4.8'
+version='0.4.9'
 
-__all__ = ['nn', 'display', 'camera', 'image']
+__all__ = ['display', 'camera', 'image']
 
 try:
   from . import nn
@@ -9,5 +9,5 @@ try:
 except ModuleNotFoundError as e:
   pass
 
-import signal
+import signal # v831 need release mpp, maybe have bug so remove.
 signal.signal(signal.SIGINT,lambda signum,frame:exit(0))

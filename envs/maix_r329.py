@@ -95,7 +95,7 @@ _maix_nn_module = Extension('_maix_nn',
     include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
     sources=max_nn_srcs,
     libraries=[
-        "maix_utils", "maix_nn", "maix_nn_app"
+        "maix_utils", "maix_cam", "maix_nn", "maix_nn_app"
     ],
     library_dirs=[ ext_so, ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]

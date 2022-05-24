@@ -1011,3 +1011,19 @@ maix_image &maix_image::_imlib_rotation_corr(float x_rotation, float y_rotation,
 
   return *this;
 }
+
+maix_image &maix_image::_opencv_Canny(double threshold1, double threshold2, int apertureSize, bool L2gradient)
+{
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
+  if (this->_maix_image_type == "RGB") {
+    cv::Mat gray, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
+    cv::cvtColor(rgb, gray, cv::COLOR_RGB2GRAY);
+    cv::Canny(gray, gray, threshold1, threshold2, apertureSize, L2gradient);
+    cv::cvtColor(gray, rgb, cv::COLOR_GRAY2RGB);
+  }
+  return *this;
+}

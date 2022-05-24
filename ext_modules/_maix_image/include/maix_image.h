@@ -206,5 +206,6 @@ public:
 
   maix_image &_mean(const int ksize, bool threshold, int offset,bool invert,maix_image & mask);
 
+  maix_image &_opencv_Canny(double threshold1, double threshold2, int apertureSize, bool L2gradient);
 };
 #endif

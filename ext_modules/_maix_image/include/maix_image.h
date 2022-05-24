@@ -114,7 +114,7 @@ public:
   int len__();
   void _show();
   int _save(std::string file_path, std::string format);
-  py::bytes _tobytes();
+  py::bytes _tobytes(std::string format, std::vector<int> params);
   size_t img_pointer();
   maix_image &_new(std::vector<int> size, std::vector<int> color, std::string mode);
   maix_image &_load(py::object data, std::vector<int> size, std::string mode);

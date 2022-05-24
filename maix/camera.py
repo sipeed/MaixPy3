@@ -60,16 +60,16 @@ try:
                 if size == None:
                     size = (display.width(), display.height())
                 super(V831VivoMaixVideo, self).config(size)
-                if self.cam == None:
-                    display.__fastview__ = self.cam = _v83x_vivo(display.width(), display.height(), _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
-                    def __new_draw__(img):
-                        if isinstance(img, bytes):
-                            display.__fastview__.set(img)
-                    display.__draw__ = __new_draw__
-                else:
-                    self.cam.resize(size[0], size[1])
                 print('[camera] config input size(%d, %d)' %
                     (self.width(), self.height()))
+                if self.cam == None:
+                    display.__show__ = self.cam = _v83x_vivo(size[0], size[1], _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
+                    def __new_draw__(img):
+                        if isinstance(img, bytes):
+                            display.__show__.set(img)
+                    display.__draw__ = __new_draw__
+                else:
+                    self.cam.config(size[0], size[1])
 
             def read(self, video_num=0, show=False, skip_frame=8):
                 if self.cam == None:
@@ -104,12 +104,11 @@ try:
                     from maix import display
                     size = (display.width(), display.height())
                 super(SpMaixVideo, self).config(size)
-                if self.cam == None:
-                    self.cam = Camera(self.width(), self.height(), video, horizontal, vertical)
-                else:
-                    pass
                 print('[camera] config input size(%d, %d, %d)' %
                     (self.width(), self.height(), video))
+                if self.cam:
+                    del self.cam
+                self.cam = Camera(self.width(), self.height(), video, horizontal, vertical)
 
             def read(self):
                 if self.cam == None:

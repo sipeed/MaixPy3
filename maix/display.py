@@ -8,14 +8,14 @@ def config(size=(240, 240)):
         _width, _height = size[0], size[1]
 
 try:
-    __fastview__ = None
+    __show__ = None
     from _maix_display import Display
-    __fastview__ = Display()
-    config(size=(__fastview__.width, __fastview__.height))
+    __show__ = Display()
+    config(size=(__show__.width, __show__.height))
     def __draw__(img):
-        global __fastview__, _width, _height
+        global __show__, _width, _height
         if isinstance(img, bytes):
-          __fastview__.draw(img, _width, _height)
+          __show__.draw(img, _width, _height)
     from maix import camera
 except ModuleNotFoundError as e:
     pass
@@ -60,5 +60,5 @@ def show(img=None, box=(0, 0), local_show=True, remote_show=True):
                 img = img.tobytes()
         except ImportError as e:
           pass
-        if __fastview__:
+        if __show__:
             __draw__(img)

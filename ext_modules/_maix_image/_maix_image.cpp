@@ -423,11 +423,33 @@ int maix_image::_save(std::string file_path, std::string format)
   return 0;
 }
 
-py::bytes maix_image::_tobytes()
+py::bytes maix_image::_tobytes(std::string format, std::vector<int> params)
 {
   if (NULL == this->_img)
     return py::bytes();
-  return py::bytes((const char *)this->_img->data, this->_maix_image_size);
+
+  if (format == "rgb")
+    return py::bytes((const char *)this->_img->data, this->_maix_image_size);
+
+  std::vector<uchar>encoded_buffer;
+  cv::Mat cv_is_bgr, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
+  cv::cvtColor(rgb, cv_is_bgr, cv::COLOR_RGB2BGR);
+
+  if (format == "jpg") {
+    if (params.size() == 0) params.push_back(CV_IMWRITE_JPEG_QUALITY), params.push_back(95);
+    cv::imencode(".jpeg", cv_is_bgr, encoded_buffer, params);
+    return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
+  }
+  if (format == "png") {
+    if (params.size() == 0) params.push_back(CV_IMWRITE_PNG_COMPRESSION), params.push_back(3);
+    cv::imencode(".png", cv_is_bgr, encoded_buffer, params);
+    return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
+  }
+  if (format == "bmp") {
+    cv::imencode(".bmp", cv_is_bgr, encoded_buffer, params);
+    return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
+  }
+  return py::bytes();
 }
 
 maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std::vector<int> size)

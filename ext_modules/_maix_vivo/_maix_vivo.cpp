@@ -305,7 +305,7 @@ public:
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 
-    int resize(int w, int h, int i)
+    int config(int w, int h, int i)
     {
         if (this->inited && this->vi[i]->width != w && this->vi[i]->height != h)
         {
@@ -438,6 +438,6 @@ PYBIND11_MODULE(_maix_vivo, m)
         .def(pybind11::init<int, int, int, int, int, int>(),
              py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 224, py::arg("ai_h") = 224, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
         .def("get", &_v83x_vivo::get, py::arg("show") = false, py::arg("more") = false)
-        .def("resize", &_v83x_vivo::resize, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 1)
+        .def("config", &_v83x_vivo::config, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 0)
         .def("set", &_v83x_vivo::set);
 }

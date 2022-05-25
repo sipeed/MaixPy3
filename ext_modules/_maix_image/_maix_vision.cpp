@@ -171,10 +171,10 @@ py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thre
     for (size_t i = 0; i < thresholds.size(); i++)
     {
       thresholds[i][0] = int((thresholds[i][0] * 255) / 100);
-      thresholds[i][1] = thresholds[i][1] + 128;
-      thresholds[i][2] = thresholds[i][2] + 128;
-      thresholds[i][3] = int((thresholds[i][3] * 255) / 100);
-      thresholds[i][4] = thresholds[i][4] + 128;
+      thresholds[i][1] = thresholds[i][2] + 128;
+      thresholds[i][2] = thresholds[i][4] + 128;
+      thresholds[i][3] = int((thresholds[i][1] * 255) / 100);
+      thresholds[i][4] = thresholds[i][3] + 128;
       thresholds[i][5] = thresholds[i][5] + 128;
     }
     break;

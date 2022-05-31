@@ -26,6 +26,7 @@ class MaixVideo():
             try:
                 if pillow == False:
                     from maix import image
+                    # print("self._width, self._height", self._width, self._height)
                     return image.Image().load(tmp, (self._width, self._height), "RGB")
             except Exception as e:
                 pass
@@ -69,7 +70,7 @@ try:
                             display.__show__.set(img)
                     display.__draw__ = __new_draw__
                 else:
-                    self.cam.config(size[0], size[1])
+                    self.cam.cfg(size[0], size[1])
 
             def read(self, video_num=0, show=False, skip_frame=8):
                 if self.cam == None:
@@ -163,14 +164,16 @@ except Exception as e:
         # camera = MaixVideo()
         raise e
 
+''' # 20220531 dls fix it!!!!
 def _del_config(*args, **kwargs):
     # or use camera.camera.config if you knew what you were doing.
     print("[camera.config] is deprecated, use [image.resize] for images.")
+'''
 
 # registered interface
 capture = camera.capture
 read = camera.read
-config = _del_config
+config = camera.config
 height = camera.height
 width = camera.width
 close = camera.close

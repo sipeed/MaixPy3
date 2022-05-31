@@ -301,13 +301,13 @@ public:
         // // save buffer used default 3 3
         // extern uint8_t libmaix_cam_vovi_bufmax, libmaix_cam_voui_bufmax;
         // libmaix_cam_vovi_bufmax = 3, libmaix_cam_voui_bufmax = 3;
-        // printf("[_v83x_vivo] %d %d %d %d %d %d \r\n", vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 
-    int config(int w, int h, int i)
+    int cfg(int w, int h, int i)
     {
-        if (this->inited && this->vi[i]->width != w && this->vi[i]->height != h)
+        // printf("[cfg] %d %d %d \r\n", this->inited, (this->vi[i]->width != w), (this->vi[i]->height != h));
+        if ((this->inited) && ((this->vi[i]->width != w) || (this->vi[i]->height != h)))
         {
             if (NULL != this->vi[i])
                 libmaix_cam_destroy(&this->vi[i]);
@@ -334,11 +334,6 @@ public:
     {
         if (!this->inited)
         {
-            // printf("libmaix_camera_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
-            libmaix_camera_module_init();
-            // printf("libmaix_image_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
-            libmaix_image_module_init();
-
             this->ai_dir = ai_dir;
             this->vo_dir = this->vo_dir = vo_dir;
 
@@ -416,11 +411,6 @@ public:
                 libmaix_image_destroy(&this->yuv2rgb);
             if (NULL != this->vo)
                 libmaix_vo_destroy(&this->vo);
-            // usleep(200000); // wait 1s to deinit
-            // printf("libmaix_image_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
-            libmaix_image_module_deinit();
-            // printf("libmaix_camera_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
-            libmaix_camera_module_deinit();
             this->inited = false;
         }
         return this->inited;
@@ -432,12 +422,24 @@ public:
     }
 };
 
+static struct _maix_vivo
+{
+    _maix_vivo() {
+        libmaix_camera_module_init();
+        libmaix_image_module_init();
+    }
+    ~_maix_vivo() {
+        libmaix_image_module_deinit();
+        libmaix_camera_module_deinit();
+    }
+} global_maix_vivo;
+
 PYBIND11_MODULE(_maix_vivo, m)
 {
     pybind11::class_<_v83x_vivo>(m, "_v83x_vivo")
         .def(pybind11::init<int, int, int, int, int, int>(),
-             py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 224, py::arg("ai_h") = 224, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
+             py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
         .def("get", &_v83x_vivo::get, py::arg("show") = false, py::arg("more") = false)
-        .def("config", &_v83x_vivo::config, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 0)
+        .def("cfg", &_v83x_vivo::cfg, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 0)
         .def("set", &_v83x_vivo::set);
 }

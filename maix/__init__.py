@@ -1,5 +1,5 @@
 
-version='0.4.9'
+version='0.5.0'
 
 __all__ = ['display', 'camera', 'image']
 

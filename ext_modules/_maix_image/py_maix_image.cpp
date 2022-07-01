@@ -123,11 +123,10 @@ PYBIND11_MODULE(_maix_image, mo)
       // maix_image继承maix_vision方法
       .def("get_blob_lab", &maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
       .def("get_blob_color", &maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)
-      .def("find_blob_lab", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
       .def("find_ball_color", &maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
       .def("find_circles_blob", &maix_image::_maix_vision_find_ball_blob, py::arg("thresholds"), py::arg("co") = 1)
       .def("find_line", &maix_image::find_line, py::arg("func") = 0)
-      .def("find_blobs", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
+      .def("find_blobs_cv", &maix_image::_maix_vision_find_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("co") = 1)
       .def("custom_find_ball_blob", &maix_image::_find_ball_blob, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("tilt") = 0, py::arg("h_min") = 1, py::arg("w_min") = 1, py::arg("co") = 1)
       // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
       .def("get_histogram", &maix_image::_imlib_get_histogram, py::arg("roi") = std::vector<int>{0, 0, 0, 0},
@@ -150,6 +149,7 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("find_line_segments", &maix_image::_imlib_find_line_segments, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("merge_distance") = 0, py::arg("max_theta_diff") = 15)
       .def("find_apriltags", &maix_image::_imlib_find_apriltags, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("families") = 16, py::arg("fx") = 0, py::arg("fy") = 0, py::arg("cx") = 0, py::arg("cy") = 0)
       .def("find_qrcodes", &maix_image::_imlib_find_qrcodes, py::arg("roi") = std::vector<int>{0, 0, 0, 0})
+      .def("find_blobs", &maix_image::_imlib_find_blobs, py::arg("thresholds_src"), py::arg("roi_src") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("x_hist_bins_max") = 0, py::arg("y_hist_bins_max") = 0)
       .def("find_barcodes", &maix_image::_imlib_find_barcodes, py::arg("roi") = std::vector<int>{0, 0, 0, 0}); // module end
 
 #ifdef CONFIG_ARCH_V83X

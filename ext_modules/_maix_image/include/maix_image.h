@@ -100,6 +100,7 @@ public:
   py::list _imlib_find_apriltags(std::vector<int> &roi, int families, float fx, float fy, float cx, float cy);
   py::list _imlib_find_qrcodes(std::vector<int> &roi);
   py::list _imlib_find_barcodes(std::vector<int> &roi);
+  py::list _imlib_find_blobs(std::vector<std::vector<int>> &thresholds_src, std::vector<int> roi_src, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int x_hist_bins_max, int y_hist_bins_max);
 };
 
 class maix_image : virtual public any_image, public maix_vision, public maix_custom

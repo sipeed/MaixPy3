@@ -62,7 +62,7 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
   }
   switch (co)
   {
-  case 0: //rgb
+  case 0: // rgb
   {
     return_val.append(lnum);
     return_val.append(anum);
@@ -70,7 +70,7 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
     return return_val;
   }
   break;
-  case 1: //lab
+  case 1: // lab
   {
     cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
     cv::Mat lab;
@@ -99,7 +99,7 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
     return return_val;
   }
   break;
-  case 2: //hsv
+  case 2: // hsv
   {
     cv::Mat rgb(1, 1, CV_8UC3, cv::Scalar(lnum, anum, bnum));
     cv::Mat lab;
@@ -133,6 +133,7 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
   }
   return return_val;
 }
+
 py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thresholds, std::vector<int> roi, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int tilt, int co)
 {
   py::list return_val;
@@ -143,7 +144,7 @@ py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thre
   bool grasy = 0;
   switch (co)
   {
-  case 0: //rgb
+  case 0: // rgb
     if (in_img.channels() != 3)
       return return_val;
     if (roi[2] != 0 && roi[3] != 0)
@@ -156,7 +157,7 @@ py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thre
       lab = in_img;
     }
     break;
-  case 1: //lab
+  case 1: // lab
     if (in_img.channels() != 3)
       return return_val;
     if (roi[2] != 0 && roi[3] != 0)
@@ -178,7 +179,7 @@ py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thre
       thresholds[i][5] = thresholds[i][5] + 128;
     }
     break;
-  case 2: //hsv
+  case 2: // hsv
     if (in_img.channels() != 3)
       return return_val;
     if (roi[2] != 0 && roi[3] != 0)
@@ -300,6 +301,7 @@ py::list maix_vision::_maix_vision_find_blob(std::vector<std::vector<int>> &thre
   }
   return return_val;
 }
+
 py::list maix_vision::_maix_vision_find_ball_blob(std::vector<int> &thresholds, int co)
 {
   py::list out;
@@ -309,12 +311,12 @@ py::list maix_vision::_maix_vision_find_ball_blob(std::vector<int> &thresholds, 
   cv::Mat hsv, mask;
   switch (co)
   {
-  case 0: //rgb
+  case 0: // rgb
     if (in_img.channels() != 3)
       return out;
     hsv = in_img;
     break;
-  case 1: //lab
+  case 1: // lab
     if (in_img.channels() != 3)
       return out;
     cv::cvtColor(in_img, hsv, cv::COLOR_RGB2Lab);
@@ -325,7 +327,7 @@ py::list maix_vision::_maix_vision_find_ball_blob(std::vector<int> &thresholds, 
     thresholds[4] = thresholds[4] + 128;
     thresholds[5] = thresholds[5] + 128;
     break;
-  case 2: //hsv
+  case 2: // hsv
     if (in_img.channels() != 3)
       return out;
     cv::cvtColor(in_img, hsv, cv::COLOR_RGB2HSV);
@@ -372,6 +374,7 @@ py::list maix_vision::_maix_vision_find_ball_blob(std::vector<int> &thresholds, 
   }
   return out;
 }
+
 #define heigh_t 10
 py::dict find_line_old(cv::Mat &src)
 {
@@ -608,7 +611,6 @@ py::dict maix_vision::find_line(int func)
   return return_val;
 }
 
-
 /*
 函数原型：
 _imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh = 0)
@@ -618,10 +620,10 @@ is_xywh：返回值类型选择
 is_xywh = 0：返回值为：(x1,y1,x2,y2,magnitude)
 is_xywh = 1:返回值为：（x,y,w,h,magnitude)
 */
-py::list maix_vision::_imlib_find_rects(std::vector<int> &roi,uint32_t threshold,int is_xywh)
+py::list maix_vision::_imlib_find_rects(std::vector<int> &roi, uint32_t threshold, int is_xywh)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -630,7 +632,7 @@ py::list maix_vision::_imlib_find_rects(std::vector<int> &roi,uint32_t threshold
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -640,21 +642,23 @@ py::list maix_vision::_imlib_find_rects(std::vector<int> &roi,uint32_t threshold
   _roi.w = roi[2];
   _roi.h = roi[3];
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
 
   fb_alloc_mark();
   imlib_find_rects(&out, &img, &_roi, threshold);
-	fb_alloc_free_till_mark();
+  fb_alloc_free_till_mark();
 
   for (size_t i = 0; list_size(&out); i++)
   {
     py::list tmps;
     find_rects_list_lnk_data_t lnk_data;
-    list_pop_front(&out,&lnk_data);
-    if(is_xywh)
+    list_pop_front(&out, &lnk_data);
+    if (is_xywh)
     {
       tmps.append(lnk_data.rect.x);
       tmps.append(lnk_data.rect.y);
@@ -685,10 +689,10 @@ threshold阈值
 theta_margin:控制检测到的行的合并
 rho_margin:控制检测到的行的合并
 */
-py::list maix_vision::_imlib_find_lines(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
+py::list maix_vision::_imlib_find_lines(std::vector<int> &roi, unsigned int x_stride, unsigned int y_stride, uint32_t threshold, unsigned int theta_margin, unsigned int rho_margin)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -697,7 +701,7 @@ py::list maix_vision::_imlib_find_lines(std::vector<int> &roi,unsigned int x_str
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -707,20 +711,22 @@ py::list maix_vision::_imlib_find_lines(std::vector<int> &roi,unsigned int x_str
   _roi.w = roi[2];
   _roi.h = roi[3];
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
 
   fb_alloc_mark();
   imlib_find_lines(&out, &img, &_roi, x_stride, y_stride, threshold, theta_margin, rho_margin);
-	fb_alloc_free_till_mark();
+  fb_alloc_free_till_mark();
 
   for (size_t i = 0; list_size(&out); i++)
   {
     py::list tmps;
     find_lines_list_lnk_data_t lnk_data;
-    list_pop_front(&out,&lnk_data);
+    list_pop_front(&out, &lnk_data);
 
     tmps.append(lnk_data.line.x1);
     tmps.append(lnk_data.line.y1);
@@ -752,11 +758,11 @@ y:圆心y
 r:圆半径
 magnitude:检测圆的强度
 */
-py::list maix_vision::_imlib_find_circles(std::vector<int> &roi,unsigned int x_stride, unsigned int y_stride,uint32_t threshold,
-unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
+py::list maix_vision::_imlib_find_circles(std::vector<int> &roi, unsigned int x_stride, unsigned int y_stride, uint32_t threshold,
+                                          unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned int r_min, unsigned int r_max, unsigned int r_step)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -765,7 +771,7 @@ unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned in
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -775,22 +781,25 @@ unsigned int x_margin, unsigned int y_margin, unsigned int r_margin, unsigned in
   _roi.w = roi[2];
   _roi.h = roi[3];
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
   //默认为min(roi.w/2, roi.h/2)
-  if(r_max == 0) r_max = MIN(_roi.w/2,_roi.h/2);
+  if (r_max == 0)
+    r_max = MIN(_roi.w / 2, _roi.h / 2);
 
   list_t out;
 
   fb_alloc_mark();
   imlib_find_circles(&out, &img, &_roi, x_stride, y_stride, threshold, x_margin, y_margin, r_margin, r_min, r_max, r_step);
-	fb_alloc_free_till_mark();
+  fb_alloc_free_till_mark();
 
   for (size_t i = 0; list_size(&out); i++)
   {
     py::list tmps;
     find_circles_list_lnk_data lnk_data;
-    list_pop_front(&out,&lnk_data);
+    list_pop_front(&out, &lnk_data);
 
     tmps.append(lnk_data.p.x);
     tmps.append(lnk_data.p.y);
@@ -821,7 +830,7 @@ rho：从霍夫变换返回直线的rho值
 py::list maix_vision::_imlib_find_line_segments(std::vector<int> &roi, unsigned int merge_distance, unsigned int max_theta_diff)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -830,7 +839,7 @@ py::list maix_vision::_imlib_find_line_segments(std::vector<int> &roi, unsigned 
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -840,20 +849,22 @@ py::list maix_vision::_imlib_find_line_segments(std::vector<int> &roi, unsigned 
   _roi.w = roi[2];
   _roi.h = roi[3];
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
 
   fb_alloc_mark();
   imlib_lsd_find_line_segments(&out, &img, &_roi, merge_distance, max_theta_diff);
-	fb_alloc_free_till_mark();
+  fb_alloc_free_till_mark();
 
   for (size_t i = 0; list_size(&out); i++)
   {
     py::list tmps;
     find_lines_list_lnk_data_t lnk_data;
-    list_pop_front(&out,&lnk_data);
+    list_pop_front(&out, &lnk_data);
 
     tmps.append(lnk_data.line.x1);
     tmps.append(lnk_data.line.y1);
@@ -867,7 +878,6 @@ py::list maix_vision::_imlib_find_line_segments(std::vector<int> &roi, unsigned 
   }
   return return_val;
 }
-
 
 /*
 函数原型：
@@ -906,10 +916,10 @@ y_rotation： Y 平面中 apriltag 的弧度旋转
 z_rotation： Z 平面中 apriltag 的弧度旋转
 */
 py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
-                          float fx, float fy, float cx, float cy)
+                                            float fx, float fy, float cx, float cy)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -918,7 +928,7 @@ py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -928,19 +938,21 @@ py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
   _roi.w = roi[2];
   _roi.h = roi[3];
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
 
   fb_alloc_mark();
   imlib_find_apriltags(&out, &img, &_roi, apriltag_families_t(families), fx, fy, cx, cy);
-	fb_alloc_free_till_mark();
+  fb_alloc_free_till_mark();
 
   for (size_t i = 0; list_size(&out); i++)
   {
     find_apriltags_list_lnk_data lnk_data;
-    list_pop_front(&out,&lnk_data);
+    list_pop_front(&out, &lnk_data);
 
     py::dict val;
     val["x"] = lnk_data.rect.x;
@@ -990,7 +1002,7 @@ py::list maix_vision::_imlib_find_apriltags(std::vector<int> &roi, int families,
 py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -999,7 +1011,7 @@ py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -1010,8 +1022,10 @@ py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
   _roi.h = roi[3];
 
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
   fb_alloc_mark();
@@ -1054,7 +1068,7 @@ py::list maix_vision::_imlib_find_qrcodes(std::vector<int> &roi)
 py::list maix_vision::_imlib_find_barcodes(std::vector<int> &roi)
 {
   py::list return_val;
-  if(NULL == this->_img)
+  if (NULL == this->_img)
   {
     py::print("no img");
     return return_val;
@@ -1063,7 +1077,7 @@ py::list maix_vision::_imlib_find_barcodes(std::vector<int> &roi)
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
 
   rectangle_t _roi;
@@ -1074,8 +1088,10 @@ py::list maix_vision::_imlib_find_barcodes(std::vector<int> &roi)
   _roi.h = roi[3];
 
   //默认整个图像
-  if(_roi.w == 0)  _roi.w = img.w;
-  if(_roi.h == 0)  _roi.h = img.h;
+  if (_roi.w == 0)
+    _roi.w = img.w;
+  if (_roi.h == 0)
+    _roi.h = img.h;
 
   list_t out;
   fb_alloc_mark();
@@ -1114,27 +1130,27 @@ py::list maix_vision::_imlib_find_barcodes(std::vector<int> &roi)
 }
 
 // void imlib_get_histogram(histogram_t *out, image_t *ptr, rectangle_t *roi, list_t *thresholds, bool invert, image_t *other);
-maix_image::maix_histogram maix_image::_imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins)
+maix_image::maix_histogram maix_image::_imlib_get_histogram(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image &other_src, int bins, int l_bins, int a_bins, int b_bins)
 {
   if (NULL == this->_img)
   {
     py::print("no img");
     return maix_histogram();
   }
-  image_t img_tmp = { }, *arg_img = &img_tmp;
+  image_t img_tmp = {}, *arg_img = &img_tmp;
   arg_img->w = this->_img->width;
   arg_img->h = this->_img->height;
-  arg_img->pixels = (uint8_t*)this->_img->data;
+  arg_img->pixels = (uint8_t *)this->_img->data;
   arg_img->pixfmt = PIXFORMAT_RGB888;
 
   image_t other_img = {}, *other = NULL;
   if (NULL != other_src._img)
   {
-      other->w = other_src._img->width;
-      other->h = other_src._img->height;
-      other->pixels = (uint8_t*)other_src._img->data;
-      other->pixfmt = PIXFORMAT_RGB888;
-      other = &other_img;
+    other->w = other_src._img->width;
+    other->h = other_src._img->height;
+    other->pixels = (uint8_t *)other_src._img->data;
+    other->pixfmt = PIXFORMAT_RGB888;
+    other = &other_img;
   }
 
   fb_alloc_mark();
@@ -1153,56 +1169,144 @@ maix_image::maix_histogram maix_image::_imlib_get_histogram(std::vector<int> roi
     list_push_back(&thresholds, &tmp_ct);
   }
 
-  if (roi_src[2] == 0) roi_src[2] = arg_img->w;
-  if (roi_src[3] == 0) roi_src[3] = arg_img->h;
+  if (roi_src[2] == 0)
+    roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0)
+    roi_src[3] = arg_img->h;
 
-  rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
+  rectangle_t roi = {roi_src[0], roi_src[1], roi_src[2], roi_src[3]};
   histogram_t hist;
-  switch (arg_img->pixfmt) {
-    case PIXFORMAT_GRAYSCALE: {
-      if (bins >= 2 && bins <= 255) {
-        hist.LBinCount = bins;
-      } else {
-        hist.LBinCount = bins = 255;
-      }
-      if (hist.LBinCount >= 2) {
-        hist.ABinCount = 0;
-        hist.BBinCount = 0;
-        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.ABins = NULL;
-        hist.BBins = NULL;
-        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
-        list_free(&thresholds);
-      }
-      break;
+  switch (arg_img->pixfmt)
+  {
+  case PIXFORMAT_GRAYSCALE:
+  {
+    if (bins >= 2 && bins <= 255)
+    {
+      hist.LBinCount = bins;
     }
-    case PIXFORMAT_RGB565:
-    case PIXFORMAT_RGB888: {
-      if (bins >= 2 && bins <= 255) {
-        hist.LBinCount = bins;
-      } else {
-        hist.LBinCount = bins = 255;
-      }
-      if (l_bins < 2) l_bins = bins;
-      hist.LBinCount = l_bins;
-      if (a_bins < 2) a_bins = bins;
-      hist.ABinCount = a_bins;
-      if (b_bins < 2) b_bins = bins;
-      hist.BBinCount = b_bins;
+    else
+    {
+      hist.LBinCount = bins = 255;
+    }
+    if (hist.LBinCount >= 2)
+    {
+      hist.ABinCount = 0;
+      hist.BBinCount = 0;
+      hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.ABins = NULL;
+      hist.BBins = NULL;
+      imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+      list_free(&thresholds);
+    }
+    break;
+  }
+  case PIXFORMAT_RGB565:
+  case PIXFORMAT_RGB888:
+  {
+    if (bins >= 2 && bins <= 255)
+    {
+      hist.LBinCount = bins;
+    }
+    else
+    {
+      hist.LBinCount = bins = 255;
+    }
+    if (l_bins < 2)
+      l_bins = bins;
+    hist.LBinCount = l_bins;
+    if (a_bins < 2)
+      a_bins = bins;
+    hist.ABinCount = a_bins;
+    if (b_bins < 2)
+      b_bins = bins;
+    hist.BBinCount = b_bins;
 
-      if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
-        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
-        list_free(&thresholds);
-      }
-      break;
+    if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2)
+    {
+      hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+      list_free(&thresholds);
     }
+    break;
+  }
   }
 
   auto result = maix_histogram(hist);
   result.pixfmt = arg_img->pixfmt;
   fb_alloc_free_till_mark();
   return result;
+}
+
+py::list maix_vision::_imlib_find_blobs(std::vector<std::vector<int>> &thresholds_src, std::vector<int> roi_src, int x_stride, int y_stride, bool invert, int area_threshold, int pixels_threshold, bool merge, int margin, int x_hist_bins_max, int y_hist_bins_max)
+{
+  py::list return_val;
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return return_val;
+  }
+
+  image_t img_tmp = {}, *arg_img = &img_tmp;
+  arg_img->w = this->_img->width;
+  arg_img->h = this->_img->height;
+  arg_img->pixels = (uint8_t *)this->_img->data;
+  arg_img->pixfmt = PIXFORMAT_RGB888;
+
+  if (roi_src[2] == 0)
+    roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0)
+    roi_src[3] = arg_img->h;
+
+  rectangle_t roi = {roi_src[0], roi_src[1], roi_src[2], roi_src[3]};
+  if (roi_src[2] == 0)
+    roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0)
+    roi_src[3] = arg_img->h;
+
+  list_t out;
+
+  fb_alloc_mark();
+
+  list_t thresholds;
+  list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
+  for (auto src : thresholds_src)
+  {
+    color_thresholds_list_lnk_data_t tmp_ct;
+    tmp_ct.LMin = src[0];
+    tmp_ct.LMax = src[1];
+    tmp_ct.AMin = src[2];
+    tmp_ct.AMax = src[3];
+    tmp_ct.BMin = src[4];
+    tmp_ct.BMax = src[5];
+    list_push_back(&thresholds, &tmp_ct);
+  }
+
+  imlib_find_blobs(&out, arg_img, &roi, x_stride, y_stride, &thresholds, invert,
+                   area_threshold, pixels_threshold, merge, margin,
+                   NULL, NULL, NULL, NULL, x_hist_bins_max, y_hist_bins_max);
+  fb_alloc_free_till_mark();
+
+  for (size_t i = 0; list_size(&out); i++)
+  {
+    find_blobs_list_lnk_data_t lnk_data;
+    list_pop_front(&out, &lnk_data);
+
+    py::dict val;
+    val["x"] = lnk_data.rect.x;
+    val["y"] = lnk_data.rect.y;
+    val["w"] = lnk_data.rect.w;
+    val["h"] = lnk_data.rect.h;
+    val["pixels"] = lnk_data.pixels;
+    val["centroid_x"] = lnk_data.centroid_x;
+    val["centroid_y"] = lnk_data.centroid_y;
+    val["rotation"] = lnk_data.rotation;
+    val["code"] = lnk_data.code;
+    val["count"] = lnk_data.count;
+
+    return_val.append(val);
+  }
+
+  return return_val;
 }

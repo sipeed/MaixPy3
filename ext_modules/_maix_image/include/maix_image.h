@@ -195,6 +195,8 @@ public:
 
   py::list _imlib_get_statistics(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins);
 
+  py::dict _imlib_find_template(maix_image &template_src, float arg_thresh, std::vector<int> roi_src, int step, int search);
+
   // void imlib_rotation_corr(image_t *img, float x_rotation, float y_rotation,
   //                  float z_rotation, float x_translation, float y_translation,
   //                  float zoom, float fov, float *corners);

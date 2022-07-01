@@ -1049,3 +1049,65 @@ maix_image &maix_image::_opencv_Canny(double threshold1, double threshold2, int 
   }
   return *this;
 }
+
+py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_thresh, std::vector<int> roi_src, int step = 2, int search = SEARCH_EX)
+{
+  py::dict return_val;
+  if (NULL == this->_img || NULL == template_src._img)
+  {
+    return return_val;
+  }
+
+  cv::Mat gray, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
+  cv::cvtColor(rgb, gray, cv::COLOR_RGB2GRAY);
+
+  image_t _arg_img = { .w = gray.cols, .h = gray.rows, }, *arg_img = &_arg_img;
+  arg_img->size = gray.cols * gray.rows;
+  arg_img->data = gray.data;
+  arg_img->pixfmt = PIXFORMAT_GRAYSCALE;
+
+  cv::Mat template_gray, template_rgb(template_src._img->height, template_src._img->width, CV_8UC3, template_src._img->data);
+  cv::cvtColor(template_rgb, template_gray, cv::COLOR_RGB2GRAY);
+
+  image_t _arg_template = { .w = template_gray.cols, .h = template_gray.rows, }, *arg_template = &_arg_template;
+  arg_template->size = template_gray.cols * template_gray.rows;
+  arg_template->data = template_gray.data;
+  arg_template->pixfmt = PIXFORMAT_GRAYSCALE;
+
+  if (roi_src[2] == 0)
+    roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0)
+    roi_src[3] = arg_img->h;
+
+  rectangle_t roi = {roi_src[0], roi_src[1], roi_src[2], roi_src[3]};
+
+  if (roi.w >= arg_template->w && roi.h >= arg_template->h)
+  {
+    // printf("roi.w:%d, roi.h:%d, arg_template->w:%d, arg_template->h:%d\n", roi.w, roi.h, arg_template->w, arg_template->h);
+    if ((roi.x + roi.w) <= arg_img->w && (roi.y + roi.h) <= arg_img->h)
+    {
+      // printf("roi.x:%d, roi.y:%d, roi.w:%d, roi.h:%d\n", roi.x, roi.y, roi.w, roi.h);
+      rectangle_t r;
+      float corr;
+      fb_alloc_mark();
+      if (search == SEARCH_DS)
+      {
+        corr = imlib_template_match_ds(arg_img, arg_template, &r);
+      }
+      else
+      {
+        corr = imlib_template_match_ex(arg_img, arg_template, &roi, step, &r);
+      }
+      fb_alloc_free_till_mark();
+      if (corr > arg_thresh)
+      {
+        return_val["x"] = r.x;
+        return_val["y"] = r.y;
+        return_val["w"] = r.w;
+        return_val["h"] = r.h;
+        return_val["thresh"] = corr;
+      }
+    }
+  }
+  return return_val;
+}

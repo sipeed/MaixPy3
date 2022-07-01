@@ -149,7 +149,8 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("find_line_segments", &maix_image::_imlib_find_line_segments, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("merge_distance") = 0, py::arg("max_theta_diff") = 15)
       .def("find_apriltags", &maix_image::_imlib_find_apriltags, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("families") = 16, py::arg("fx") = 0, py::arg("fy") = 0, py::arg("cx") = 0, py::arg("cy") = 0)
       .def("find_qrcodes", &maix_image::_imlib_find_qrcodes, py::arg("roi") = std::vector<int>{0, 0, 0, 0})
-      .def("find_blobs", &maix_image::_imlib_find_blobs, py::arg("thresholds_src"), py::arg("roi_src") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("x_hist_bins_max") = 0, py::arg("y_hist_bins_max") = 0)
+      .def("find_blobs", &maix_image::_imlib_find_blobs, py::arg("thresholds"), py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("x_stride") = 2, py::arg("y_stride") = 2, py::arg("invert") = 0, py::arg("area_threshold") = 10, py::arg("pixels_threshold") = 10, py::arg("merge") = 0, py::arg("margin") = 0, py::arg("x_hist_bins_max") = 0, py::arg("y_hist_bins_max") = 0)
+      .def("find_template", &maix_image::_imlib_find_template, py::arg("template") = maix_image(), py::arg("thresh") = 0.5, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("step") = 2, py::arg("search") = 1)
       .def("find_barcodes", &maix_image::_imlib_find_barcodes, py::arg("roi") = std::vector<int>{0, 0, 0, 0}); // module end
 
 #ifdef CONFIG_ARCH_V83X

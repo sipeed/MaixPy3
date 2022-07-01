@@ -201,8 +201,6 @@ _maix_image_module = Pybind11Extension("_maix_image",
         get_incs(
             'ext_modules/libmaix/components/maix_cv_image/include'),
         get_incs(
-            'ext_modules/libmaix/components/third_party/include'),
-        get_incs(
             'ext_modules/libmaix/components/third_party/imlib/include'),
         get_incs(
             'ext_modules/_maix_image/include')
@@ -213,16 +211,8 @@ _maix_image_module = Pybind11Extension("_maix_image",
             get_srcs('ext_modules/libmaix/components/third_party/imlib/src'),
     libraries=[
         "maix_utils", "maix_cam", "maix_image",
-        "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
-        # "opencv_aruco", "opencv_dnn", "opencv_hfs", "opencv_optflow", "opencv_shape",
-        # "opencv_videoio","opencv_bgsegm", "opencv_dpm", "opencv_highgui", "opencv_phase_unwrapping", "opencv_stereo",
-        # "opencv_video", "opencv_bioinspired", "opencv_face", "opencv_imgcodecs", "opencv_photo",
-        # "opencv_stitching", "opencv_videostab", "opencv_calib3d", "opencv_features2d", "opencv_img_hash",
-        # "opencv_plot", "opencv_structured_light", "opencv_xfeatures2d", "opencv_ccalib", "opencv_flann",
-        # "opencv_imgproc", "opencv_quality", "opencv_superres", "opencv_ximgproc", "opencv_core", "opencv_freetype",
-        # "opencv_line_descriptor", "opencv_reg", "opencv_surface_matching", "opencv_xobjdetect", "opencv_datasets",
-        # "opencv_fuzzy", "opencv_ml", "opencv_rgbd", "opencv_text", "opencv_xphoto", "opencv_dnn_objdetect",
-        # "opencv_gapi", "opencv_objdetect", "opencv_saliency", "opencv_tracking"
+        "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype",
+        # "opencv_xfeatures2d", "opencv_features2d", "opencv_flann", "opencv_ml", "opencv_calib3d", "opencv_shape",
     ],
     library_dirs=[
         ext_so,
@@ -230,9 +220,9 @@ _maix_image_module = Pybind11Extension("_maix_image",
     ],
     extra_link_args=[
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix",
-        "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix/_maix_opencv"
+        "-Wl,-rpath=/usr/lib/python3.8/site-packages"
     ],
-    extra_compile_args=['-std=c++11', '-std=gnu++11', '-DIMLIB_CONFIG_H_FILE="costom_imlib_config.h"' ],
+    extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831', '-DIMLIB_CONFIG_H_FILE="costom_imlib_config.h"' ],
 )
 
 _maix_modules = [
@@ -250,7 +240,7 @@ _maix_modules = [
 
 _maix_data_files = [
     ('/maix', get_srcs(ext_so, ['so'], ['libopencv_'])),
-    # ('/maix/_maix_opencv/', get_srcs("ext_modules/_maix_opencv/ports/v83x/lib", ['so'])),  # depend system provide
+    # ('/', get_srcs("ext_modules/libmaix/components/libmaix/lib/arch/v83x/opencv4", ['so'])),  # depend system provide
 ]
 
 _maix_py_modules = [

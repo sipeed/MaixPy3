@@ -21,8 +21,10 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/imgcodecs/legacy/constants_c.h>
 #include "opencv2/core/types_c.h"
+#include <opencv2/opencv.hpp>
 #include "libmaix_cv_image.h"
 #include "libmaix_disp.h"
+
 // #include "NanoLog.hpp"
 #define enable_PIL
 #define enable_numpy

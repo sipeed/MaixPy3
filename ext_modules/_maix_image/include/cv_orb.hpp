@@ -37,10 +37,10 @@ struct cv_orb
     this->cache_src = NULL;
   }
 
-  py::list match(maix_image &src, maix_image &dst, int limit = 10, float min = 0.5f, float max = 100.0f, bool crossCheck = false, bool dump = 0)
+  py::dict match(maix_image &src, maix_image &dst, int limit = 10, float min = 0.0f, float max = 1000.0f, bool crossCheck = false, bool dump = 0)
   {
 
-    py::list ret;
+    py::dict ret;
     if (NULL == src._img || NULL == dst._img)
       return ret;
 
@@ -107,38 +107,117 @@ struct cv_orb
       {
         cv::Mat imageOutput;
         cv::drawKeypoints(img_src, queryPoints, imageOutput, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-        cv::imwrite("cv_surf_img_src.jpg", imageOutput);
+        cv::imwrite("cv_img_src.jpg", imageOutput);
       }
       if (trainPoints.size() > 0)
       {
         cv::Mat imageOutput;
         cv::drawKeypoints(img_dst, trainPoints, imageOutput, cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-        cv::imwrite("cv_surf_img_dst.jpg", imageOutput);
+        cv::imwrite("cv_img_dst.jpg", imageOutput);
       }
       if (trainPoints.size() > queryPoints.size())
       {
         cv::Mat imageOutput;
-        drawMatches(img_src, queryPoints, img_dst, trainPoints, matches, imageOutput);
-        cv::imwrite("cv_surf_img_matches.jpg", imageOutput);
+        cv::drawMatches(img_src, queryPoints, img_dst, trainPoints, matches, imageOutput);
+        cv::imwrite("cv_img_matches.jpg", imageOutput);
       }
     }
 
-    //过滤出特征点距离 distance 小于 limit 以内的特征点
-    for (int i = 0; i < matches.size(); i++)
+    for (int i = 0; i < queryDescriptors.rows; i++)
     {
-      // printf("distance: %f\n", matches[i].distance);
-      if (matches[i].distance < max)
+      double dist = matches[i].distance;
+      if (dist > max)
       {
-        max = matches[i].distance;
-        if (max < min)
-          max = min;
-        auto src_points = queryPoints[matches[i].queryIdx], dst_points = trainPoints[matches[i].trainIdx];
-        auto tmp = py::make_tuple(matches[i].distance, (int)src_points.pt.x, (int)src_points.pt.y, (int)dst_points.pt.x, (int)dst_points.pt.y);
-        ret.append(tmp);
+        max = dist;
       }
-      if (ret.size() >= limit)
+      if (dist < min)
+      {
+        min = dist;
+      }
+    }
+
+    std::vector<cv::DMatch> good_matches;
+    for (int i = 0; i < queryDescriptors.rows; i++)
+    {
+      double dist = matches[i].distance;
+      // printf("distance : %f\n", dist);
+      if (min < dist && dist < max)
+      {
+        good_matches.push_back(matches[i]);
+      }
+      if (good_matches.size() >= limit)
         break;
     }
+
+    if (good_matches.size() == 0)
+      return ret;
+
+    //-- Draw matches
+    // cv::Mat img_matches;
+    // cv::drawMatches(img_src, queryPoints, img_dst, trainPoints, good_matches, img_matches, cv::Scalar::all(-1),
+    //                 cv::Scalar::all(-1), std::vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS);
+    // //-- Localize the object
+    // std::vector<cv::Point2f> obj, scene;
+    // for (size_t i = 0; i < good_matches.size(); i++)
+    // {
+    //   //-- Get the keypoints from the good matches
+    //   obj.push_back(queryPoints[good_matches[i].queryIdx].pt);
+    //   scene.push_back(trainPoints[good_matches[i].trainIdx].pt);
+    // }
+    // // for (size_t i = 0; i < obj.size(); i++)
+    // // {
+    // //   printf("%d   obj: %0.1f %0.1f\n", i, obj[i].x, obj[i].y);
+    // //   printf("%d scene: %0.1f %0.1f\n", i, scene[i].x, scene[i].y);
+    // // }
+    // cv::Mat H = cv::findHomography(obj, scene, cv::RHO);
+    // //-- Get the corners from the image_1 ( the object to be "detected" )
+    // std::vector<cv::Point2f> obj_corners(4);
+    // obj_corners[0] = cv::Point2f(0, 0);
+    // obj_corners[1] = cv::Point2f((float)img_src.cols, 0);
+    // obj_corners[2] = cv::Point2f((float)img_src.cols, (float)img_src.rows);
+    // obj_corners[3] = cv::Point2f(0, (float)img_src.rows);
+    // std::vector<cv::Point2f> scene_corners(4);
+    // cv::perspectiveTransform(obj_corners, scene_corners, H);
+    // //-- Draw lines between the corners (the mapped object in the scene - image_2 )
+    // cv::line(img_matches, scene_corners[0] + cv::Point2f((float)img_src.cols, 0),
+    //          scene_corners[1] + cv::Point2f((float)img_src.cols, 0), cv::Scalar(0, 255, 0), 4);
+    // cv::line(img_matches, scene_corners[1] + cv::Point2f((float)img_src.cols, 0),
+    //          scene_corners[2] + cv::Point2f((float)img_src.cols, 0), cv::Scalar(0, 255, 0), 4);
+    // cv::line(img_matches, scene_corners[2] + cv::Point2f((float)img_src.cols, 0),
+    //          scene_corners[3] + cv::Point2f((float)img_src.cols, 0), cv::Scalar(0, 255, 0), 4);
+    // cv::line(img_matches, scene_corners[3] + cv::Point2f((float)img_src.cols, 0),
+    //          scene_corners[0] + cv::Point2f((float)img_src.cols, 0), cv::Scalar(0, 255, 0), 4);
+
+    // cv::imwrite("img_matches.jpg", img_matches);
+
+    // py::list corners; // orb 因为匹配尺寸相同，最终计算的都两张图的相识度，所以不同于 sift 的特征点，结果只会存在有框或是无框。
+    // printf("scene_corners[0] : %0.1f %0.1f\n", scene_corners[0].x, scene_corners[0].y);
+    // printf("scene_corners[1] : %0.1f %0.1f\n", scene_corners[1].x, scene_corners[1].y);
+    // printf("scene_corners[2] : %0.1f %0.1f\n", scene_corners[2].x, scene_corners[2].y);
+    // printf("scene_corners[3] : %0.1f %0.1f\n", scene_corners[3].x, scene_corners[3].y);
+    // int x = (int)scene_corners[0].x, y = (int)scene_corners[0].y, w = (int)scene_corners[2].x, h = (int)scene_corners[2].y;
+    // corners.append(x);
+    // corners.append(y);
+    // corners.append(w);
+    // corners.append(h);
+    // ret["rect"] = corners;
+
+    std::vector<cv::Point2f> obj_src, triangle;
+    for (size_t i = 0; i < good_matches.size(); i++) {
+      obj_src.push_back(trainPoints[good_matches[i].trainIdx].pt);
+    }
+
+    cv::RotatedRect box = cv::minAreaRect(obj_src);
+    ret["angle"] = box.angle;
+    ret["center"] = py::make_tuple((int)box.center.x, (int)box.center.y);
+    ret["size"] = py::make_tuple((int)box.size.width, (int)box.size.height);
+
+    py::list points;
+    for (auto &p : good_matches)
+    {
+      points.append(py::make_tuple((int)trainPoints[p.trainIdx].pt.x, (int)trainPoints[p.trainIdx].pt.y));
+    }
+    ret["points"] = points;
     return ret;
   }
 };

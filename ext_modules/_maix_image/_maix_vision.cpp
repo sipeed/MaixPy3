@@ -24,10 +24,10 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
   critical = critical > 100 ? 100 : critical;
   critical = critical < 0 ? 0 : critical;
   cv::Rect rect;
-  rect.x = roi[0];
-  rect.y = roi[1];
-  rect.width = roi[2];
-  rect.height = roi[3];
+  rect.x = std::max(roi[0], 0);
+  rect.y = std::max(roi[1], 0);
+  rect.width = std::max(roi[2], this->_img->width);
+  rect.height = std::max(roi[3], this->_img->height);
   cv::Mat lab_img;
   lab_img = in_img(rect);
   std::vector<cv::Mat> lab_planes;

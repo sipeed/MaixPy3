@@ -11,6 +11,10 @@ extern "C"
     unsigned char *g2d_allocMem(unsigned int size);
     int g2d_freeMem(void *vir_ptr);
     unsigned int g2d_getPhyAddrByVirAddr(void *vir_ptr);
+
+    int AW_MPI_ISP_AE_SetMode(int IspDev, int Value);			// [0:auto, 1:manual]
+    int AW_MPI_ISP_AE_SetExposure(int IspDev, int Value);		// [0, 65535*16]
+    int AW_MPI_ISP_AE_SetGain(int IspDev, int Value);			// [0, 65535]
 }
 
 // #define CALC_FPS(tips)                                                                                     \
@@ -304,6 +308,18 @@ public:
         init(vi_w, vi_h, ai_w, ai_h, vo_dir, ai_dir);
     }
 
+    int exp_gain(int exp, int gain)
+    {
+        if (exp == 0 && gain == 0) {
+            AW_MPI_ISP_AE_SetMode(0, 0);
+        } else {
+            AW_MPI_ISP_AE_SetMode(0, 1);
+            AW_MPI_ISP_AE_SetGain(0, exp);
+            AW_MPI_ISP_AE_SetExposure(0, gain);
+        }
+        return 0;
+    }
+
     int cfg(int w, int h, int i)
     {
         // printf("[cfg] %d %d %d \r\n", this->inited, (this->vi[i]->width != w), (this->vi[i]->height != h));
@@ -441,5 +457,6 @@ PYBIND11_MODULE(_maix_vivo, m)
              py::arg("vi_w") = 240, py::arg("vi_h") = 240, py::arg("ai_w") = 192, py::arg("ai_h") = 128, py::arg("vo_dir") = 0, py::arg("ai_dir") = 0)
         .def("get", &_v83x_vivo::get, py::arg("show") = false, py::arg("more") = false)
         .def("cfg", &_v83x_vivo::cfg, py::arg("w") = 240, py::arg("h") = 240, py::arg("i") = 0)
+        .def("exp_gain", &_v83x_vivo::exp_gain, py::arg("exp") = 0, py::arg("gain") = 0)
         .def("set", &_v83x_vivo::set);
 }

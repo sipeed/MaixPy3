@@ -57,20 +57,25 @@ try:
                     self._vo_dir = self._ai_dir = 3 # -90 rotate show
                 self.config() # for v831 mpp ready
 
-            def config(self, size=None, _ai_size=(224, 224)):
+            def config(self, size=None, _ai_size=(224, 224), exp_gain=(-1, -1)):
                 if size == None:
                     size = (display.width(), display.height())
                 super(V831VivoMaixVideo, self).config(size)
-                print('[camera] config input size(%d, %d)' %
-                    (self.width(), self.height()))
                 if self.cam == None:
+                    print('[camera] config input size(%d, %d)' %
+                        (self.width(), self.height()))
                     display.__show__ = self.cam = _v83x_vivo(size[0], size[1], _ai_size[0], _ai_size[1], vo_dir = self._vo_dir, ai_dir = self._ai_dir)
                     def __new_draw__(img):
                         if isinstance(img, bytes):
                             display.__show__.set(img)
                     display.__draw__ = __new_draw__
                 else:
-                    self.cam.cfg(size[0], size[1])
+                    if exp_gain != (-1, -1):
+                        self.cam.exp_gain(exp_gain[0], exp_gain[1])
+                    else:
+                        self.cam.cfg(size[0], size[1])
+                        print('[camera] config input size(%d, %d)' %
+                            (self.width(), self.height()))
 
             def read(self, video_num=0, show=False, skip_frame=8):
                 if self.cam == None:

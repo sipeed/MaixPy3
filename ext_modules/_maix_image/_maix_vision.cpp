@@ -26,8 +26,8 @@ py::list maix_vision::get_blob_color_max(std::vector<int> &roi, int critical, in
   cv::Rect rect;
   rect.x = std::max(roi[0], 0);
   rect.y = std::max(roi[1], 0);
-  rect.width = std::max(roi[2], this->_img->width);
-  rect.height = std::max(roi[3], this->_img->height);
+  rect.width = std::min(roi[2], this->_img->width - roi[0]);
+  rect.height = std::min(roi[3], this->_img->height - roi[1]);
   cv::Mat lab_img;
   lab_img = in_img(rect);
   std::vector<cv::Mat> lab_planes;

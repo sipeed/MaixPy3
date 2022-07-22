@@ -144,7 +144,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
             PyErr_SetString(PyExc_ValueError, "arg opt need model_type key");
             return -1;
         }
-        self->use_mdsc = false;
+        self->use_mud = false;
         const char* model_type = (const char*)PyUnicode_DATA(o_model_type);
         if(strcmp(model_type, "awnn") == 0)
         {
@@ -564,18 +564,16 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     {
         // mud
         printf("mud mode \n");
-        self->use_mdsc = true;
-        // printf("libmaix_nn_module_init %s:%s\r\n", __FILE__, __FUNCTION__);
+        self->use_mud = true;
         libmaix_camera_module_init();
         libmaix_nn_module_init();
         char * mud = (char*)PyUnicode_DATA(o_model_path);
         printf("%s\n",mud);
         self->mud = mud;
-        self->info = (ini_info_t *)malloc(sizeof(ini_info_t));
+        self->info = libmaix_mud_load_mud(mud);
         libmaix_nn_model_path_t *model_path = (libmaix_nn_model_path_t * )malloc(sizeof(libmaix_nn_model_path_t));
         libmaix_nn_opt_param_t *opt_param = (libmaix_nn_opt_param_t *)malloc(sizeof(libmaix_nn_opt_param_t));
-        read_file(self->mud,self->info);
-        self->nn = build_model(self->info , model_path , opt_param);
+        self->nn = libmaix_mud_build_model(self->info , model_path , opt_param);
         if(!self->nn)
         {
             PyErr_SetString(PyExc_MemoryError, "libmaix_nn object create fail");
@@ -601,13 +599,16 @@ end:
     {
         libmaix_nn_destroy(&(self->nn));
     }
+    if(self->use_mud && self->is_init)
+    {
+        libmaix_mud_deinit_mud(self->info);
+    }
     // printf("libmaix_nn_module_deinit %s:%s\r\n", __FILE__, __FUNCTION__);
     libmaix_nn_module_deinit();
     libmaix_camera_module_deinit();
     /* load by libmaix API error deal end*/
     return (int)err;
 }
-
 
 static PyObject *Model_str(PyObject *object)
 {
@@ -665,12 +666,12 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
     libmaix_nn_layout_t outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     if(strcmp(layout_str, "hwc") == 0)
     {
-        // printf("py layout is hwc \n");
+
         outputs_layout = LIBMAIX_NN_LAYOUT_HWC;
     }
     else if (strcmp(layout_str, "chw") == 0)
     {
-        // printf("py  layout is chw  \n");
+
         outputs_layout = LIBMAIX_NN_LAYOUT_CHW;
     }
     else
@@ -681,7 +682,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
 
     //choise mode
 
-    if(self->use_mdsc)
+    if(self->use_mud)
     {
         long input_h = self->info->inputs_shape[0][0];
         long input_w = self->info->inputs_shape[0][1];
@@ -690,7 +691,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         self->outputs_len = self->info->output_num;
         if(PyBytes_Check(o_inputs))
         {
-            // printf("py  input is bytes\n");
             o_input_bytes = o_inputs;
         }
         else if(strstr(o_inputs->ob_type->tp_name, "Image") >= 0)
@@ -715,7 +715,6 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             goto err0;
         }
         char* input_bytes = PyBytes_AsString(o_input_bytes);
-        // printf("py  input bytes as string \n");
         if(input_bytes == NULL)
         {
             PyErr_SetString(PyExc_ValueError, "get bytes data error");
@@ -746,6 +745,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             }
             input.buff_quantization = self->quantize_buffer;
         }
+
         // outputs as a list ,use a index to find a position and
         out_fmap = (libmaix_nn_layer_t*)malloc(self->outputs_len * sizeof(libmaix_nn_layer_t));
         if(!out_fmap)
@@ -753,6 +753,7 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
             PyErr_NoMemory();
             goto err0;
         }
+
         for(int i=0; i<self->outputs_len; ++i)
         {
             long output_h = self->info->outputs_shape[i][0];
@@ -793,12 +794,14 @@ static PyObject* Model_forward(ModelObject *self, PyObject *args, PyObject *kw_a
         {
             out_fmap[i].data = self->out_buffer[i];
         }
+
         if(debug)
         {
             gettimeofday(&start, NULL);
         }
         // forward
         err = self->nn->forward(self->nn, &input, out_fmap);
+
 
         if(err != LIBMAIX_ERR_NONE)
         {
@@ -1164,4 +1167,3 @@ PyTypeObject PyMaix_NN_Model_Type = {
     0,                                        /* tp_alloc */
     Model_new,                                /* tp_new */
 };
-

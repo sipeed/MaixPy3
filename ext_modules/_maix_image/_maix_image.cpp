@@ -261,7 +261,26 @@ maix_image &maix_image::_open_file(std::string path)
 {
   this->v_close();
   libmaix_image_t *tmp_img = NULL;
-  if (libmaix_cv_image_open_file(&tmp_img, path.c_str()) != 0)
+  libmaix_err_t err = libmaix_cv_image_open_file(&tmp_img, path.c_str());
+  if (LIBMAIX_ERR_NOT_EXEC == err)
+  {
+    try
+    {
+      // maybe is jpg or bmp bytes
+      cv::Mat tmp(1, path.size(), CV_8U, (char*)path.data());
+      cv::Mat image = cv::imdecode(tmp, cv::IMREAD_COLOR);
+      cv::cvtColor(image, image, cv::ColorConversionCodes::COLOR_BGR2RGB);
+      tmp_img = libmaix_image_create(image.cols, image.rows, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+      memcpy(tmp_img->data, image.data, tmp_img->width * tmp_img->height * 3);
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what() << '\n';
+      this->v_close();
+      return *this;
+    }
+  }
+  else if (LIBMAIX_ERR_NONE != err)
   {
     printf("[image.open] %s file does not exist\r\n", path.c_str());
     this->v_close();

@@ -267,13 +267,13 @@ maix_image &maix_image::_open_file(std::string path)
     try
     {
       // maybe is jpg or bmp bytes
-      cv::Mat tmp(1, path.size(), CV_8U, (char*)path.data());
+      cv::Mat tmp(1, path.size(), CV_8U, (char *)path.data());
       cv::Mat image = cv::imdecode(tmp, cv::IMREAD_COLOR);
       cv::cvtColor(image, image, cv::ColorConversionCodes::COLOR_BGR2RGB);
       tmp_img = libmaix_image_create(image.cols, image.rows, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
       memcpy(tmp_img->data, image.data, tmp_img->width * tmp_img->height * 3);
     }
-    catch(const std::exception& e)
+    catch (const std::exception &e)
     {
       std::cerr << e.what() << '\n';
       this->v_close();
@@ -373,7 +373,7 @@ void maix_image::_delete()
 }
 maix_image &maix_image::_clear()
 {
-  uint8_t* img_p_t = (uint8_t*)this->_img->data;
+  uint8_t *img_p_t = (uint8_t *)this->_img->data;
   memset(img_p_t, 0, this->_maix_image_size);
   return *this;
 }
@@ -450,21 +450,26 @@ py::bytes maix_image::_tobytes(std::string format, std::vector<int> params)
   if (format == "rgb")
     return py::bytes((const char *)this->_img->data, this->_maix_image_size);
 
-  std::vector<uchar>encoded_buffer;
+  std::vector<uchar> encoded_buffer;
   cv::Mat cv_is_bgr, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
   cv::cvtColor(rgb, cv_is_bgr, cv::COLOR_RGB2BGR);
 
-  if (format == "jpg") {
-    if (params.size() == 0) params.push_back(CV_IMWRITE_JPEG_QUALITY), params.push_back(95);
+  if (format == "jpg")
+  {
+    if (params.size() == 0)
+      params.push_back(CV_IMWRITE_JPEG_QUALITY), params.push_back(95);
     cv::imencode(".jpeg", cv_is_bgr, encoded_buffer, params);
     return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
   }
-  if (format == "png") {
-    if (params.size() == 0) params.push_back(CV_IMWRITE_PNG_COMPRESSION), params.push_back(3);
+  if (format == "png")
+  {
+    if (params.size() == 0)
+      params.push_back(CV_IMWRITE_PNG_COMPRESSION), params.push_back(3);
     cv::imencode(".png", cv_is_bgr, encoded_buffer, params);
     return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
   }
-  if (format == "bmp") {
+  if (format == "bmp")
+  {
     cv::imencode(".bmp", cv_is_bgr, encoded_buffer, params);
     return py::bytes((const char *)encoded_buffer.data(), encoded_buffer.size());
   }
@@ -478,7 +483,8 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
     py::print("no img");
     return *this;
   }
-  if (dst_w == 0 && dst_h == 0) dst_w = size[0], dst_h = size[1];
+  if (dst_w == 0 && dst_h == 0)
+    dst_w = size[0], dst_h = size[1];
   int src_w = this->_img->width, src_h = this->_img->height;
   if (src_w == dst_w && src_h == dst_h)
     return *this;
@@ -488,18 +494,25 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
     cv::Mat src(src_h, src_w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), this->_img->data);
     cv::Mat dst(dst_h, dst_w, any_cast<int>(py_to_pram[this->get_to(this->_maix_image_type)][2]), tmp->data);
 
-    if (padding) {
+    if (padding)
+    {
       float scale_src = ((float)src_w) / ((float)src_h), scale_dst = ((float)dst_w) / ((float)dst_h);
-      if (scale_dst == scale_src) {
+      if (scale_dst == scale_src)
+      {
         // func == InterpolationFlags default 1 == cv::INTER_LINEAR
         cv::resize(src, dst, cv::Size(dst_w, dst_h), func);
-      } else {
+      }
+      else
+      {
         // Scale to original image
         int new_w = 0, new_h = 0, top = 0, bottom = 0, left = 0, right = 0;
-        if (scale_src > scale_dst) {
+        if (scale_src > scale_dst)
+        {
           new_w = dst_w, new_h = new_w * src_h / src_w; // new_h / src_h = new_w / src_w => new_h = new_w * src_h / src_w
           top = (dst_h - new_h) / 2, bottom = top;
-        } else { // Division loses precision
+        }
+        else
+        { // Division loses precision
           new_h = dst_h, new_w = new_h * src_w / src_h;
           left = (dst_w - new_w) / 2, right = left;
         }
@@ -508,7 +521,9 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
         cv::resize(src, tmp, cv::Size(new_w, new_h), func);
         cv::copyMakeBorder(tmp, dst, top, bottom, left, right, IPL_BORDER_CONSTANT);
       }
-    } else {
+    }
+    else
+    {
       // func == InterpolationFlags default 1 == cv::INTER_LINEAR
       cv::resize(src, dst, cv::Size(dst_w, dst_h), func);
     }
@@ -549,7 +564,7 @@ maix_image &maix_image::_draw_cross(int x, int y, int c, int size, int thickness
   image_t img = {};
   img.w = this->_img->width;
   img.h = this->_img->height;
-  img.pixels = (uint8_t*)this->_img->data;
+  img.pixels = (uint8_t *)this->_img->data;
   img.pixfmt = PIXFORMAT_RGB888;
   imlib_draw_cross(&img, x, y, c, size, thickness);
   return *this;
@@ -562,7 +577,8 @@ maix_image &maix_image::_draw_rectangle(int x1_x, int y1_y, int x2_w, int y2_h, 
     py::print("no img");
     return *this;
   }
-  if (is_xywh) x2_w = x1_x + x2_w, y2_h = y1_y + y2_h;
+  if (is_xywh)
+    x2_w = x1_x + x2_w, y2_h = y1_y + y2_h;
   libmaix_cv_image_draw_rectangle(this->_img, x1_x, y1_y, x2_w, y2_h, MaixColor(color[0], color[1], color[2]), thickness);
   return *this;
 }
@@ -691,10 +707,10 @@ maix_image *maix_image::_draw_crop(int x, int y, int w, int h)
     maix_image *tmp_img = new maix_image();
     return tmp_img;
   }
-  x = std::max(x,0);
-  y = std::max(y,0);
+  x = std::max(x, 0);
+  y = std::max(y, 0);
   w = std::min(w, this->_img->width - x);
-  h = std::min(h , this->_img->height - y);
+  h = std::min(h, this->_img->height - y);
   libmaix_image_t *tmp = libmaix_image_create(w, h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (tmp)
   {
@@ -781,128 +797,128 @@ maix_image &maix_image::_set_pixel(int x, int y, std::vector<int> color)
   return *this;
 }
 
-maix_image &maix_image::_hist_eq(bool adaptive,float clip_limit,maix_image & mask)
+maix_image &maix_image::_hist_eq(bool adaptive, float clip_limit, maix_image &mask)
 {
-    if (NULL == this->_img)
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
+
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t *)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+
+  image_t *mask_img = NULL;
+  if (NULL != mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height)
+  {
+    mask_img = (image_t *)malloc(sizeof(image_t));
+    if (mask_img)
     {
-      py::print("no img");
-      return *this;
+      mask_img->w = mask._img->width;
+      mask_img->h = mask._img->height;
+      mask_img->pixels = (uint8_t *)mask._img->data;
+      mask_img->pixfmt = PIXFORMAT_RGB888;
     }
+  }
 
-    image_t img = {};
-    img.w = this->_img->width;
-    img.h = this->_img->height;
-    img.pixels = (uint8_t*)this->_img->data;
-    img.pixfmt = PIXFORMAT_RGB888;
+  fb_alloc_mark();
+  if (adaptive)
+    imlib_clahe_histeq(&img, clip_limit, mask_img);
+  else
+    imlib_histeq(&img, mask_img);
+  fb_alloc_free_till_mark();
 
-    image_t *mask_img = NULL;
-    if (NULL!=mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height )
-    {
-      mask_img = (image_t *)malloc(sizeof(image_t));
-      if(mask_img)
-      {
-        mask_img->w = mask._img->width;
-        mask_img->h = mask._img->height;
-        mask_img->pixels = (uint8_t*)mask._img->data;
-        mask_img->pixfmt = PIXFORMAT_RGB888;
-      }
-    }
+  if (NULL != mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height)
+    free(mask_img), mask_img = NULL;
 
-    fb_alloc_mark();
-    if (adaptive)
-      imlib_clahe_histeq(&img, clip_limit, mask_img);
-    else
-      imlib_histeq(&img, mask_img);
-	  fb_alloc_free_till_mark();
-
-    if (NULL!=mask._img && this->_img->width == mask._img->width && this->_img->height == mask._img->height )
-      free(mask_img), mask_img = NULL;
-
-    return * this;
+  return *this;
 }
 
-maix_image &maix_image::_gamma_corr(float gamma,float contrast,float brightness)
+maix_image &maix_image::_gamma_corr(float gamma, float contrast, float brightness)
 {
-    if (NULL == this->_img)
-    {
-      py::print("no img");
-      return *this;
-    }
-    image_t img = {};
-    img.w = this->_img->width;
-    img.h = this->_img->height;
-    img.pixels = (uint8_t*)this->_img->data;
-    img.pixfmt = PIXFORMAT_RGB888;
-    fb_alloc_mark();
-    imlib_gamma_corr(&img,gamma,contrast,contrast);
-    fb_alloc_free_till_mark();
-    return * this;
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t *)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
+  fb_alloc_mark();
+  imlib_gamma_corr(&img, gamma, contrast, contrast);
+  fb_alloc_free_till_mark();
+  return *this;
 }
 
 maix_image &maix_image::_lens_corr(float strength, float zoom, float x_corr, float y_corr)
 {
-    if (NULL == this->_img)
-    {
-      py::print("no img");
-      return *this;
-    }
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
 
-    image_t img = {};
-    img.w = this->_img->width;
-    img.h = this->_img->height;
-    img.pixels = (uint8_t*)this->_img->data;
-    img.pixfmt = PIXFORMAT_RGB888;
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t *)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
 
-    fb_alloc_mark();
-    imlib_lens_corr(&img,strength,zoom,x_corr,y_corr);
-    fb_alloc_free_till_mark();
+  fb_alloc_mark();
+  imlib_lens_corr(&img, strength, zoom, x_corr, y_corr);
+  fb_alloc_free_till_mark();
 
-    return * this;
+  return *this;
 }
 
-maix_image &maix_image::_mean(const int ksize, bool threshold, int offset,bool invert,maix_image & mask)
+maix_image &maix_image::_mean(const int ksize, bool threshold, int offset, bool invert, maix_image &mask)
 {
-    if (NULL == this->_img)
-    {
-      py::print("no img");
-      return *this;
-    }
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    return *this;
+  }
 
-    image_t img = {};
-    img.w = this->_img->width;
-    img.h = this->_img->height;
-    img.pixels = (uint8_t*)this->_img->data;
-    img.pixfmt = PIXFORMAT_RGB888;
+  image_t img = {};
+  img.w = this->_img->width;
+  img.h = this->_img->height;
+  img.pixels = (uint8_t *)this->_img->data;
+  img.pixfmt = PIXFORMAT_RGB888;
 
-    image_t *mask_img = NULL;
-    if (NULL!=mask._img ) //check if mask is NULL
+  image_t *mask_img = NULL;
+  if (NULL != mask._img) // check if mask is NULL
+  {
+    if (this->_img->width == mask._img->width && this->_img->height == mask._img->height) // check if mask has same size with image
     {
-      if (this->_img->width == mask._img->width && this->_img->height == mask._img->height ) //check if mask has same size with image
-      {
       mask_img = (image_t *)malloc(sizeof(image_t));
-      if(mask_img)
+      if (mask_img)
       {
         mask_img->w = mask._img->width;
         mask_img->h = mask._img->height;
-        mask_img->pixels = (uint8_t*)mask._img->data;
+        mask_img->pixels = (uint8_t *)mask._img->data;
         mask_img->pixfmt = PIXFORMAT_RGB888;
       }
-      }
-      else printf("The size of mask is different with input image,use default mask!");
     }
+    else
+      printf("The size of mask is different with input image,use default mask!");
+  }
 
-    fb_alloc_mark();
-    imlib_mean_filter(&img,ksize,offset,threshold,invert,mask_img);
-    fb_alloc_free_till_mark();
+  fb_alloc_mark();
+  imlib_mean_filter(&img, ksize, offset, threshold, invert, mask_img);
+  fb_alloc_free_till_mark();
 
-    if (mask_img!=NULL) free(mask_img), mask_img = NULL;
+  if (mask_img != NULL)
+    free(mask_img), mask_img = NULL;
 
-    return * this;
+  return *this;
 }
 
-
-
-py::list maix_image::_imlib_get_statistics(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image & other_src, int bins, int l_bins, int a_bins, int b_bins)
+py::list maix_image::_imlib_get_statistics(std::vector<int> roi_src, std::vector<std::vector<int>> &thresholds_src, bool invert, maix_image &other_src, int bins, int l_bins, int a_bins, int b_bins)
 {
 
   if (NULL == this->_img)
@@ -911,20 +927,20 @@ py::list maix_image::_imlib_get_statistics(std::vector<int> roi_src, std::vector
     return py::none();
   }
 
-  image_t img_tmp = { }, *arg_img = &img_tmp;
+  image_t img_tmp = {}, *arg_img = &img_tmp;
   arg_img->w = this->_img->width;
   arg_img->h = this->_img->height;
-  arg_img->pixels = (uint8_t*)this->_img->data;
+  arg_img->pixels = (uint8_t *)this->_img->data;
   arg_img->pixfmt = PIXFORMAT_RGB888;
 
   image_t other_img = {}, *other = NULL;
   if (NULL != other_src._img)
   {
-      other->w = other_src._img->width;
-      other->h = other_src._img->height;
-      other->pixels = (uint8_t*)other_src._img->data;
-      other->pixfmt = PIXFORMAT_RGB888;
-      other = &other_img;
+    other->w = other_src._img->width;
+    other->h = other_src._img->height;
+    other->pixels = (uint8_t *)other_src._img->data;
+    other->pixfmt = PIXFORMAT_RGB888;
+    other = &other_img;
   }
 
   fb_alloc_mark();
@@ -943,54 +959,70 @@ py::list maix_image::_imlib_get_statistics(std::vector<int> roi_src, std::vector
     list_push_back(&thresholds, &tmp_ct);
   }
 
-  if (roi_src[2] == 0) roi_src[2] = arg_img->w;
-  if (roi_src[3] == 0) roi_src[3] = arg_img->h;
+  if (roi_src[2] == 0)
+    roi_src[2] = arg_img->w;
+  if (roi_src[3] == 0)
+    roi_src[3] = arg_img->h;
 
-  rectangle_t roi = { roi_src[0], roi_src[1], roi_src[2], roi_src[3] };
+  rectangle_t roi = {roi_src[0], roi_src[1], roi_src[2], roi_src[3]};
 
   histogram_t hist;
 
-  switch (arg_img->pixfmt) {
-    case PIXFORMAT_GRAYSCALE: {
-      if (bins >= 2 && bins <= 255) {
-        hist.LBinCount = bins;
-      } else {
-        hist.LBinCount = bins = 255;
-      }
-      if (hist.LBinCount >= 2) {
-        hist.ABinCount = 0;
-        hist.BBinCount = 0;
-        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.ABins = NULL;
-        hist.BBins = NULL;
-        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
-        list_free(&thresholds);
-      }
-      break;
+  switch (arg_img->pixfmt)
+  {
+  case PIXFORMAT_GRAYSCALE:
+  {
+    if (bins >= 2 && bins <= 255)
+    {
+      hist.LBinCount = bins;
     }
-    case PIXFORMAT_RGB565:
-    case PIXFORMAT_RGB888: {
-      if (bins >= 2 && bins <= 255) {
-        hist.LBinCount = bins;
-      } else {
-        hist.LBinCount = bins = 255;
-      }
-      if (l_bins < 2) l_bins = bins;
-      hist.LBinCount = l_bins;
-      if (a_bins < 2) a_bins = bins;
-      hist.ABinCount = a_bins;
-      if (b_bins < 2) b_bins = bins;
-      hist.BBinCount = b_bins;
+    else
+    {
+      hist.LBinCount = bins = 255;
+    }
+    if (hist.LBinCount >= 2)
+    {
+      hist.ABinCount = 0;
+      hist.BBinCount = 0;
+      hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.ABins = NULL;
+      hist.BBins = NULL;
+      imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+      list_free(&thresholds);
+    }
+    break;
+  }
+  case PIXFORMAT_RGB565:
+  case PIXFORMAT_RGB888:
+  {
+    if (bins >= 2 && bins <= 255)
+    {
+      hist.LBinCount = bins;
+    }
+    else
+    {
+      hist.LBinCount = bins = 255;
+    }
+    if (l_bins < 2)
+      l_bins = bins;
+    hist.LBinCount = l_bins;
+    if (a_bins < 2)
+      a_bins = bins;
+    hist.ABinCount = a_bins;
+    if (b_bins < 2)
+      b_bins = bins;
+    hist.BBinCount = b_bins;
 
-      if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2) {
-        hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
-        imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
-        list_free(&thresholds);
-      }
-      break;
+    if (hist.LBinCount >= 2 && hist.ABinCount >= 2 && hist.BBinCount >= 2)
+    {
+      hist.LBins = (float *)fb_alloc(hist.LBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.ABins = (float *)fb_alloc(hist.ABinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      hist.BBins = (float *)fb_alloc(hist.BBinCount * sizeof(float), FB_ALLOC_NO_HINT);
+      imlib_get_histogram(&hist, arg_img, &roi, &thresholds, invert, other);
+      list_free(&thresholds);
     }
+    break;
+  }
   }
 
   statistics_t stats;
@@ -1043,7 +1075,7 @@ maix_image &maix_image::_imlib_rotation_corr(float x_rotation, float y_rotation,
   image_t img_tmp = {}, *img = &img_tmp;
   img->w = this->_img->width;
   img->h = this->_img->height;
-  img->pixels = (uint8_t*)this->_img->data;
+  img->pixels = (uint8_t *)this->_img->data;
   img->pixfmt = PIXFORMAT_RGB888;
 
   fb_alloc_mark();
@@ -1064,7 +1096,8 @@ maix_image &maix_image::_opencv_Canny(double threshold1, double threshold2, int 
     py::print("no img");
     return *this;
   }
-  if (this->_maix_image_type == "RGB") {
+  if (this->_maix_image_type == "RGB")
+  {
     cv::Mat gray, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
     cv::cvtColor(rgb, gray, cv::COLOR_RGB2GRAY);
     cv::Canny(gray, gray, threshold1, threshold2, apertureSize, L2gradient);
@@ -1084,7 +1117,11 @@ py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_th
   cv::Mat gray, rgb(this->_img->height, this->_img->width, CV_8UC3, this->_img->data);
   cv::cvtColor(rgb, gray, cv::COLOR_RGB2GRAY);
 
-  image_t _arg_img = { .w = gray.cols, .h = gray.rows, }, *arg_img = &_arg_img;
+  image_t _arg_img = {
+              .w = gray.cols,
+              .h = gray.rows,
+          },
+          *arg_img = &_arg_img;
   arg_img->size = gray.cols * gray.rows;
   arg_img->data = gray.data;
   arg_img->pixfmt = PIXFORMAT_GRAYSCALE;
@@ -1092,7 +1129,11 @@ py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_th
   cv::Mat template_gray, template_rgb(template_src._img->height, template_src._img->width, CV_8UC3, template_src._img->data);
   cv::cvtColor(template_rgb, template_gray, cv::COLOR_RGB2GRAY);
 
-  image_t _arg_template = { .w = template_gray.cols, .h = template_gray.rows, }, *arg_template = &_arg_template;
+  image_t _arg_template = {
+              .w = template_gray.cols,
+              .h = template_gray.rows,
+          },
+          *arg_template = &_arg_template;
   arg_template->size = template_gray.cols * template_gray.rows;
   arg_template->data = template_gray.data;
   arg_template->pixfmt = PIXFORMAT_GRAYSCALE;
@@ -1135,37 +1176,22 @@ py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_th
   return return_val;
 }
 
-maix_image *maix_image::_draw_affine(int x , int y ,  int w , int h ,  std::vector<int> dst_size)
+maix_image *maix_image::_warp_affine(std::vector<int> points, int w, int h)
 {
-  if (NULL == this->_img)
+  if (NULL == this->_img && points.size() < 4)
   {
     py::print("no img");
     maix_image *tmp_img = new maix_image();
     return tmp_img;
   }
-  x = std::max(x,0);
-  y = std::max(y,0);
-  w = std::min(w, this->_img->width - x);
-  h = std::min(h , this->_img->height - y);
-  int reg_w = dst_size[0];
-  int reg_h = dst_size[1];
-  libmaix_image_t *tmp = libmaix_image_create(reg_w, reg_h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+  w = std::min(w, this->_img->width);
+  h = std::min(h, this->_img->height);
+  libmaix_image_t *tmp = libmaix_image_create(w, h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (tmp)
   {
     maix_image *tmp_img = new maix_image();
-
-
-
-    int affine_dst_pts[6] = {reg_w , reg_h , 0 , reg_h , 0,0};
-
-    int affine_src_pts [6];
-    affine_src_pts[0] =  x + w;
-    affine_src_pts[1] =  y + h ;
-    affine_src_pts[2] =  x;
-    affine_src_pts[3] =  y + h;
-    affine_src_pts[4] = x;
-    affine_src_pts[5]  = y;
-    if (libmaix_cv_image_affine(this->_img, affine_src_pts , affine_dst_pts , reg_w, reg_h, &tmp) != 0)
+    int affine_dst_pts[6] = {w, h, 0, h, 0, 0}, *affine_src_pts = points.data();
+    if (libmaix_cv_image_affine(this->_img, affine_src_pts, affine_dst_pts, h, w, &tmp) != LIBMAIX_ERR_NONE)
     {
       return tmp_img;
     }
@@ -1178,8 +1204,4 @@ maix_image *maix_image::_draw_affine(int x , int y ,  int w , int h ,  std::vect
   }
   maix_image *tmp_img = new maix_image();
   return tmp_img;
-
-
-
-
 }

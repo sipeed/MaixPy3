@@ -119,7 +119,7 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("get_pixel", &maix_image::_get_pixel, py::arg("x"), py::arg("y"))
       .def("set_pixel", &maix_image::_set_pixel, py::arg("x"), py::arg("y"), py::arg("color"))
       .def("Canny", &maix_image::_opencv_Canny, py::arg("threshold1") = 10, py::arg("threshold2") = 100, py::arg("apertureSize") = 3, py::arg("L2gradient") = false)
-      .def("affine",&maix_image::_warp_affine, py::arg("points"), py::arg("w"), py::arg("h"))
+      .def("crop_affine",&maix_image::_warp_affine, py::arg("points"), py::arg("w"), py::arg("h"))
 
       // maix_image继承maix_vision方法
       .def("get_blob_lab", &maix_image::get_blob_color_max, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("critical") = 0, py::arg("co") = 0)

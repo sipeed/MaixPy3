@@ -262,13 +262,18 @@ maix_image &maix_image::_open_file(std::string path)
   this->v_close();
   libmaix_image_t *tmp_img = NULL;
   libmaix_err_t err = libmaix_cv_image_open_file(&tmp_img, path.c_str());
-  if (LIBMAIX_ERR_NOT_EXEC == err)
+  if (LIBMAIX_ERR_NOT_EXEC == err) // maybe is bytes jpg.
   {
     try
     {
       // maybe is jpg or bmp bytes
       cv::Mat tmp(1, path.size(), CV_8U, (char *)path.data());
       cv::Mat image = cv::imdecode(tmp, cv::IMREAD_COLOR);
+      if (image.empty()) {
+        printf("[image.open] %s file does not exist\r\n", path.c_str());
+        this->v_close();
+        return *this;
+      }
       cv::cvtColor(image, image, cv::ColorConversionCodes::COLOR_BGR2RGB);
       tmp_img = libmaix_image_create(image.cols, image.rows, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
       memcpy(tmp_img->data, image.data, tmp_img->width * tmp_img->height * 3);
@@ -298,7 +303,7 @@ py::object maix_image::_to_py(std::string im)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return py::none();
   }
   if (im == "maix_image")
@@ -381,7 +386,7 @@ void maix_image::_show()
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return;
   }
   auto _maix_display = py::module::import("_maix_display");
@@ -480,7 +485,7 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   if (dst_w == 0 && dst_h == 0)
@@ -547,7 +552,7 @@ maix_image &maix_image::_draw_line(int x1, int y1, int x2, int y2, std::vector<i
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_cv_image_draw_line(this->_img, x1, y1, x2, y2, MaixColor(color[0], color[1], color[2]), thickness);
@@ -558,7 +563,7 @@ maix_image &maix_image::_draw_cross(int x, int y, int c, int size, int thickness
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   image_t img = {};
@@ -574,7 +579,7 @@ maix_image &maix_image::_draw_rectangle(int x1_x, int y1_y, int x2_w, int y2_h, 
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   if (is_xywh)
@@ -587,7 +592,7 @@ maix_image &maix_image::_draw_circle(int x, int y, int r, std::vector<int> color
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_cv_image_draw_circle(this->_img, x, y, r, MaixColor(color[0], color[1], color[2]), thickness);
@@ -598,7 +603,7 @@ maix_image &maix_image::_draw_ellipse(int cx, int cy, int rx, int ry, double ang
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_cv_image_draw_ellipse(this->_img, cx, cy, rx, ry, angle, startAngle, endAngle, MaixColor(color[0], color[1], color[2]), thickness);
@@ -609,7 +614,7 @@ maix_image &maix_image::_draw_string(int x, int y, std::string str, double scale
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_cv_image_draw_string(this->_img, x, y, str.c_str(), scale, MaixColor(color[0], color[1], color[2]), thickness);
@@ -620,7 +625,7 @@ maix_image &maix_image::_rotate(double angle, int adjust)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_image_t *tmp = NULL;
@@ -636,7 +641,7 @@ maix_image &maix_image::_flip(int flip)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_cv_image_flip(this->_img, flip);
@@ -647,7 +652,7 @@ maix_image &maix_image::_convert(std::string mode)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_image_t *tmp = libmaix_image_create(this->_img->width, this->_img->height, any_cast<libmaix_image_mode_t>(this->py_to_pram[this->get_to(mode)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
@@ -703,7 +708,7 @@ maix_image *maix_image::_draw_crop(int x, int y, int w, int h)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     maix_image *tmp_img = new maix_image();
     return tmp_img;
   }
@@ -734,7 +739,7 @@ maix_image &maix_image::_draw_image(py::object data, int x, int y, double alpha)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   if (py_input_maix_image != this->get_img_type(data))
@@ -765,7 +770,7 @@ maix_image &maix_image::_set_pixel(int x, int y, std::vector<int> color)
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   libmaix_image_color_t colot_tmp;
@@ -801,7 +806,7 @@ maix_image &maix_image::_hist_eq(bool adaptive, float clip_limit, maix_image &ma
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
 
@@ -841,7 +846,7 @@ maix_image &maix_image::_gamma_corr(float gamma, float contrast, float brightnes
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   image_t img = {};
@@ -859,7 +864,7 @@ maix_image &maix_image::_lens_corr(float strength, float zoom, float x_corr, flo
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
 
@@ -880,7 +885,7 @@ maix_image &maix_image::_mean(const int ksize, bool threshold, int offset, bool 
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
 
@@ -923,7 +928,7 @@ py::list maix_image::_imlib_get_statistics(std::vector<int> roi_src, std::vector
 
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return py::none();
   }
 
@@ -1066,7 +1071,7 @@ maix_image &maix_image::_imlib_rotation_corr(float x_rotation, float y_rotation,
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
 
@@ -1093,7 +1098,7 @@ maix_image &maix_image::_opencv_Canny(double threshold1, double threshold2, int 
 {
   if (NULL == this->_img)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     return *this;
   }
   if (this->_maix_image_type == "RGB")
@@ -1178,9 +1183,9 @@ py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_th
 
 maix_image *maix_image::_warp_affine(std::vector<int> points, int w, int h)
 {
-  if (NULL == this->_img && points.size() < 4)
+  if (NULL == this->_img || points.size() < 3)
   {
-    py::print("no img");
+    py::print("[image] is empty !");
     maix_image *tmp_img = new maix_image();
     return tmp_img;
   }

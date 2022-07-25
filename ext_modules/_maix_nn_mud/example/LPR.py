@@ -1,4 +1,7 @@
+
 from time import time
+
+
 
 class LPR:
     loc_model_path = './loc.mud'
@@ -37,6 +40,11 @@ class LPR:
     def  draw_fps(self,img , fps):
         img.draw_string(0, 0 ,'FPS :'+str(fps), scale=1,color=(255, 0, 255), thickness=1)
 
+    def draw_string(self , img , x , y , string , color):
+        img.draw_string( x , y , string ,color = color)
+
+    def draw_paste(self , src ,dst):
+        src.paste(dst , 0 , 0)
 
     def draw_rectangle(self,img, box):
         img.draw_rectangle(box[0], box[1], box[2], box[3],color=(230 ,230, 250), thickness=2)
@@ -50,13 +58,28 @@ class LPR:
     def process(self,input):
         loc_out = self.loc_model.forward(input, quantize=1, layout = "chw") # retinaface decoder only support chw layout
         boxes , landmarks = self.loc_decoder.run(loc_out, nms = 0.2 ,score_thresh = 0.7 , outputs_shape =[[1,4,2058],[1,2,2058],[1,8,2058]])
-        reg_out =  self.reg_decoder()
+
         for i,box in enumerate(boxes):
+            reg_in_crop = input.crop(box[0], box[1] , box[2] - box[0] , box[3] - box[1])
+            reg_in_resize = reg_in_crop.resize( w =94 ,h=24 ,padding =0)
+            reg_out = self.reg_model.forward(reg_in_resize ,  quantize=1, layout = "chw")
+
+
+
+
+            LP_number = self.reg_decoder.run(reg_out)
+            string_LP = ''
+            for id in LP_number:
+                string_LP += self.chars[id]
+
+            self.draw_string(input , box[0], box[1] , string_LP  ,color=(225,0,0))
+            self.draw_paste(input , reg_in_resize)
             self.draw_rectangle(input,box)
             self.draw_point(input , landmarks[i])
 
 def main():
-    from maix import display, camera
+    from maix import display, camera , image
+    image.load_freetype("/home/res/sans.ttf")
     app  = LPR()
 
     while True:

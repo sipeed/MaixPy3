@@ -672,6 +672,10 @@ maix_image *maix_image::_draw_crop(int x, int y, int w, int h)
     maix_image *tmp_img = new maix_image();
     return tmp_img;
   }
+  x = std::max(x,0);
+  y = std::max(y,0);
+  w = std::min(w, this->_img->width - x);
+  h = std::min(h , this->_img->height - y);
   libmaix_image_t *tmp = libmaix_image_create(w, h, this->_img->mode, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (tmp)
   {
@@ -1110,4 +1114,53 @@ py::dict maix_image::_imlib_find_template(maix_image &template_src, float arg_th
     }
   }
   return return_val;
+}
+
+maix_image *maix_image::_draw_affine(int x , int y ,  int w , int h ,  std::vector<int> dst_size)
+{
+  if (NULL == this->_img)
+  {
+    py::print("no img");
+    maix_image *tmp_img = new maix_image();
+    return tmp_img;
+  }
+  x = std::max(x,0);
+  y = std::max(y,0);
+  w = std::min(w, this->_img->width - x);
+  h = std::min(h , this->_img->height - y);
+  int reg_w = dst_size[0];
+  int reg_h = dst_size[1];
+  libmaix_image_t *tmp = libmaix_image_create(reg_w, reg_h, LIBMAIX_IMAGE_MODE_RGB888, LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
+  if (tmp)
+  {
+    maix_image *tmp_img = new maix_image();
+
+
+
+    int affine_dst_pts[6] = {reg_w , reg_h , 0 , reg_h , 0,0};
+
+    int affine_src_pts [6];
+    affine_src_pts[0] =  x + w;
+    affine_src_pts[1] =  y + h ;
+    affine_src_pts[2] =  x;
+    affine_src_pts[3] =  y + h;
+    affine_src_pts[4] = x;
+    affine_src_pts[5]  = y;
+    if (libmaix_cv_image_affine(this->_img, affine_src_pts , affine_dst_pts , reg_w, reg_h, &tmp) != 0)
+    {
+      return tmp_img;
+    }
+    tmp_img->local_load(tmp);
+    return tmp_img;
+  }
+  else
+  {
+    libmaix_image_destroy(&tmp);
+  }
+  maix_image *tmp_img = new maix_image();
+  return tmp_img;
+
+
+
+
 }

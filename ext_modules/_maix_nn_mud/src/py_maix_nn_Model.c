@@ -131,7 +131,7 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     else if(PyObject_TypeCheck(o_model_path, &PyDict_Type))
     {
         // dict
-        printf("Dict mode");
+        // printf("Dict mode");
         if(!o_opt || !PyObject_TypeCheck(o_opt, &PyDict_Type))
         {
             PyErr_SetString(PyExc_ValueError, "arg opt is needed");
@@ -563,12 +563,10 @@ static int Model_init(ModelObject *self, PyObject *args, PyObject *kwds)
     else if(PyObject_TypeCheck(o_model_path, &PyUnicode_Type))
     {
         // mud
-        printf("mud mode \n");
         self->use_mud = true;
         libmaix_camera_module_init();
         libmaix_nn_module_init();
         char * mud = (char*)PyUnicode_DATA(o_model_path);
-        printf("%s\n",mud);
         self->mud = mud;
         self->info = libmaix_mud_load_mud(mud);
         libmaix_nn_model_path_t *model_path = (libmaix_nn_model_path_t * )malloc(sizeof(libmaix_nn_model_path_t));

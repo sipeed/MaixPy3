@@ -42,8 +42,8 @@ typedef struct
     int           outputs_len;
     bool          is_init;
     char * mud;
-    ini_info_t *info;
-    bool use_mdsc;
+    mud_info *info;
+    bool use_mud;
 } ModelObject;
 
 

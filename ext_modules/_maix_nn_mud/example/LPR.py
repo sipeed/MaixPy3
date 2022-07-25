@@ -60,12 +60,10 @@ class LPR:
         boxes , landmarks = self.loc_decoder.run(loc_out, nms = 0.2 ,score_thresh = 0.7 , outputs_shape =[[1,4,2058],[1,2,2058],[1,8,2058]])
 
         for i,box in enumerate(boxes):
-            reg_in_crop = input.crop(box[0], box[1] , box[2] - box[0] , box[3] - box[1])
-            reg_in_resize = reg_in_crop.resize( w =94 ,h=24 ,padding =0)
-            reg_out = self.reg_model.forward(reg_in_resize ,  quantize=1, layout = "chw")
 
-
-
+            landmark = landmarks[i][:6]
+            reg_in  = input.affine(landmark , 94 , 24)
+            reg_out = self.reg_model.forward(reg_in ,  quantize=1, layout = "chw")
 
             LP_number = self.reg_decoder.run(reg_out)
             string_LP = ''
@@ -73,7 +71,7 @@ class LPR:
                 string_LP += self.chars[id]
 
             self.draw_string(input , box[0], box[1] , string_LP  ,color=(225,0,0))
-            self.draw_paste(input , reg_in_resize)
+            self.draw_paste(input , reg_in)
             self.draw_rectangle(input,box)
             self.draw_point(input , landmarks[i])
 

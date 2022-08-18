@@ -314,8 +314,8 @@ public:
             AW_MPI_ISP_AE_SetMode(0, 0);
         } else {
             AW_MPI_ISP_AE_SetMode(0, 1);
-            AW_MPI_ISP_AE_SetGain(0, exp);
-            AW_MPI_ISP_AE_SetExposure(0, gain);
+            AW_MPI_ISP_AE_SetGain(0, gain);
+            AW_MPI_ISP_AE_SetExposure(0, exp);
         }
         return 0;
     }

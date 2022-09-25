@@ -514,12 +514,12 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
         if (scale_src > scale_dst)
         {
           new_w = dst_w, new_h = new_w * src_h / src_w; // new_h / src_h = new_w / src_w => new_h = new_w * src_h / src_w
-          top = (dst_h - new_h) / 2, bottom = top;
+          top = (dst_h - new_h) / 2, bottom = dst_h - new_h - top;
         }
-        else
+        else 
         { // Division loses precision
           new_h = dst_h, new_w = new_h * src_w / src_h;
-          left = (dst_w - new_w) / 2, right = left;
+          left = (dst_w - new_w) / 2, right = dst_w - new_w - left;
         }
         // printf("_resize %d %d > %d %d > %d %d : %d %d %d %d \r\n", src_w, src_h, new_w, new_h, dst_w, dst_h, top, bottom, left, right);
         cv::Mat tmp;

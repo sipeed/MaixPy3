@@ -604,7 +604,7 @@ class MSA301:  # pylint: disable=too-many-instance-attributes
         return False
     
 from maix import i2c
-i2c = i2c.I2CDevice('/dev/i2c-2', 0x26)
+i2c = i2c.I2C('/dev/i2c-2', 0x26)
 print(i2c)
 print(i2c.read(0x1, 1))
 

@@ -198,6 +198,22 @@ _maix_nn_decode_CTC_module =Pybind11Extension(
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
+
+
+_maix_nn_decode_pose_module =Pybind11Extension(
+    name = '_maix_nn_decoder_pose',
+    include_dirs=['ext_modules/libmaix/components/libmaix/include'],
+    sources=['ext_modules/_maix_nn_decoder/py_maix_nn_decoder_pose.cpp','ext_modules/libmaix/components/libmaix/src/decoder/decoder_pose.c'] ,
+    libraries=[
+        "pthread",
+        "maix_nn",
+    ],
+    library_dirs=[ ext_so, ],
+    # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+    extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
+)
+
+
 # _maix_nn_decode_yolo2_module =Pybind11Extension(
 #     name = '_maix_nn_decoder_yolo',
 #     include_dirs=['ext_modules/libmaix/components/libmaix/include'],
@@ -264,6 +280,7 @@ _maix_modules = [
     _maix_nn_decode_retinaface_module,
     _maix_nn_decode_license_plate_location_module,
     _maix_nn_decode_CTC_module,
+    _maix_nn_decode_pose_module,
 ]
 
 _maix_data_files = [

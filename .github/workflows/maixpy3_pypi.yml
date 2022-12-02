@@ -17,7 +17,7 @@ jobs:
         git submodule update --init --recursive
     - uses: actions/setup-python@v2
       with:
-        python-version: 3.8.5
+        python-version: 3.8
     - name: Install dependencies
       run: |
         sudo apt update

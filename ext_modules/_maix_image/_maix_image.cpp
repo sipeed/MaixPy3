@@ -516,7 +516,7 @@ maix_image &maix_image::_resize(int dst_w, int dst_h, int func, int padding, std
           new_w = dst_w, new_h = new_w * src_h / src_w; // new_h / src_h = new_w / src_w => new_h = new_w * src_h / src_w
           top = (dst_h - new_h) / 2, bottom = dst_h - new_h - top;
         }
-        else 
+        else
         { // Division loses precision
           new_h = dst_h, new_w = new_h * src_w / src_h;
           left = (dst_w - new_w) / 2, right = dst_w - new_w - left;
@@ -915,6 +915,63 @@ maix_image &maix_image::_mean(const int ksize, bool threshold, int offset, bool 
 
   fb_alloc_mark();
   imlib_mean_filter(&img, ksize, offset, threshold, invert, mask_img);
+  fb_alloc_free_till_mark();
+
+  if (mask_img != NULL)
+    free(mask_img), mask_img = NULL;
+
+  return *this;
+}
+
+maix_image &maix_image::_binary(std::vector<std::vector<int>> &thresholds_src, bool invert, bool zero, maix_image &mask)
+{
+
+  if (NULL == this->_img)
+  {
+    py::print("[image] is empty !");
+    return *this;
+  }
+
+  image_t img_tmp = {}, *arg_img = &img_tmp;
+  arg_img->w = this->_img->width;
+  arg_img->h = this->_img->height;
+  arg_img->pixels = (uint8_t *)this->_img->data;
+  arg_img->pixfmt = PIXFORMAT_RGB888;
+
+  list_t thresholds;
+  list_init(&thresholds, sizeof(color_thresholds_list_lnk_data_t));
+  for (auto src : thresholds_src)
+  {
+    color_thresholds_list_lnk_data_t tmp_ct;
+    tmp_ct.LMin = src[0];
+    tmp_ct.LMax = src[1];
+    tmp_ct.AMin = src[2];
+    tmp_ct.AMax = src[3];
+    tmp_ct.BMin = src[4];
+    tmp_ct.BMax = src[5];
+    list_push_back(&thresholds, &tmp_ct);
+  }
+
+  image_t *mask_img = NULL;
+  if (NULL != mask._img) // check if mask is NULL
+  {
+    if (this->_img->width == mask._img->width && this->_img->height == mask._img->height) // check if mask has same size with image
+    {
+      mask_img = (image_t *)malloc(sizeof(image_t));
+      if (mask_img)
+      {
+        mask_img->w = mask._img->width;
+        mask_img->h = mask._img->height;
+        mask_img->pixels = (uint8_t *)mask._img->data;
+        mask_img->pixfmt = PIXFORMAT_RGB888;
+      }
+    }
+    else
+      printf("The size of mask is different with input image,use default mask!");
+  }
+
+  fb_alloc_mark();
+  imlib_binary(arg_img, arg_img, &thresholds, invert, zero, mask_img);
   fb_alloc_free_till_mark();
 
   if (mask_img != NULL)

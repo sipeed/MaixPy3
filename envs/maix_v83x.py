@@ -30,6 +30,7 @@ _maix_vivo_module = Pybind11Extension("_maix_vivo",
     library_dirs=[ ext_so, ],
     extra_link_args=[
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"],
+    extra_compile_args=['-march=armv7-a', '-mfloat-abi=hard', '-mfpu=neon','-std=c++11', '-std=gnu++11' ],
     # define_macros=[('V831Camera', None)],
 )
 
@@ -112,7 +113,7 @@ _maix_display_module = Pybind11Extension(
         "maix_disp",
     ],
     library_dirs=["/lib",  "/usr/lib", ext_so, ],
-    # extra_compile_args=['-DV83xDisplay'],
+    extra_compile_args=[],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
@@ -152,6 +153,7 @@ _maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn_mud/
     "maix_utils", "maix_nn", "maix_cam",
 ],
     library_dirs=[ ext_so, ],
+    extra_compile_args=['-march=armv7-a', '-mfloat-abi=hard', '-mfpu=neon', ],
     # extra_link_args  = [ "-Wl,-z,origin", "-Wl,-rpath='$ORIGIN/maix'" ]
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
@@ -166,7 +168,7 @@ _maix_nn_decode_retinaface_module =Pybind11Extension(
         "maix_nn",
     ],
     library_dirs=[ ext_so, ],
-    # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+    extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
@@ -180,7 +182,7 @@ _maix_nn_decode_license_plate_location_module =Pybind11Extension(
         "maix_nn",
     ],
     library_dirs=[ ext_so, ],
-    # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+    extra_compile_args=['-march=armv7-a', '-mfloat-abi=hard', '-mfpu=neon','-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
@@ -194,7 +196,7 @@ _maix_nn_decode_CTC_module =Pybind11Extension(
         "maix_nn",
     ],
     library_dirs=[ ext_so, ],
-    # extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
+    extra_compile_args=['-march=armv7-a', '-mfloat-abi=hard', '-mfpu=neon','-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831'],
     extra_link_args=["-Wl,-rpath=/usr/lib/python3.8/site-packages/maix"]
 )
 
@@ -239,7 +241,8 @@ _maix_image_module = Pybind11Extension("_maix_image",
             get_srcs('ext_modules/libmaix/components/third_party/imlib/src'),
     libraries=[
         "maix_utils", "maix_cam", "maix_image",
-        "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype", "opencv_flann", "opencv_features2d", "opencv_calib3d"
+        "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
+        # "opencv_videoio", "opencv_highgui", "opencv_flann", "opencv_features2d", "opencv_calib3d"
     ],
     library_dirs=[
         ext_so,
@@ -249,7 +252,7 @@ _maix_image_module = Pybind11Extension("_maix_image",
         "-Wl,-rpath=/usr/lib/python3.8/site-packages/maix",
         "-Wl,-rpath=/usr/lib/python3.8/site-packages"
     ],
-    extra_compile_args=['-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831', '-DIMLIB_CONFIG_H_FILE="costom_imlib_config.h"' ],
+    extra_compile_args=['-march=armv7-a', '-mfloat-abi=hard', '-mfpu=neon','-std=c++11', '-std=gnu++11', '-DCONFIG_ARCH_V831', '-DIMLIB_CONFIG_H_FILE="costom_imlib_config.h"' ],
 )
 
 _maix_modules = [
@@ -259,7 +262,7 @@ _maix_modules = [
     _maix_image_module,
     # _maix_camera_module,
     _maix_speech_module,
-    _maix_display_module,
+    # _maix_display_module,
     _maix_nn_module,
     _maix_nn_decode_retinaface_module,
     _maix_nn_decode_license_plate_location_module,

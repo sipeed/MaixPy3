@@ -154,7 +154,7 @@ maix_image &maix_image::_new(std::vector<int> size, std::vector<int> color, std:
   this->_img = libmaix_image_create_patch(this->_img, size[0], size[1], any_cast<libmaix_image_mode_t>(this->py_to_pram[this->get_to(this->_maix_image_type)][0]), LIBMAIX_IMAGE_LAYOUT_HWC, NULL, true);
   if (this->_img)
   {
-    libmaix_cv_image_draw_rectangle(this->_img, 0, 0, size[0], size[1], MaixColor(color[0], color[1], color[2]), -1);
+    libmaix_cv_image_draw_rectangle(this->_img, 0, 0, size[0], size[1], MaixColorBGRA(color[0], color[1], color[2], color[3]), -1);
   }
   else
   {
@@ -555,7 +555,7 @@ maix_image &maix_image::_draw_line(int x1, int y1, int x2, int y2, std::vector<i
     py::print("[image] is empty !");
     return *this;
   }
-  libmaix_cv_image_draw_line(this->_img, x1, y1, x2, y2, MaixColor(color[0], color[1], color[2]), thickness);
+  libmaix_cv_image_draw_line(this->_img, x1, y1, x2, y2, MaixColorBGRA(color[0], color[1], color[2], color[3]), thickness);
   return *this;
 }
 
@@ -584,7 +584,7 @@ maix_image &maix_image::_draw_rectangle(int x1_x, int y1_y, int x2_w, int y2_h, 
   }
   if (is_xywh)
     x2_w = x1_x + x2_w, y2_h = y1_y + y2_h;
-  libmaix_cv_image_draw_rectangle(this->_img, x1_x, y1_y, x2_w, y2_h, MaixColor(color[0], color[1], color[2]), thickness);
+  libmaix_cv_image_draw_rectangle(this->_img, x1_x, y1_y, x2_w, y2_h, MaixColorBGRA(color[0], color[1], color[2], color[3]), thickness);
   return *this;
 }
 
@@ -595,7 +595,7 @@ maix_image &maix_image::_draw_circle(int x, int y, int r, std::vector<int> color
     py::print("[image] is empty !");
     return *this;
   }
-  libmaix_cv_image_draw_circle(this->_img, x, y, r, MaixColor(color[0], color[1], color[2]), thickness);
+  libmaix_cv_image_draw_circle(this->_img, x, y, r, MaixColorBGRA(color[0], color[1], color[2], color[3]), thickness);
   return *this;
 }
 
@@ -606,7 +606,7 @@ maix_image &maix_image::_draw_ellipse(int cx, int cy, int rx, int ry, double ang
     py::print("[image] is empty !");
     return *this;
   }
-  libmaix_cv_image_draw_ellipse(this->_img, cx, cy, rx, ry, angle, startAngle, endAngle, MaixColor(color[0], color[1], color[2]), thickness);
+  libmaix_cv_image_draw_ellipse(this->_img, cx, cy, rx, ry, angle, startAngle, endAngle, MaixColorBGRA(color[0], color[1], color[2], color[3]), thickness);
   return *this;
 }
 
@@ -617,7 +617,7 @@ maix_image &maix_image::_draw_string(int x, int y, std::string str, double scale
     py::print("[image] is empty !");
     return *this;
   }
-  libmaix_cv_image_draw_string(this->_img, x, y, str.c_str(), scale, MaixColor(color[0], color[1], color[2]), thickness);
+  libmaix_cv_image_draw_string(this->_img, x, y, str.c_str(), scale, MaixColorBGRA(color[0], color[1], color[2], color[3]), thickness);
   return *this;
 }
 

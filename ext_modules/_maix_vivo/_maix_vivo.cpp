@@ -177,10 +177,11 @@ public:
                 uint32_t *argb = (uint32_t *)ui->buf, *abgr = (uint32_t *)value.c_str();
                 for (int i = 0, sum = frame_size; i != sum; i++)
                 {
-                    argb[i] =   (abgr[i] & 0xFF000000) |         // ______AA
-                                ((abgr[i] & 0x00FF0000) >> 16) | // BB______
-                                (abgr[i] & 0x0000FF00) |         // __GG____
-                                ((abgr[i] & 0x000000FF) << 16);  // ____RR__
+                    argb[i] = __builtin_bswap32(argb[i]);
+                    // argb[i] =   (abgr[i] & 0xFF000000) |         // ______AA
+                    //             ((abgr[i] & 0x00FF0000) >> 16) | // BB______
+                    //             (abgr[i] & 0x0000FF00) |         // __GG____
+                    //             ((abgr[i] & 0x000000FF) << 16);  // ____RR__
                 }
             }
             else if (frame_size * 3 == value.length())

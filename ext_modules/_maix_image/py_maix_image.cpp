@@ -1,6 +1,6 @@
 #include "maix_image.h"
 
-#include "cv_orb.hpp"
+// #include "cv_orb.hpp"
 
 void _load_freetype(std::string path, int fontHeight)
 {
@@ -155,8 +155,9 @@ PYBIND11_MODULE(_maix_image, mo)
       .def("find_template", &maix_image::_imlib_find_template, py::arg("template") = maix_image(), py::arg("thresh") = 0.5, py::arg("roi") = std::vector<int>{0, 0, 0, 0}, py::arg("step") = 2, py::arg("search") = 1)
       .def("find_barcodes", &maix_image::_imlib_find_barcodes, py::arg("roi") = std::vector<int>{0, 0, 0, 0}); // module end
 
-  pybind11::class_<cv_orb>(mo, "orb")
-      .def(pybind11::init<int, float, int, int, int, int, int, int, int>(),
-           py::arg("nfeatures") = 500, py::arg("scaleFactor") = 1.2f, py::arg("nlevels") = 8, py::arg("edgeThreshold") = 31, py::arg("firstLevel") = 0, py::arg("WTA_K") = 2, py::arg("scoreType") = 0, py::arg("patchSize") = 31, py::arg("fastThreshold") = 20)
-      .def("match", &cv_orb::match, pybind11::arg("src"), pybind11::arg("dst"), pybind11::arg("limit") = 30, pybind11::arg("min") = 0.0f, pybind11::arg("max") = 100.f, pybind11::arg("crossCheck") = false, pybind11::arg("dump") = 0);
+  // pybind11::class_<cv_orb>(mo, "orb")
+  //     .def(pybind11::init<int, float, int, int, int, int, int, int, int>(),
+  //          py::arg("nfeatures") = 500, py::arg("scaleFactor") = 1.2f, py::arg("nlevels") = 8, py::arg("edgeThreshold") = 31, py::arg("firstLevel") = 0, py::arg("WTA_K") = 2, py::arg("scoreType") = 0, py::arg("patchSize") = 31, py::arg("fastThreshold") = 20)
+  //     .def("match", &cv_orb::match, pybind11::arg("src"), pybind11::arg("dst"), pybind11::arg("limit") = 30, pybind11::arg("min") = 0.0f, pybind11::arg("max") = 100.f, pybind11::arg("crossCheck") = false, pybind11::arg("dump") = 0);
+
 }

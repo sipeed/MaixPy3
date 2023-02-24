@@ -44,7 +44,7 @@ class MaixVideo():
 try:
     try:
         # use mpp vivo on v831
-        from maix import display, image
+        from maix import display
         from _maix_vivo import _v83x_vivo
         class V831VivoMaixVideo(MaixVideo):
             def __init__(self, source="allwinner mpp"):

@@ -81,7 +81,7 @@ your v83x
 
 - python3.8 setup.py bdist_wheel maix_v83x
 
-- rm dist/* && python3.8 setup.py clean --all bdist_wheel maix_v83x && adb shell 'rm /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl' && adb push ./dist/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl --upgrade"
+- rm -rf dist/* && python3.8 setup.py clean --all bdist_wheel maix_v83x && adb shell 'rm /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl' && adb push ./dist/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl --upgrade"
 
 - adb shell 'rm /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl' && adb push ./dist/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl /root/ && adb shell "pip install /root/maixpy3-0.5.*-cp38-cp38-linux_armv7l.whl --upgrade"
 

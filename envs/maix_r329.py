@@ -41,7 +41,9 @@ _maix_image_module = Pybind11Extension(
             get_srcs('ext_modules/libmaix/components/maix_cv_image/src') +
             get_srcs('ext_modules/libmaix/components/third_party/imlib/src'),
     libraries=[
-        "maix_image","maix_disp", "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype", "opencv_flann", "opencv_features2d", "opencv_calib3d"
+        "maix_image","maix_disp",
+        "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
+        # "opencv_videoio", "opencv_highgui", "opencv_flann", "opencv_features2d", "opencv_calib3d"
     ],
     library_dirs=["./ext_modules/libmaix/components/libmaix/lib/arch/r329/opencv4",
         ext_so,
@@ -88,11 +90,10 @@ _maix_display_module = Pybind11Extension(
     ],
 )
 
-max_nn_srcs = get_srcs('ext_modules/_maix_nn_mdsc/src')
+max_nn_srcs = get_srcs('ext_modules/_maix_nn_mud/src')
 max_nn_srcs.extend(get_srcs('ext_modules/libmaix/components/libmaix/src'))
 max_nn_srcs.remove("ext_modules/libmaix/components/libmaix/src/libmaix.c")
-_maix_nn_module = Extension('_maix_nn',
-    include_dirs=['ext_modules/_maix_nn_mdsc/include', 'ext_modules/libmaix/components/libmaix/include'],
+_maix_nn_module = Extension('_maix_nn', include_dirs=['ext_modules/_maix_nn_mud/include', 'ext_modules/libmaix/components/libmaix/include'],
     sources=max_nn_srcs,
     libraries=[
         "maix_utils", "maix_cam", "maix_nn", "maix_nn_app"

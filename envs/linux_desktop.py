@@ -117,7 +117,7 @@ _maix_display_module = Pybind11Extension(
              get_srcs('ext_modules/libmaix/components/libmaix/lib/arch/desktop/libmaix_disp') +
              get_srcs('ext_modules/_maix_display'),
     libraries=[
-        "opencv_videoio", "opencv_highgui", "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
+        "opencv_core", "opencv_imgproc", "opencv_imgcodecs", "opencv_freetype"
     ],
     library_dirs=[
         "/usr/lib/",

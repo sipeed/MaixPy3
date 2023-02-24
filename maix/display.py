@@ -16,9 +16,14 @@ try:
         global __show__, _width, _height
         if isinstance(img, bytes):
           __show__.draw(img, _width, _height)
-    from maix import camera
 except ModuleNotFoundError as e:
-    pass
+    # v83x remove _maix_display and dts get lcd size
+    import os
+    os.system("cat /sys/firmware/devicetree/base/soc@03000000/board/lcd > /tmp/lcd")
+    with open("/tmp/lcd", "r") as f:
+        lcd = f.read().strip()
+        if lcd.find("240,320") != -1:
+            config(size=(240, 320))
 except Exception as e:
     pass
 

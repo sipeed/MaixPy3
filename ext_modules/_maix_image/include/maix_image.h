@@ -25,8 +25,8 @@
 #include "libmaix_cv_image.h"
 #include "libmaix_disp.h"
 
-#define enable_PIL
-#define enable_numpy
+// #define enable_PIL
+// #define enable_numpy
 
 namespace py = pybind11;
 typedef enum

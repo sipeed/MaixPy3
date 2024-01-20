@@ -1,6 +1,16 @@
+
+
+
 <p align="center">
     <img height="120" src="https://wiki.sipeed.com/soft/maixpy/assets/maixpy/maixpy.png" title="" alt="MaixPy3 Logo">
 </p>
+
+> **This repository is DEPRECATED !**
+> 
+> But you can remain use this repo for Sipeed Maix-II-Dock(v831) board.
+> 
+> **Now we recommend to use [Sipeed/MaixPy](https://github.com/sipeed/maixpy) and new hardware platform**, more info visit it.
+
 
 # MaixPy3 ![GitHub forks](https://img.shields.io/github/forks/sipeed/maixpy3.svg?style=social) ![GitHub stars](https://img.shields.io/github/stars/sipeed/maixpy3.svg?style=social) ![GitHub watchers](https://img.shields.io/github/watchers/sipeed/maixpy3.svg?style=social)
 
